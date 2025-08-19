@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
         if(savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mapFrag).commit();
+
+            // 지도 탭을 선택 상태로 변경
+            bottomNav.setSelectedItemId(R.id.nav_map);
         }
 
         // 네비게이션 클릭 시
