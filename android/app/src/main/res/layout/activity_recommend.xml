@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- 스크롤 영역 -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/recommend_activity"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btnGoDetail"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <!-- 제목 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="카테고리 검색"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingBottom="8dp"/>
+
+            <!-- 검색창 -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSearch"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="카테고리 검색하기"
+                app:startIconDrawable="@android:drawable/ic_menu_search">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etKeyword"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:singleLine="true"
+                    android:imeOptions="actionSearch"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- 섹션 타이틀 -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="추천 병원"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:paddingTop="16dp"
+                android:paddingBottom="8dp"/>
+
+            <!-- 카테고리 칩 -->
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/cgDept"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:chipSpacingHorizontal="8dp">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chResp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="호흡기 내과"
+                    app:chipBackgroundColor="@android:color/transparent"
+                    app:chipStrokeColor="?attr/colorPrimary"
+                    app:chipStrokeWidth="1dp"
+                    android:textColor="?attr/colorPrimary"/>
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chEr"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="응급의학과"
+                    app:chipBackgroundColor="@android:color/transparent"
+                    app:chipStrokeColor="?attr/colorPrimary"
+                    app:chipStrokeWidth="1dp"
+                    android:textColor="?attr/colorPrimary"/>
+            </com.google.android.material.chip.ChipGroup>
+
+            <!-- 리스트 카드 (row 2개만) -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="8dp">
+
+                    <!-- 헤더 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp"
+                        android:background="#F2F4F7">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="#"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="병원명"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="위치"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="거리"
+                            android:gravity="end"
+                            android:textStyle="bold"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:text="혼잡도"
+                            android:gravity="end"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <!-- row1 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="1"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="건양대학교병원"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="대전 서구 관저로 15"
+                                android:textSize="12sp"
+                                android:textColor="#666666"
+                                android:maxLines="1"
+                                android:ellipsize="end"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="대전 서구 관저동"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="1.1km"
+                            android:gravity="end"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:gravity="end"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="●"
+                                android:textColor="#4CAF50"
+                                android:paddingEnd="4dp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="보통"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#E6E6E6"/>
+
+                    <!-- row2 -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="8dp">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="wrap_content"
+                            android:text="2"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="가톨릭대학교 성모병원"
+                                android:textStyle="bold"
+                                android:maxLines="1"
+                                android:ellipsize="end"/>
+
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="대전 중구 태평로 64"
+                                android:textSize="12sp"
+                                android:textColor="#666666"
+                                android:maxLines="1"
+                                android:ellipsize="end"/>
+                        </LinearLayout>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:text="대전 중구 태평동"
+                            android:textSize="12sp"
+                            android:maxLines="1"
+                            android:ellipsize="end"/>
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="4.2km"
+                            android:gravity="end"/>
+
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1.2"
+                            android:gravity="end"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="●"
+                                android:textColor="#2E7D32"
+                                android:paddingEnd="4dp"/>
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="원활"/>
+                        </LinearLayout>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <Space
+                android:layout_width="match_parent"
+                android:layout_height="16dp"/>
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- 하단 고정 버튼 -->
+    <Button
+        android:id="@+id/btnGoDetail"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:text="상세보기"
+        android:textAllCaps="false"
+        android:textColor="@android:color/white"
+        android:backgroundTint="?attr/colorPrimary"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

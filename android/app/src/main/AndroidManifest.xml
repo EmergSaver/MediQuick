@@ -12,6 +12,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediQuick">
         <activity
+            android:name=".DetailHospitalActivity"
+            android:exported="false" />
+        <activity
+            android:name=".RecommendActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CategoryActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
