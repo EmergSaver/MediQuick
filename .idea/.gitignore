@@ -1,0 +1,41 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+# ------------------------
+# Android Studio
+# ------------------------
+*.iml
+.gradle/
+build/
+captures/
+local.properties
+
+# ------------------------
+# Python / Raspberry Pi
+# ------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+env/
+venv/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# ------------------------
+# 모델/데이터 관련
+# ------------------------
+*.pt        # YOLO 가중치
+*.weights   # YOLO 학습 가중치
+*.cfg       # YOLO config
+data/       # 대용량 데이터셋
+captures/   # 캡처 이미지
+logs/       # 로그 파일
+
+# ------------------------
+# 기타
+# ------------------------
+*.log
+*.tmp
