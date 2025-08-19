@@ -13,8 +13,6 @@ import com.google.android.material.button.MaterialButton; // ← MaterialButton 
 
 public class LoginActivity extends AppCompatActivity {
 
-    private MaterialButton Signup; // ← 이름/타입 정리 (XML의 @id/Signup 버튼)
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,10 +20,11 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login); // activity_login.xml 로 연결
 
         // XML 매핑 (id가 'Signup' 인 MaterialButton)
-        Signup = findViewById(R.id.Signup);
+        // ← 이름/타입 정리 (XML의 @id/Signup 버튼)
+        MaterialButton signup = findViewById(R.id.Signup);
 
         // 회원가입 화면으로 이동
-        Signup.setOnClickListener(v -> {
+        signup.setOnClickListener(v -> {
             Intent intent = new Intent(LoginActivity.this, InsertActivity.class);
             startActivity(intent);
         });
