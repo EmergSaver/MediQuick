@@ -8,11 +8,10 @@ android:layout_height="match_parent"
 tools:context="nav.MapFragment">
 
 <!--  나중에 지도로 가져오게 변경 -->
-<FrameLayout
+<com.kakao.vectormap.MapView
     android:id="@+id/mapView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/black" >
+    android:layout_height="match_parent" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -45,7 +44,7 @@ tools:context="nav.MapFragment">
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginRight="10dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+</com.kakao.vectormap.MapView>
     <!-- Bottom Sheet -->
     <LinearLayout
         android:id="@+id/bottom_sheet"
