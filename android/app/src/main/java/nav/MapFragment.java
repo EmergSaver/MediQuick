@@ -10,11 +10,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 
 import com.emergsaver.mediquick.CategoryActivity;
-import com.emergsaver.mediquick.MainActivity;
 import com.emergsaver.mediquick.R;
 
 /**
