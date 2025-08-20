@@ -21,7 +21,7 @@ tools:context="nav.MapFragment">
         android:layout_marginTop="40dp">
 
         <EditText
-            android:id="@+id/editText"
+            android:id="@+id/search_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
@@ -40,8 +40,8 @@ tools:context="nav.MapFragment">
             android:layout_gravity="right"
             android:background="@color/white"
             android:src="@drawable/ic_search"
-            app:layout_constraintBottom_toBottomOf="@+id/editText"
-            app:layout_constraintEnd_toEndOf="@+id/editText"
+            app:layout_constraintBottom_toBottomOf="@+id/search_text"
+            app:layout_constraintEnd_toEndOf="@+id/search_text"
             app:layout_constraintTop_toTopOf="parent"
             android:layout_marginRight="10dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
