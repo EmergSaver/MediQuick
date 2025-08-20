@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediQuick">
         <activity
+            android:name=".LoginTitle"
+            android:exported="false" />
+        <activity
             android:name=".DetailHospitalActivity"
             android:exported="false" />
         <activity
