@@ -1,5 +1,7 @@
 pluginManagement {
     repositories {
+        // 카카오톡 지도 SDK 추가
+        maven { url 'https://devrepo.kakao.com/nexus/repository/kakaomap-releases/' }
         google()
         mavenCentral()
         gradlePluginPortal()
