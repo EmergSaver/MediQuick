@@ -9,7 +9,7 @@ tools:context="nav.MapFragment">
 
 <!--  나중에 지도로 가져오게 변경 -->
 <com.kakao.vectormap.MapView
-    android:id="@+id/mapView"
+    android:id="@+id/map_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 

@@ -7,6 +7,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,11 @@ import android.widget.EditText;
 
 import com.emergsaver.mediquick.CategoryActivity;
 import com.emergsaver.mediquick.R;
+import com.kakao.vectormap.KakaoMap;
+import com.kakao.vectormap.KakaoMapReadyCallback;
+import com.kakao.vectormap.KakaoMapSdk;
+import com.kakao.vectormap.MapLifeCycleCallback;
+import com.kakao.vectormap.MapView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -30,6 +36,8 @@ public class MapFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    private MapView mapView;
 
     public MapFragment() {
         // Required empty public constructor
@@ -74,11 +82,48 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         EditText search = view.findViewById(R.id.search_text);
-
+        // editText 누르면 추천하는 병원 페이지 보여줌
         search.setOnClickListener(v -> {
             Intent intent = new Intent(requireContext(), CategoryActivity.class);
             startActivity(intent);
         });
 
+        mapView = view.findViewById(R.id.map_view);
+        KakaoMapSdk.init(requireContext(), getString(R.string.kakao_app_key));
+        Log.d("API_KEY", getString(R.string.kakao_app_key));
+
+        mapView.start(new MapLifeCycleCallback() {
+            @Override
+            public void onMapDestroy() {
+                // API가 정상적으로 종료된 경우
+                Log.d("API_CONNECT_END", "API 호출이 정상적으로 종료되었습니다.");
+            }
+
+            @Override
+            public void onMapError(Exception e) {
+                // 지도 사용 중 에러 발생 시
+                Log.e("API_CONNECT_ERROR", e.getMessage());
+            }
+        }, new KakaoMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull KakaoMap kakaoMap) {
+                // 인증 후 API가 정상적으로 호출된 경우
+                Log.d("API_CONNECT_SUCCESS", "API가 정상적으로 호출됨");
+                
+                // 지도 제어
+            }
+        });
+
+    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.resume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.pause();
     }
 }
