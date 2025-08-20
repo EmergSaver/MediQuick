@@ -1,0 +1,49 @@
+package com.emergsaver.mediquick;
+
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
+public class ProfileFragment extends Fragment {
+    private Button btnAllergy;
+    private Button btnProfile;
+    private Button btnUploadphoto;
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
+        // fragment_profile.xml 연결
+        View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+        btnAllergy = view.findViewById(R.id.btn_allergy);
+        btnProfile = view.findViewById(R.id.btn_profile);
+        btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
+
+        // 버튼 이벤트 처리
+        btnAllergy.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), AllergyActivity.class);
+            startActivity(intent);
+        });
+
+        btnProfile.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), EditProfileActivity.class);
+            startActivity(intent);
+        });
+
+        btnUploadphoto.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), UploadPhotoActivity.class);
+            startActivity(intent);
+        });
+
+        return view;
+    }
+}
