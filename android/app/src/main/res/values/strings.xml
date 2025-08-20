@@ -3,6 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string-array name="blood_abo">
+        <item>선택 안함</item>
         <item>A</item>
         <item>B</item>
         <item>O</item>
@@ -11,6 +12,7 @@
 
     <!-- Rh 혈액형 배열 -->
     <string-array name="blood_rh">
+        <item>선택 안함</item>
         <item>+</item>
         <item>-</item>
     </string-array>
