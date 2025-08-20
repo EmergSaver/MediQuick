@@ -12,7 +12,19 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediQuick">
         <activity
+            android:name=".UploadPhotoActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditProfileActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AllergyActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
