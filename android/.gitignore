@@ -25,3 +25,5 @@ output.json
 *.jks
 *.keystore
 
+# Local environment variables
+gradle.properties
