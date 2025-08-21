@@ -1,10 +1,13 @@
 package nav;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -17,7 +20,6 @@ import com.emergsaver.mediquick.CategoryActivity;
 import com.emergsaver.mediquick.R;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
-import com.kakao.vectormap.KakaoMapSdk;
 import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
 
@@ -80,6 +82,15 @@ public class MapFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // 위치 권한 체크 & 요청
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    requireActivity(),
+                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1000
+            );
+        }
 
         EditText search = view.findViewById(R.id.search_text);
         // editText 누르면 추천하는 병원 페이지 보여줌
