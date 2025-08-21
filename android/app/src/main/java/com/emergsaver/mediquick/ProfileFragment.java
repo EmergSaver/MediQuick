@@ -10,7 +10,6 @@ import android.widget.EditText;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 // OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends DialogFragment implements EditProfileDialog.OnProfileEditListener {
