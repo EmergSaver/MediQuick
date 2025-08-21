@@ -33,6 +33,21 @@ public class EditProfileDialog extends DialogFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (getDialog() != null) {
+            int width = ViewGroup.LayoutParams.MATCH_PARENT; // 팝업창 너비를 화면에 맞춤
+            int height = ViewGroup.LayoutParams.WRAP_CONTENT; // 팝업창 높이를 콘텐츠에 맞춤
+            getDialog().getWindow().setLayout(width, height);
+
+            // 또는 원하는 크기를 px 단위로 직접 설정할 수 있습니다.
+            // 예시: 팝업 너비를 화면의 90%로 설정
+            // int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.90);
+            // getDialog().getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+        }
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
