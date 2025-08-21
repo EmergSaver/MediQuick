@@ -101,14 +101,7 @@ public class MapFragment extends Fragment {
             startActivity(intent);
         });
 
-        // 위치 권한 체크 & 요청
-        if (ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    requireActivity(),
-                    new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, 1000
-            );
-        }
+        mapView = view.findViewById(R.id.map_view);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         locationCallback = new LocationCallback() {
@@ -124,6 +117,7 @@ public class MapFragment extends Fragment {
 
                     Log.d("CURRENT_LOCATION", "위도 : " + lat + "경도 : " + lng);
 
+                    // kakaoMap이 준비되어 있으면 카메라 이동
                     if(kakaoMap != null) {
                         kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
                                 LatLng.from(lat, lng)
@@ -134,7 +128,12 @@ public class MapFragment extends Fragment {
             }
         };
 
-        mapView = view.findViewById(R.id.map_view);
+        // 위치 권한 체크 & 요청
+        if (ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+        }
 
         mapView.start(new MapLifeCycleCallback() {
             @Override
@@ -168,6 +167,9 @@ public class MapFragment extends Fragment {
                                     kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
                                             LatLng.from(lat, lng)
                                     ));
+                                } else {
+                                    // null 이면 기본 위치 (서울 시청으로)
+                                    Log.d("LOCATION", "현재 위치 가져올 수 없음");
                                 }
                             });
                 } else {
