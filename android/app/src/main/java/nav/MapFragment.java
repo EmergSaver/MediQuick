@@ -3,6 +3,7 @@ package nav;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -18,6 +19,12 @@ import android.widget.EditText;
 
 import com.emergsaver.mediquick.CategoryActivity;
 import com.emergsaver.mediquick.R;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.MapLifeCycleCallback;
@@ -40,10 +47,9 @@ public class MapFragment extends Fragment {
     private String mParam2;
 
     private MapView mapView;
-
-    public MapFragment() {
-        // Required empty public constructor
-    }
+    // 구글에서 제공하는 위치 서비스 API
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationCallback locationCallback;
 
     /**
      * Use this factory method to create a new instance of
@@ -92,6 +98,23 @@ public class MapFragment extends Fragment {
             );
         }
 
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(@NonNull LocationResult locationResult) {
+                super.onLocationResult(locationResult);
+
+                if(locationResult == null)
+                    return;
+                for(Location location : locationResult.getLocations()) {
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+
+                    Log.d("CURRENT_LOCATION", "위도 : " + lat + "경도 : " + lng);
+                }
+            }
+        };
+
         EditText search = view.findViewById(R.id.search_text);
         // editText 누르면 추천하는 병원 페이지 보여줌
         search.setOnClickListener(v -> {
@@ -128,6 +151,15 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.resume();
+
+        if(ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationRequest locationRequest = new LocationRequest.Builder(
+                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000
+            ). build();
+
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
     }
 
     @Override
