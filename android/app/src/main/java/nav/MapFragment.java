@@ -150,11 +150,30 @@ public class MapFragment extends Fragment {
             }
         }, new KakaoMapReadyCallback() {
             @Override
-            public void onMapReady(@NonNull KakaoMap kakaoMap) {
+            public void onMapReady(@NonNull KakaoMap map) {
                 // 인증 후 API가 정상적으로 호출된 경우
                 Log.d("API_CONNECT_SUCCESS", "API가 정상적으로 호출됨");
                 
                 // 지도 제어
+                kakaoMap = map;
+
+                // 권한 체크 후 마지막 위치 가져오기 (초기 지도 위치 설정)
+                if(ActivityCompat.checkSelfPermission(requireContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    fusedLocationProviderClient.getLastLocation()
+                            .addOnSuccessListener(location -> {
+                                if(location != null) {
+                                    double lat = location.getLatitude();
+                                    double lng = location.getLongitude();
+                                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
+                                            LatLng.from(lat, lng)
+                                    ));
+                                }
+                            });
+                } else {
+                    ActivityCompat.requestPermissions(requireActivity(),
+                            new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+                }
             }
         });
 
