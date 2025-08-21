@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">MediQuick</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="kakao_app_key">2bc2cf2c5cb7fd8ac7a984f06a197781</string>
+</resources>
