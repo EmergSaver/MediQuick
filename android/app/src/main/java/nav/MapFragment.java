@@ -89,8 +89,6 @@ public class MapFragment extends Fragment {
         });
 
         mapView = view.findViewById(R.id.map_view);
-        KakaoMapSdk.init(requireContext(), getString(R.string.kakao_app_key));
-        Log.d("API_KEY", getString(R.string.kakao_app_key));
 
         mapView.start(new MapLifeCycleCallback() {
             @Override
