@@ -152,10 +152,11 @@ public class MapFragment extends Fragment {
         super.onResume();
         mapView.resume();
 
+        // 사용자 위치 업데이트 (10초마다)
         if(ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             LocationRequest locationRequest = new LocationRequest.Builder(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 5000
+                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10000
             ). build();
 
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
@@ -166,5 +167,8 @@ public class MapFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mapView.pause();
+
+        // 사용자 위치 업데이트 중단 (배터리 절약)
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 }
