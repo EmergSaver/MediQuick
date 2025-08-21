@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity {
         // Fragment 초기화
         Fragment hospitalFrag = new HospitalFragment();
         Fragment mapFrag = new MapFragment();
-        Fragment userFrag = new UserFragment();
+        Fragment userFrag = new ProfileFragment();
 
         // 첫 번째 화면일 경우 (지도 보기)
         if(savedInstanceState == null) {
