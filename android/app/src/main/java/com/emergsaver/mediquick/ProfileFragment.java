@@ -31,18 +31,6 @@ public class ProfileFragment extends DialogFragment implements EditProfileDialog
                              @Nullable Bundle savedInstanceState) {
         // fragment_profile.xml 연결
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
-        getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, bundle) -> {
-            if ("requestKey".equals(requestKey)) {
-                // 팝업에서 전달받은 데이터를 번들에서 꺼냅니다.
-                String birthdate = bundle.getString("birthdate");
-                String bloodType = bundle.getString("bloodType");
-                String emergencyContact = bundle.getString("emergencyContact");
-
-                // 이 데이터를 사용하여 UI를 업데이트하는 로직을 여기에 구현합니다.
-                // 예: etDob.setText(birthdate);
-                // ...
-            }
-        });
 
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
@@ -63,7 +51,7 @@ public class ProfileFragment extends DialogFragment implements EditProfileDialog
 
         btnProfile.setOnClickListener(v -> {
             EditProfileDialog dialog = new EditProfileDialog();
-            dialog.show(getParentFragmentManager(), "edit_profile_dialog");
+            dialog.show(getChildFragmentManager(), "editProfileDialog");
         });
 
         // '프로필 수정' 버튼 이벤트 (기존과 동일)
