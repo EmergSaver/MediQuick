@@ -88,30 +88,36 @@ public class EditProfileDialog extends DialogFragment {
         // 년도 스피너 설정 (현재 년도부터 1900년까지)
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         ArrayList<String> years = new ArrayList<>();
+        years.add("");
         for (int i = currentYear; i >= 1900; i--) {
             years.add(String.valueOf(i));
         }
         ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, years);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerYear.setAdapter(yearAdapter);
+        binding.spinnerYear.setSelection(0);
 
         // 월 스피너 설정 (1월부터 12월까지)
         ArrayList<String> months = new ArrayList<>();
+        months.add("");
         for (int i = 1; i <= 12; i++) {
             months.add(String.valueOf(i));
         }
         ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, months);
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerMonth.setAdapter(monthAdapter);
+        binding.spinnerMonth.setSelection(0);
 
         // 일 스피너 설정 (1일부터 31일까지)
         ArrayList<String> days = new ArrayList<>();
+        days.add("");
         for (int i = 1; i <= 31; i++) {
             days.add(String.valueOf(i));
         }
         ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, days);
         dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerDay.setAdapter(dayAdapter);
+        binding.spinnerDay.setSelection(0);
 
         // 혈액형 스피너 설정 (A, B, O, AB)
         String[] bloodTypes = {"A형", "B형", "O형", "AB형"};
