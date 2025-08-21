@@ -27,8 +27,11 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
+import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
+import com.kakao.vectormap.camera.CameraUpdateFactory;
+import com.kakao.vectormap.shape.MapPoints;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,6 +53,8 @@ public class MapFragment extends Fragment {
     // 구글에서 제공하는 위치 서비스 API
     private FusedLocationProviderClient fusedLocationProviderClient;
     private LocationCallback locationCallback;
+    // 지도 객체 저장
+    private KakaoMap kakaoMap;
 
     /**
      * Use this factory method to create a new instance of
@@ -89,6 +94,13 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        EditText search = view.findViewById(R.id.search_text);
+        // editText 누르면 추천하는 병원 페이지 보여줌
+        search.setOnClickListener(v -> {
+            Intent intent = new Intent(requireContext(), CategoryActivity.class);
+            startActivity(intent);
+        });
+
         // 위치 권한 체크 & 요청
         if (ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -111,16 +123,16 @@ public class MapFragment extends Fragment {
                     double lng = location.getLongitude();
 
                     Log.d("CURRENT_LOCATION", "위도 : " + lat + "경도 : " + lng);
+
+                    if(kakaoMap != null) {
+                        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
+                                LatLng.from(lat, lng)
+                        ));
+                    }
                 }
+
             }
         };
-
-        EditText search = view.findViewById(R.id.search_text);
-        // editText 누르면 추천하는 병원 페이지 보여줌
-        search.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), CategoryActivity.class);
-            startActivity(intent);
-        });
 
         mapView = view.findViewById(R.id.map_view);
 
