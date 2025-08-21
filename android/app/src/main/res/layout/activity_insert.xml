@@ -43,7 +43,6 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-
             app:boxCornerRadiusTopStart="12dp"
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
@@ -52,7 +51,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <com.google.android.material.textfield.TextInputEditText
+
+        <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -181,25 +181,32 @@
             <Spinner
                 android:id="@+id/spYear"
                 android:layout_width="0dp"
-
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_weight="1"
-
-                />
+                android:spinnerMode="dropdown"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
 
             <Spinner
                 android:id="@+id/spMonth"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:spinnerMode="dropdown"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
+
 
             <Spinner
                 android:id="@+id/spDay"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:spinnerMode="dropdown"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
         </LinearLayout>
 
         <!-- 혈액형 (선택) -->
@@ -226,15 +233,21 @@
             <Spinner
                 android:id="@+id/spAbo"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"/>
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:spinnerMode="dropdown"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
 
             <Spinner
                 android:id="@+id/spRh"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_marginStart="8dp"
-                android:layout_weight="1"/>
+                android:layout_weight="1"
+                android:spinnerMode="dropdown"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"/>
         </LinearLayout>
 
         <!-- 하단 버튼 -->
@@ -268,9 +281,9 @@
                 android:text="취 소"
                 android:textAllCaps="false"
                 app:strokeWidth="1dp"
-                app:cornerRadius="12dp"
-                />
+                app:cornerRadius="12dp"/>
         </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

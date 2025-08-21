@@ -11,6 +11,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediQuick">
         <activity
+            android:name=".AgreeTermActivity"
+            android:exported="false" />
+        <activity
             android:name=".DetailHospitalActivity"
             android:exported="false" />
         <activity
@@ -23,7 +26,7 @@
             android:name=".InsertActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".ProfileActivity"
             android:exported="false" />
         <activity
             android:name=".UploadPhotoActivity"
@@ -38,7 +41,7 @@
             android:name=".AllergyActivity"
             android:exported="false" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
