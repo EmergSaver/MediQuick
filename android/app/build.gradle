@@ -28,7 +28,7 @@ android {
         versionCode 1
         versionName "1.0"
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a" // 실제 디바이스 아키텍처
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86" // 실제 디바이스 아키텍처 및 애뮬레이션 아키텍쳐
         }
         buildConfigField "String", "KAKAO_NATIVE_KEY", "\"${kakaoKey}\""
     }
@@ -59,6 +59,9 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
     implementation 'androidx.fragment:fragment-ktx:1.6.0'
+
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.12.0'
 
     // 카카오톡 지도 SDK 의존성 추가
     implementation 'com.kakao.maps.open:android:2.12.8'
