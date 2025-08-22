@@ -9,10 +9,12 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 
 // OnProfileEditListener 인터페이스를 구현합니다.
-public class ProfileFragment extends DialogFragment implements EditProfileDialog.OnProfileEditListener {
+public class ProfileFragment extends Fragment {
+//        implements EditProfileDialog.OnProfileEditListener
 
     private Button btnAllergy;
     private Button btnProfile;
@@ -22,6 +24,32 @@ public class ProfileFragment extends DialogFragment implements EditProfileDialog
     private EditText etDob; // 생년월일
     private EditText etEmergencyContact; // 비상 연락처
     private EditText etBloodType; // 혈액형
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                // EditProfileDialog로부터 받은 데이터를 EditText에 설정
+                String birthdate = result.getString("birthdate");
+                String bloodType = result.getString("bloodType");
+                String emergencyContact = result.getString("emergencyContact");
+
+                if (etDob != null) {
+                    etDob.setText(birthdate);
+                }
+                if (etEmergencyContact != null) {
+                    etEmergencyContact.setText(emergencyContact);
+                }
+                if (etBloodType != null) {
+                    etBloodType.setText(bloodType);
+                }
+            }
+        });
+    }
 
     @Nullable
     @Override
@@ -50,7 +78,9 @@ public class ProfileFragment extends DialogFragment implements EditProfileDialog
 
         btnProfile.setOnClickListener(v -> {
             EditProfileDialog dialog = new EditProfileDialog();
-            dialog.show(getChildFragmentManager(), "editProfileDialog");
+            // ✨ 수정: 팝업창이 닫혔을 때 데이터를 받을 타겟 Fragment를 설정합니다.
+//            dialog.setTargetFragment(ProfileFragment.this, 0);
+            dialog.show(getParentFragmentManager(), "editProfileDialog");
         });
 
         // '프로필 수정' 버튼 이벤트 (기존과 동일)
@@ -63,11 +93,20 @@ public class ProfileFragment extends DialogFragment implements EditProfileDialog
     }
 
     // 팝업에서 데이터가 수정되면 호출되는 콜백 메서드
-    @Override
-    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
-        // 전달받은 데이터를 UI의 EditText에 반영
-        etDob.setText(birthdate);
-        etEmergencyContact.setText(emergencyContact);
-        etBloodType.setText(bloodType);
+//    @Override
+//    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
+//        // 전달받은 데이터를 UI의 EditText에 반영
+//        if (etDob != null) {
+//            etDob.setText(birthdate);
+//        }
+//        if (etEmergencyContact != null) {
+//            etEmergencyContact.setText(emergencyContact);
+//        }
+//        if (etBloodType != null) {
+//            etBloodType.setText(bloodType);
+//        }
+//        etDob.setText(birthdate);
+//        etEmergencyContact.setText(emergencyContact);
+//        etBloodType.setText(bloodType);
     }
-}
+//}

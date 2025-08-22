@@ -20,9 +20,9 @@ public class EditProfileDialog extends DialogFragment {
     private FragmentEditProfileDialogBinding binding;
 
     // 콜백 인터페이스 정의 (팝업과 메인 화면 간 데이터 통신을 위함)
-    public interface OnProfileEditListener {
-        void onProfileEdited(String birthdate, String bloodType, String emergencyContact);
-    }
+//    public interface OnProfileEditListener {
+//        void onProfileEdited(String birthdate, String bloodType, String emergencyContact);
+//    }
 
     @Nullable
     @Override
@@ -68,16 +68,25 @@ public class EditProfileDialog extends DialogFragment {
                     + binding.etContact3.getText().toString();
 
             // 2. 콜백 리스너를 통해 데이터 전달
-            OnProfileEditListener listener = null;
-            if (getTargetFragment() instanceof OnProfileEditListener) {
-                listener = (OnProfileEditListener) getTargetFragment();
-            } else if (getActivity() instanceof OnProfileEditListener) {
-                listener = (OnProfileEditListener) getActivity();
-            }
+            // ✨ 수정: Bundle에 데이터를 담아 Fragment Result를 통해 전달합니다.
+            Bundle result = new Bundle();
+            result.putString("birthdate", birthdate);
+            result.putString("bloodType", bloodType);
+            result.putString("emergencyContact", emergencyContact);
 
-            if (listener != null) {
-                listener.onProfileEdited(birthdate, bloodType, emergencyContact);
-            }
+            // "requestKey"라는 고유 키를 사용하여 결과를 부모 프래그먼트에 보냅니다.
+            getParentFragmentManager().setFragmentResult("requestKey", result);
+
+//            OnProfileEditListener listener = null;
+//            if (getTargetFragment() instanceof OnProfileEditListener) {
+//                listener = (OnProfileEditListener) getTargetFragment();
+//            } else if (getActivity() instanceof OnProfileEditListener) {
+//                listener = (OnProfileEditListener) getActivity();
+//            }
+//
+//            if (listener != null) {
+//                listener.onProfileEdited(birthdate, bloodType, emergencyContact);
+//            }
 
             // 3. 팝업 닫기
             dismiss();
