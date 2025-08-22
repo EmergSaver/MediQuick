@@ -5,8 +5,10 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
 import android.widget.Spinner;
 import android.widget.Toast;
 import android.content.Intent;
@@ -17,6 +19,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -68,7 +71,7 @@ public class InsertActivity extends AppCompatActivity {
         etPw2.addTextChangedListener(clearOnly);
 
         AdapterView.OnItemSelectedListener clearOnSelect = new AdapterView.OnItemSelectedListener() {
-            @Override public void onItemSelected(AdapterView<?> parent, android.view.View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent == spYear || parent == spMonth) {
                     refreshDays(getSel(spYear), getSel(spMonth));
                 }
@@ -80,12 +83,10 @@ public class InsertActivity extends AppCompatActivity {
         spMonth.setOnItemSelectedListener(clearOnSelect);
         spDay.setOnItemSelectedListener(clearOnSelect);
 
+        // ✅ 확인 버튼: 검증 → 약관 바텀시트 → (동의 시) Firestore 저장
         btnOk.setOnClickListener(v -> {
-            if (!validateAndShowErrors()) {
-                return;
-            }
+            if (!validateAndShowErrors()) return;
 
-            // ✅ Firestore에 저장할 데이터 준비
             String name  = textOf(etName).trim();
             String email = textOf(etEmail).trim();
             String pw    = textOf(etPw).trim();
@@ -101,19 +102,49 @@ public class InsertActivity extends AppCompatActivity {
             user.put("birth", birth);
             user.put("bloodType", abo + rh);
 
-            // Firestore에 추가
-            db.collection("users").add(user)
+            showTermsBottomSheet(user); // 🔻 DB 저장 전에 약관 동의부터
+        });
+
+        btnCancel.setOnClickListener(v -> finish());
+    }
+
+    // ------------------- 바텀시트 표시 (약관 동의) -------------------
+    private void showTermsBottomSheet(Map<String, Object> userData) {
+        View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
+
+        CheckBox cbService   = sheetView.findViewById(R.id.cbTermsService);
+        CheckBox cbPrivacy   = sheetView.findViewById(R.id.cbTermsPrivacy);
+        CheckBox cbMarketing = sheetView.findViewById(R.id.cbTermsMarketing);
+        MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
+        MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setContentView(sheetView);
+        dialog.setCanceledOnTouchOutside(false); // 밖 터치로 닫히지 않게
+
+        sheetBtnAgree.setOnClickListener(v -> {
+            if (!cbService.isChecked() || !cbPrivacy.isChecked()) {
+                Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // ✅ 동의 완료 → Firestore 저장
+            db.collection("users").add(userData)
                     .addOnSuccessListener(docRef -> {
+                        dialog.dismiss();
                         Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                        Intent intent = new Intent(InsertActivity.this, AgreeTermActivity.class);
-                        startActivity(intent);
+                        // 필요하면 다음 화면 이동:
+                        // startActivity(new Intent(InsertActivity.this, NextActivity.class));
+                        finish(); // 현재 화면 종료 (원하면 유지해도 됨)
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
 
-        btnCancel.setOnClickListener(v -> finish());
+        sheetBtnCancel.setOnClickListener(v -> dialog.dismiss());
+
+        dialog.show();
     }
 
     private void bindViews() {
