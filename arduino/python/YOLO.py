@@ -1,85 +1,86 @@
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 import cv2
-import numpy as np
+import torch
+import time
+import mysql.connector
+from datetime import datetime
 
-# YOLO 파일 경로
-yolo_cfg = r"C:/Users/computer/darknet/yolov4-tiny.cfg"
-yolo_weights = r"C:/Users/computer/darknet/yolov4-tiny.weights"
-yolo_names = r"C:/Users/computer/darknet/coco.names"
+# YOLOv5 모델 로드
+model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+model.eval()
 
-# YOLO 초기화
-net = cv2.dnn.readNet(yolo_weights, yolo_cfg)
-with open(yolo_names, "r") as f:
-    classes = [line.strip() for line in f.readlines()]
+# MySQL 연결
+db = mysql.connector.connect(
+    host="localhost",
+    user="root",
+    password="1234",
+    database="sys"
+)
+cursor = db.cursor()
+print("Connect success")
 
-layer_names = net.getLayerNames()
-unconnected = net.getUnconnectedOutLayers()
-if len(unconnected.shape) == 2:
-    output_layers = [layer_names[i[0] - 1] for i in unconnected]
-else:
-    output_layers = [layer_names[i - 1] for i in unconnected]
-
-# 스트림 열기
-stream_url = "http://192.168.0.50:8081/"
-cap = cv2.VideoCapture(stream_url)
+# 비디오 스트림 열기
+cap = cv2.VideoCapture("http://192.168.0.50:8081/")
 
 if not cap.isOpened():
     print("Stream load fail")
     exit()
 
+last_print_time = time.time()
+
 while True:
     ret, frame = cap.read()
-    if not ret:
-        print("frame read fail")
-        break
+    if not ret or frame is None:
+        print("Frame read fail, retrying...")
+        continue
 
-    height, width = frame.shape[:2]
-
-    # YOLO 입력 blob 생성
-    blob = cv2.dnn.blobFromImage(frame, 1/255.0, (416,416), swapRB=True, crop=False)
-    net.setInput(blob)
-    outs = net.forward(output_layers)
-
-    # 탐지 결과 파싱
-    class_ids = []
-    confidences = []
-    boxes = []
-
-    for out in outs:
-        for detection in out:
-            scores = detection[5:]
-            class_id = np.argmax(scores)
-            confidence = scores[class_id]
-
-            if confidence > 0.4:  # 신뢰도 threshold
-                center_x = int(detection[0] * width)
-                center_y = int(detection[1] * height)
-                w = int(detection[2] * width)
-                h = int(detection[3] * height)
-                x = int(center_x - w/2)
-                y = int(center_y - h/2)
-                boxes.append([x, y, w, h])
-                confidences.append(float(confidence))
-                class_ids.append(class_id)
-
-    # Non-max suppression
-    indices = cv2.dnn.NMSBoxes(boxes, confidences, 0.5, 0.4)
+    # YOLO 탐지
+    with torch.no_grad():
+        results = model(frame)
 
     person_count = 0
-    if len(indices) > 0:
-        for i in indices.flatten():
-            if classes[class_ids[i]] == "person":
-                person_count += 1
-                x, y, w, h = boxes[i]
-                cv2.rectangle(frame, (x,y), (x+w, y+h), (0,255,0), 2)
-                cv2.putText(frame, "Person", (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 2)
+    current_confidences = []
 
-    # 화면에 표시
-    cv2.putText(frame, f"People Count: {person_count}", (10,30), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
-    cv2.imshow("YOLO People Detection", frame)
+    for *xyxy, conf, cls in results.xyxy[0].tolist():
+        if int(cls) == 0 and conf > 0.5:
+            person_count += 1
+            current_confidences.append(conf)
+            x1, y1, x2, y2 = map(int, xyxy)
+            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+            cv2.putText(frame, f"Person: {conf:.2f}", (x1, y1 - 10),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
 
-    # q 누르면 종료
+    # 영상에 사람 수 표시
+    cv2.putText(frame, f"People Count: {person_count}", (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.imshow("YOLOv5 People Detection", frame)
+
+    # 3초마다 콘솔 출력 + DB 저장
+    current_time = time.time()
+    if current_time - last_print_time >= 5:
+        now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+        avg_conf = (sum(current_confidences) / person_count) if person_count > 0 else 0.0
+        print(f"Person count: {person_count}, Average accuracy: {avg_conf:.2f}, Time: {now}")
+
+        # DB 저장
+        try:
+            sql = "INSERT INTO analysis (people_count, accuracy, datetime) VALUES (%s, %s, %s)"
+            val = (person_count, avg_conf, now)
+            cursor.execute(sql, val)
+            db.commit()
+        except Exception as e:
+            print("DB 저장 오류:", e)
+
+        last_print_time = current_time
+
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+# 자원 정리
 cap.release()
 cv2.destroyAllWindows()
+cursor.close()
+db.close()
