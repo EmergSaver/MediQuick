@@ -207,16 +207,17 @@ public class ProfileFragment extends Fragment {
 
         return view;
     }
+}
 
     // 팝업에서 데이터가 수정되면 호출되는 콜백 메서드
-    @Override
-    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
-        // 전달받은 데이터를 UI의 EditText에 반영
-        etDob.setText(birthdate);
-        etEmergencyContact.setText(emergencyContact);
-        etBloodType.setText(bloodType);
-    }
-}
+//    @Override
+//    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
+//        // 전달받은 데이터를 UI의 EditText에 반영
+//        etDob.setText(birthdate);
+//        etEmergencyContact.setText(emergencyContact);
+//        etBloodType.setText(bloodType);
+//    }
+//}
 
 
 
