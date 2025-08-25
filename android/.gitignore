@@ -25,6 +25,3 @@ output.json
 # Keystore (보안상 제외)
 *.jks
 *.keystore
-
-# Local environment variables
-gradle.properties
