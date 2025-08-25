@@ -31,7 +31,6 @@ import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
-import com.kakao.vectormap.shape.MapPoints;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -114,13 +113,15 @@ public class MapFragment extends Fragment {
                 for(Location location : locationResult.getLocations()) {
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
+                    LatLng currentLng = LatLng.from(lat, lng);
 
                     Log.d("CURRENT_LOCATION", "위도 : " + lat + "경도 : " + lng);
 
                     // kakaoMap이 준비되어 있으면 카메라 이동
                     if(kakaoMap != null) {
+                        // 카메라 이동
                         kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
-                                LatLng.from(lat, lng)
+                                LatLng.from(currentLng)
                         ));
                     }
                 }
@@ -164,8 +165,10 @@ public class MapFragment extends Fragment {
                                 if(location != null) {
                                     double lat = location.getLatitude();
                                     double lng = location.getLongitude();
+                                    LatLng currentLng = LatLng.from(lat, lng);
+
                                     kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
-                                            LatLng.from(lat, lng)
+                                            LatLng.from(currentLng)
                                     ));
                                 } else {
                                     // null 이면 기본 위치 (서울 시청으로)
