@@ -59,15 +59,8 @@ public class InsertActivity extends AppCompatActivity {
 
         btnOk.setEnabled(true);
 
-        TextWatcher clearOnly = new TextWatcher() {
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) { clearInlineErrors(); }
-            @Override public void afterTextChanged(Editable s) {}
-        };
-        etName.addTextChangedListener(clearOnly);
-        etEmail.addTextChangedListener(clearOnly);
-        etPw.addTextChangedListener(clearOnly);
-        etPw2.addTextChangedListener(clearOnly);
+        // ✅ 실시간 유효성 검사 & 색상 피드백
+        setupRealtimeValidation();
 
         AdapterView.OnItemSelectedListener clearOnSelect = new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -107,6 +100,74 @@ public class InsertActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> finish());
     }
 
+    // ------------------- 실시간 유효성 검사 -------------------
+    private void setupRealtimeValidation() {
+        // 이름 검사
+        etName.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String name = s.toString().trim();
+                if (name.matches("^[A-Za-z가-힣]{2,16}$")) {
+                    tilName.setError(null);
+                    tilName.setBoxStrokeColor(getColor(R.color.teal_700)); // ✅ 초록
+                } else {
+                    tilName.setError("이름은 2~16자여야 합니다.");
+                    tilName.setBoxStrokeColor(getColor(R.color.red)); // ❌ 빨강
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        // 이메일 검사
+        etEmail.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String email = s.toString().trim();
+                if (!TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    tilEmail.setError(null);
+                    tilEmail.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilEmail.setError("이메일 형식을 확인해 주세요.");
+                    tilEmail.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        // 비밀번호 검사
+        etPw.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String pw = s.toString();
+                if (isPasswordValid(pw)) {
+                    tilPw.setError(null);
+                    tilPw.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
+                    tilPw.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        // 비밀번호 확인 검사
+        etPw2.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String pw = etPw.getText() != null ? etPw.getText().toString() : "";
+                String pw2 = s.toString();
+                if (pw.equals(pw2) && isPasswordValid(pw2)) {
+                    tilPw2.setError(null);
+                    tilPw2.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilPw2.setError("비밀번호가 일치하지 않습니다.");
+                    tilPw2.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+    }
+
     // ------------------- 바텀시트 표시 (약관 동의) -------------------
     private void showTermsBottomSheet(Map<String, Object> userData) {
         View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
@@ -119,33 +180,28 @@ public class InsertActivity extends AppCompatActivity {
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         dialog.setContentView(sheetView);
-        dialog.setCanceledOnTouchOutside(false); // 밖 터치로 닫히지 않게
+        dialog.setCanceledOnTouchOutside(false);
 
         sheetBtnAgree.setOnClickListener(v -> {
             if (!cbService.isChecked() || !cbPrivacy.isChecked()) {
                 Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
-
-            // ✅ 동의 완료 → Firestore 저장
             db.collection("users").add(userData)
                     .addOnSuccessListener(docRef -> {
                         dialog.dismiss();
                         Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                        // 필요하면 다음 화면 이동:
-                        // startActivity(new Intent(InsertActivity.this, NextActivity.class));
-                        finish(); // 현재 화면 종료 (원하면 유지해도 됨)
+                        finish();
                     })
                     .addOnFailureListener(e -> {
                         Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
-
         sheetBtnCancel.setOnClickListener(v -> dialog.dismiss());
-
         dialog.show();
     }
 
+    // ------------------- 이하 기존 유틸 메서드 -------------------
     private void bindViews() {
         etName  = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
@@ -234,37 +290,24 @@ public class InsertActivity extends AppCompatActivity {
             if (firstErr == null) firstErr = tilName;
             ok = false;
         }
-
         if (!( !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches() )) {
             if (tilEmail != null) tilEmail.setError("이메일 형식을 확인해 주세요.");
             if (firstErr == null) firstErr = tilEmail;
             ok = false;
         }
-
         if (!isPasswordValid(pw)) {
             if (tilPw != null) tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
             if (firstErr == null) firstErr = tilPw;
             ok = false;
         }
-
         if (!pw.equals(pw2)) {
             if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
             if (firstErr == null) firstErr = tilPw2;
             ok = false;
         }
-
         if (!isValidDate(y, m, d)) {
             Toast.makeText(this, "생년월일을 확인해 주세요.", Toast.LENGTH_SHORT).show();
             ok = false;
-        }
-
-        if (!ok && firstErr != null) {
-            firstErr.requestFocus();
-            TextInputLayout finalFirstErr = firstErr;
-            findViewById(R.id.main_InPro).post(() ->
-                    ((androidx.core.widget.NestedScrollView) findViewById(R.id.main_InPro))
-                            .smoothScrollTo(0, finalFirstErr.getTop() - 60)
-            );
         }
         return ok;
     }
