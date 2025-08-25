@@ -129,10 +129,10 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, InsertActivity.class))
         );
 
-        // 카카오 로그인은 나중에 연동(현재 버튼만 연결)
+        /*// 카카오 로그인은 나중에 연동(현재 버튼만 연결)
         btKakao.setOnClickListener(v ->
                 Toast.makeText(this, "카카오 로그인은 추후 연동 예정입니다.", Toast.LENGTH_SHORT).show()
-        );
+        );*/
     }
 
     private String safe(TextInputEditText e) {
