@@ -15,6 +15,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 
 import com.emergsaver.mediquick.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -23,6 +24,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
@@ -58,15 +60,9 @@ public class MapFragment extends Fragment {
     // 지도 객체 저장
     private KakaoMap kakaoMap;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment MapFragment.
-     */
-    // TODO: Rename and change types and number of parameters
+    // BottomSheet 제어 변수 선언
+    private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
@@ -97,6 +93,16 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         EditText search = view.findViewById(R.id.search_text);
+        mapView = view.findViewById(R.id.map_view);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        // BottomSheet 초기화
+        LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+        // bottomSheet 기본 상태 -> 숨김 설정
+        bottomSheetBehavior.setPeekHeight(0);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
         // editText 누르면 추천하는 병원 페이지 보여줌
 //        search.setOnClickListener(v -> {
 //            Intent intent = new Intent(requireContext(), CategoryActivity.class);
@@ -109,9 +115,10 @@ public class MapFragment extends Fragment {
                 return;
             }
 
-            LatLng targetPos = LatLng.from(36.323337, 127.420247);
+            LatLng targetPos = LatLng.from(36.322848, 127.420258);
             LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
 
+            // 마커 스타일 설정
             LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
             LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
             Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
@@ -122,9 +129,11 @@ public class MapFragment extends Fragment {
                 Log.d("MAP_DEBUG", "기존 마커 제거됨");
             }
 
+            // 마커 추가
             Label newLabel = labelLayer.addLabel(LabelOptions.from("searchMarker", targetPos).setStyles(styles));
             Log.d("MAP_DEBUG", "새 마커 추가 완료: " + newLabel + " 위치: " + targetPos);
 
+            // 마커로 카메라 이동
             kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(targetPos, 18));
             Log.d("MAP_DEBUG", "카메라 이동 완료");
 
@@ -132,9 +141,6 @@ public class MapFragment extends Fragment {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         });
 
-        mapView = view.findViewById(R.id.map_view);
-
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
