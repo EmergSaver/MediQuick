@@ -34,7 +34,7 @@ public class InsertActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPw, etPw2;
     private TextInputLayout tilName, tilEmail, tilPw, tilPw2;
-    private Spinner spYear, spMonth, spDay, spAbo, spRh;
+    private Spinner spYear, spMonth, spDay, spBlood;   // ✅ spBlood 하나만 사용
     private MaterialButton btnOk, btnCancel;
 
     private FirebaseFirestore db; // Firestore 참조
@@ -49,7 +49,7 @@ public class InsertActivity extends AppCompatActivity {
 
         bindViews();
         setupBirthSpinners();
-        setupBloodSpinners();
+        setupBloodSpinner();   // ✅ 수정된 메서드 호출
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_InPro), (v, insets) -> {
             Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -84,15 +84,14 @@ public class InsertActivity extends AppCompatActivity {
             String pw    = textOf(etPw).trim();
             int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
             String birth = y + "-" + m + "-" + d;
-            String abo = String.valueOf(spAbo.getSelectedItem());
-            String rh  = String.valueOf(spRh.getSelectedItem());
+            String blood = String.valueOf(spBlood.getSelectedItem()); // ✅ 하나로 가져오기
 
             Map<String, Object> user = new HashMap<>();
             user.put("name", name);
             user.put("email", email);
             user.put("password", pw);
             user.put("birth", birth);
-            user.put("bloodType", abo + rh);
+            user.put("bloodType", blood);   // ✅ "A+" 이런 값 바로 저장
 
             showTermsBottomSheet(user); // 🔻 DB 저장 전에 약관 동의부터
         });
@@ -216,8 +215,7 @@ public class InsertActivity extends AppCompatActivity {
         spYear  = findViewById(R.id.spYear);
         spMonth = findViewById(R.id.spMonth);
         spDay   = findViewById(R.id.spDay);
-        spAbo   = findViewById(R.id.spAbo);
-        spRh    = findViewById(R.id.spRh);
+        spBlood = findViewById(R.id.spBlood);
 
         btnOk     = findViewById(R.id.btnOk);
         btnCancel = findViewById(R.id.btnCancel);
@@ -256,11 +254,10 @@ public class InsertActivity extends AppCompatActivity {
         spDay.setAdapter(simpleAdapter(days));
     }
 
-    private void setupBloodSpinners() {
-        spAbo.setAdapter(ArrayAdapter.createFromResource(
-                this, R.array.blood_abo, android.R.layout.simple_spinner_dropdown_item));
-        spRh.setAdapter(ArrayAdapter.createFromResource(
-                this, R.array.blood_rh, android.R.layout.simple_spinner_dropdown_item));
+    // ✅ 혈액형 스피너: 하나로 합침
+    private void setupBloodSpinner() {
+        spBlood.setAdapter(ArrayAdapter.createFromResource(
+                this, R.array.blood_types, android.R.layout.simple_spinner_dropdown_item));
     }
 
     private ArrayAdapter<String> simpleAdapter(List<String> items) {

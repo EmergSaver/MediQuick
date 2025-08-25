@@ -231,35 +231,17 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <LinearLayout
-            android:id="@+id/rowBlood"
+        <Spinner
+            android:id="@+id/spBlood"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_height="48dp"
             android:layout_marginTop="8dp"
             app:layout_constraintTop_toBottomOf="@id/lblBlood"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <Spinner
-                android:id="@+id/spAbo"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
-                android:spinnerMode="dropdown"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"/>
-
-            <Spinner
-                android:id="@+id/spRh"
-                android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_marginStart="8dp"
-                android:layout_weight="1"
-                android:spinnerMode="dropdown"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"/>
-        </LinearLayout>
+            app:layout_constraintEnd_toEndOf="parent"
+            android:spinnerMode="dropdown"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"/>
 
         <!-- 하단 버튼 -->
         <LinearLayout
@@ -268,7 +250,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:layout_marginTop="24dp"
-            app:layout_constraintTop_toBottomOf="@id/rowBlood"
+            app:layout_constraintTop_toBottomOf="@id/spBlood"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
