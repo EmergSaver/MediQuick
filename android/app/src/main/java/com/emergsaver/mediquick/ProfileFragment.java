@@ -1,11 +1,14 @@
 package com.emergsaver.mediquick;
 
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,9 +33,14 @@ public class ProfileFragment extends Fragment {
     private EditText etFoodAllergy1, etFoodAllergy2, etFoodAllergy3;
     private EditText etDrugAllergy1, etDrugAllergy2, etDrugAllergy3;
 
+    // 프로필 이미지를 표시할 ImageView
+    private ImageView ivProfileImage;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
 
         // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
@@ -54,6 +62,26 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
+            @Override
+            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
+                String birthdate = result.getString("birthdate");
+                String bloodType = result.getString("bloodType");
+                String emergencyContact = result.getString("emergencyContact");
+
+                if (etDob != null) {
+                    etDob.setText(birthdate);
+                }
+                if (etEmergencyContact != null) {
+                    etEmergencyContact.setText(emergencyContact);
+                }
+                if (etBloodType != null) {
+                    etBloodType.setText(bloodType);
+                }
+            }
+        });
+
         // ✨ 추가: 알러지 팝업에서 결과를 받을 리스너
         getParentFragmentManager().setFragmentResultListener("allergyRequestKey", this, (requestKey, result) -> {
             ArrayList<String> foodAllergies = result.getStringArrayList("food_allergies");
@@ -83,7 +111,25 @@ public class ProfileFragment extends Fragment {
                 }
             }
         });
+
+        // ✨ 수정: 프로필 사진/이름 팝업에서 결과를 받을 리스너를 추가합니다.
+        getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
+            String updatedName = result.getString("updatedName");
+            String updatedPhotoUri = result.getString("updatedPhotoUri");
+
+            // TextView에 업데이트된 이름 설정
+            TextView tvName = getView().findViewById(R.id.tv_name);
+            if (tvName != null) {
+                tvName.setText(updatedName);
+            }
+
+            // ImageView에 업데이트된 사진 설정
+            if (updatedPhotoUri != null && ivProfileImage != null) {
+                ivProfileImage.setImageURI(Uri.parse(updatedPhotoUri));
+            }
+        });
     }
+
 
 
     @Nullable
@@ -111,6 +157,9 @@ public class ProfileFragment extends Fragment {
         etDrugAllergy2 = view.findViewById(R.id.et_drug_allergy_2);
         etDrugAllergy3 = view.findViewById(R.id.et_drug_allergy_3);
 
+        // ivProfileImage를 초기화합니다.
+        ivProfileImage = view.findViewById(R.id.profile_image);
+
         // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
         btnAllergy.setOnClickListener(v -> {
             // Intent intent = new Intent(getActivity(), AllergyActivity.class);
@@ -132,6 +181,9 @@ public class ProfileFragment extends Fragment {
         btnUploadphoto.setOnClickListener(v -> {
             // Intent intent = new Intent(getActivity(), UploadPhotoActivity.class);
             // startActivity(intent);
+            // EditProfilePhotoDialog 팝업 띄우기
+            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+            dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
         });
 
         return view;
