@@ -20,6 +20,9 @@ public class EditProfileDialog extends DialogFragment {
     private FragmentEditProfileDialogBinding binding;
 
     // 콜백 인터페이스 정의 (팝업과 메인 화면 간 데이터 통신을 위함)
+    public interface OnProfileEditListener {
+        void onProfileEdited(String birthdate, String bloodType, String emergencyContact);
+    }
 //    public interface OnProfileEditListener {
 //        void onProfileEdited(String birthdate, String bloodType, String emergencyContact);
 //    }
@@ -73,6 +76,12 @@ public class EditProfileDialog extends DialogFragment {
             result.putString("birthdate", birthdate);
             result.putString("bloodType", bloodType);
             result.putString("emergencyContact", emergencyContact);
+            OnProfileEditListener listener = null;
+            if (getTargetFragment() instanceof OnProfileEditListener) {
+                listener = (OnProfileEditListener) getTargetFragment();
+            } else if (getActivity() instanceof OnProfileEditListener) {
+                listener = (OnProfileEditListener) getActivity();
+            }
 
             // "requestKey"라는 고유 키를 사용하여 결과를 부모 프래그먼트에 보냅니다.
             getParentFragmentManager().setFragmentResult("requestKey", result);
@@ -87,6 +96,9 @@ public class EditProfileDialog extends DialogFragment {
 //            if (listener != null) {
 //                listener.onProfileEdited(birthdate, bloodType, emergencyContact);
 //            }
+            if (listener != null) {
+                listener.onProfileEdited(birthdate, bloodType, emergencyContact);
+            }
 
             // 3. 팝업 닫기
             dismiss();
