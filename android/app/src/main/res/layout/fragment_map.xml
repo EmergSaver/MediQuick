@@ -46,12 +46,12 @@ tools:context="nav.MapFragment">
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.kakao.vectormap.MapView>
     <!-- Bottom Sheet -->
-    <LinearLayout
-        android:id="@+id/bottom_sheet"
-        android:layout_width="match_parent"
-        android:layout_height="300dp"
-        android:orientation="vertical"
-        android:background="@drawable/rounded_top_corners"
-        android:padding="16dp"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>
+<!--    <LinearLayout-->
+<!--        android:id="@+id/bottom_sheet"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="300dp"-->
+<!--        android:orientation="vertical"-->
+<!--        android:background="@drawable/rounded_top_corners"-->
+<!--        android:padding="16dp"-->
+<!--        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"/>-->
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

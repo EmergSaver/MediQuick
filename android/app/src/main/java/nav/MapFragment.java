@@ -1,7 +1,6 @@
 package nav;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -17,7 +16,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 
-import com.emergsaver.mediquick.CategoryActivity;
 import com.emergsaver.mediquick.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -31,6 +29,11 @@ import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
+import com.kakao.vectormap.label.Label;
+import com.kakao.vectormap.label.LabelLayer;
+import com.kakao.vectormap.label.LabelOptions;
+import com.kakao.vectormap.label.LabelStyle;
+import com.kakao.vectormap.label.LabelStyles;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -95,9 +98,38 @@ public class MapFragment extends Fragment {
 
         EditText search = view.findViewById(R.id.search_text);
         // editText 누르면 추천하는 병원 페이지 보여줌
+//        search.setOnClickListener(v -> {
+//            Intent intent = new Intent(requireContext(), CategoryActivity.class);
+//            startActivity(intent);
+//        });
+        // editText 누르면 대전 성모 병원으로 이동
         search.setOnClickListener(v -> {
-            Intent intent = new Intent(requireContext(), CategoryActivity.class);
-            startActivity(intent);
+            if (kakaoMap == null) {
+                Log.d("MAP_DEBUG", "kakaoMap 아직 null");
+                return;
+            }
+
+            LatLng targetPos = LatLng.from(36.323337, 127.420247);
+            LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+
+            LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
+            LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
+            Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
+
+            Label existing = labelLayer.getLabel("searchMarker");
+            if(existing != null) {
+                labelLayer.remove(existing);
+                Log.d("MAP_DEBUG", "기존 마커 제거됨");
+            }
+
+            Label newLabel = labelLayer.addLabel(LabelOptions.from("searchMarker", targetPos).setStyles(styles));
+            Log.d("MAP_DEBUG", "새 마커 추가 완료: " + newLabel + " 위치: " + targetPos);
+
+            kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(targetPos, 18));
+            Log.d("MAP_DEBUG", "카메라 이동 완료");
+
+            // 마커 클릭 시 위치 자동 이동 잠시 중단
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         });
 
         mapView = view.findViewById(R.id.map_view);
@@ -120,9 +152,7 @@ public class MapFragment extends Fragment {
                     // kakaoMap이 준비되어 있으면 카메라 이동
                     if(kakaoMap != null) {
                         // 카메라 이동
-                        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
-                                LatLng.from(currentLng)
-                        ));
+                        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentLng));
                     }
                 }
 
@@ -167,9 +197,7 @@ public class MapFragment extends Fragment {
                                     double lng = location.getLongitude();
                                     LatLng currentLng = LatLng.from(lat, lng);
 
-                                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(
-                                            LatLng.from(currentLng)
-                                    ));
+                                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentLng));
                                 } else {
                                     // null 이면 기본 위치 (서울 시청으로)
                                     Log.d("LOCATION", "현재 위치 가져올 수 없음");
@@ -207,4 +235,26 @@ public class MapFragment extends Fragment {
         // 사용자 위치 업데이트 중단 (배터리 절약)
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
+
+//    private void addLabel(LatLng lng) {
+//        if(kakaoMap == null) return;
+//
+//        // LabelLayer 가져오기
+//        LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+//
+//        // 기존 라벨 제거
+//        Label existing = labelLayer.getLabel("current");
+//        if (existing != null) labelLayer.remove(existing);
+//
+//        // 원(circle) 스타일 설정
+//        LabelStyle circleStyle = LabelStyle.from(R.drawable.ic_marker) // 원 아이콘
+//                .setAnchorPoint(0.5f, 0.5f); // 원 중심점 지정
+//
+//        // 라벨 추가
+//        labelLayer.addLabel(LabelOptions.from("currentLng", lng)
+//                .setStyles(LabelStyles.from(circleStyle)));
+//
+//        // 카메라 이동
+//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(lng, 16));
+//    }
 }
