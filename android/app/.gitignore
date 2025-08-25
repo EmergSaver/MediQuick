@@ -41,3 +41,6 @@ captures/
 /.idea/misc.xml
 /.idea/tasks.xml
 /.idea/dictionaries
+
+# firebase
+google-services.json
