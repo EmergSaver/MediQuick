@@ -10,6 +10,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -39,7 +42,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
 
         // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
@@ -82,7 +84,7 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // ✨ 추가: 알러지 팝업에서 결과를 받을 리스너
+        // 알러지 팝업에서 결과를 받을 리스너
         getParentFragmentManager().setFragmentResultListener("allergyRequestKey", this, (requestKey, result) -> {
             ArrayList<String> foodAllergies = result.getStringArrayList("food_allergies");
             ArrayList<String> drugAllergies = result.getStringArrayList("drug_allergies");
@@ -112,24 +114,23 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-        // ✨ 수정: 프로필 사진/이름 팝업에서 결과를 받을 리스너를 추가합니다.
+        //  프로필 사진/이름 팝업에서 결과를 받을 리스너를 추가합니다.
         getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
             String updatedName = result.getString("updatedName");
             String updatedPhotoUri = result.getString("updatedPhotoUri");
 
-            // TextView에 업데이트된 이름 설정
-            TextView tvName = getView().findViewById(R.id.tv_name);
-            if (tvName != null) {
-                tvName.setText(updatedName);
+            if (updatedName != null) {
+                TextView tvName = getView().findViewById(R.id.tv_name);
+                if (tvName != null) {
+                    tvName.setText(updatedName);
+                }
             }
 
-            // ImageView에 업데이트된 사진 설정
             if (updatedPhotoUri != null && ivProfileImage != null) {
                 ivProfileImage.setImageURI(Uri.parse(updatedPhotoUri));
             }
         });
     }
-
 
 
     @Nullable
@@ -160,6 +161,23 @@ public class ProfileFragment extends Fragment {
         // ivProfileImage를 초기화합니다.
         ivProfileImage = view.findViewById(R.id.profile_image);
 
+        getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
+            String updatedName = result.getString("updatedName");
+            String updatedPhotoUri = result.getString("updatedPhotoUri");
+
+            if (updatedName != null) {
+                TextView tvName = getView().findViewById(R.id.tv_name);
+                if (tvName != null) {
+                    tvName.setText(updatedName);
+                }
+            }
+
+            if (updatedPhotoUri != null && ivProfileImage != null) {
+                ivProfileImage.setImageURI(Uri.parse(updatedPhotoUri));
+            }
+        });
+
+
         // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
         btnAllergy.setOnClickListener(v -> {
             // Intent intent = new Intent(getActivity(), AllergyActivity.class);
@@ -189,21 +207,7 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    // 팝업에서 데이터가 수정되면 호출되는 콜백 메서드
-//    @Override
-//    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
-//        // 전달받은 데이터를 UI의 EditText에 반영
-//        if (etDob != null) {
-//            etDob.setText(birthdate);
-//        }
-//        if (etEmergencyContact != null) {
-//            etEmergencyContact.setText(emergencyContact);
-//        }
-//        if (etBloodType != null) {
-//            etBloodType.setText(bloodType);
-//        }
-//        etDob.setText(birthdate);
-//        etEmergencyContact.setText(emergencyContact);
-//        etBloodType.setText(bloodType);
-    }
-//}
+}
+
+
+
