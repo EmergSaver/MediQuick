@@ -1,10 +1,7 @@
 package com.emergsaver.mediquick;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.EditText;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -15,7 +12,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
 import nav.HospitalFragment;
 import nav.MapFragment;
-import nav.UserFragment;
 
 public class MainActivity extends AppCompatActivity {
     @Override
@@ -29,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         // Fragment 초기화
         Fragment hospitalFrag = new HospitalFragment();
         Fragment mapFrag = new MapFragment();
-        Fragment userFrag = new UserFragment();
+        Fragment userFrag = new ProfileFragment();
 
         // 첫 번째 화면일 경우 (지도 보기)
         if(savedInstanceState == null) {

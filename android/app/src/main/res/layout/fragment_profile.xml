@@ -23,8 +23,9 @@
                 android:id="@+id/profile_image"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
-                android:src="@drawable/ic_profile_placeholder"
-                android:contentDescription="프로필 사진" />
+                android:src="@drawable/ic_user"
+                />
+<!--                android:contentDescription="프로필 사진" -->
 
             <Button
                 android:id="@+id/btn_upload_photo"
@@ -32,7 +33,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="프로필 수정" />
-
         </LinearLayout>
 
         <LinearLayout
@@ -51,15 +51,14 @@
                 android:background="@drawable/rounded_background"
                 android:padding="8dp"
                 />
-
         </LinearLayout>
-
         <Button
             android:id="@+id/btn_profile"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="개인정보 수정" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -88,8 +87,6 @@
                 android:layout_weight="1"
                 android:text="비상연락처"
                 android:textSize="16sp" />
-
-
         </LinearLayout>
 
         <LinearLayout
@@ -98,9 +95,6 @@
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
-
-
-
             <EditText
                 android:id="@+id/et_dob"
                 android:layout_width="0dp"
@@ -121,6 +115,7 @@
                 android:background="@drawable/rounded_background"
                 android:padding="8dp" />
         </LinearLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -144,7 +139,6 @@
                 android:inputType="phone"
                 android:background="@drawable/rounded_background"
                 android:padding="8dp" />
-
         </LinearLayout>
 
         <Button
@@ -240,6 +234,5 @@
                     android:background="@drawable/rounded_background" />
             </TableRow>
         </TableLayout>
-
     </LinearLayout>
 </ScrollView>
