@@ -83,6 +83,9 @@ public class MapFragment extends Fragment {
     private FusedLocationProviderClient orientationProviderClient;
     private DeviceOrientationListener orientationListener;
 
+    // 카메라 위치 제어
+    private boolean keepCameraPos = false;
+
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -141,6 +144,8 @@ public class MapFragment extends Fragment {
         callBtn.setOnClickListener(v -> {
             String phone = callText.getText().toString();
             if(!phone.isEmpty()) {
+                // 되돌아와도 카메라 고정
+                keepCameraPos = true;
                 Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
                 startActivity(intent);
             }
