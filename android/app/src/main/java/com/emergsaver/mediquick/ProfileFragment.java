@@ -69,19 +69,24 @@ public class ProfileFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                // EditProfileDialog로부터 받은 데이터를 EditText에 설정
-                String birthdate = result.getString("birthdate");
-                String bloodType = result.getString("bloodType");
-                String emergencyContact = result.getString("emergencyContact");
 
-                if (etDob != null) {
-                    etDob.setText(birthdate);
-                }
-                if (etEmergencyContact != null) {
-                    etEmergencyContact.setText(emergencyContact);
-                }
-                if (etBloodType != null) {
-                    etBloodType.setText(bloodType);
+                // getView()가 null이 아닌지 확인하고,
+                // 추가적으로 etDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
+                if (getView() != null && etDob != null) {
+                    // EditProfileDialog로부터 받은 데이터를 EditText에 설정
+                    String birthdate = result.getString("birthdate");
+                    String bloodType = result.getString("bloodType");
+                    String emergencyContact = result.getString("emergencyContact");
+
+                    if (etDob != null) {
+                        etDob.setText(birthdate);
+                    }
+                    if (etEmergencyContact != null) {
+                        etEmergencyContact.setText(emergencyContact);
+                    }
+                    if (etBloodType != null) {
+                        etBloodType.setText(bloodType);
+                    }
                 }
             }
         });
@@ -155,7 +160,7 @@ public class ProfileFragment extends Fragment {
 
         // '개인정보 수정' 버튼 이벤트 (팝업 호출로 변경)
         btnProfile.setOnClickListener(v -> {
-            EditProfileDialog dialog = new EditProfileDialog();
+            EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
             dialog.show(getParentFragmentManager(), "editProfileDialog");
         });
 
