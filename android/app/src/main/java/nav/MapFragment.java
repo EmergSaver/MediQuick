@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
@@ -16,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.emergsaver.mediquick.R;
@@ -70,7 +70,7 @@ public class MapFragment extends Fragment {
     private KakaoMap kakaoMap;
 
     // BottomSheet 제어 변수 선언
-    private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+    private BottomSheetBehavior<ConstraintLayout> bottomSheetBehavior;
 
     // 현재 위치와 방향 표시 Label 선언
     private Label locationLabel;
@@ -125,7 +125,7 @@ public class MapFragment extends Fragment {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // BottomSheet 초기화
-        LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
+        ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         // 마커 클릭 시 병원 이름 표시 TextView
         TextView hospitalNameText = view.findViewById(R.id.hospital_name); // 수정: BottomSheet 내부 TextView
