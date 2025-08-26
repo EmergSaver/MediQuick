@@ -135,12 +135,14 @@ public class MapFragment extends Fragment {
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         // 마커 클릭 시 병원 이름 표시 TextView
-        TextView hospitalNameText = view.findViewById(R.id.hospital_name); // 수정: BottomSheet 내부 TextView
-
-        // 전화 앱 열기
+        TextView hospitalNameText = view.findViewById(R.id.hospital_name);
+        
         ImageButton callBtn = view.findViewById(R.id.callBtn);
         TextView callText = view.findViewById(R.id.callText);
+        
+        ImageButton exportBtn = view.findViewById(R.id.exportBtn);
 
+        // 전화걸기
         callBtn.setOnClickListener(v -> {
             String phone = callText.getText().toString();
             if(!phone.isEmpty()) {
@@ -151,6 +153,27 @@ public class MapFragment extends Fragment {
             }
             else {
                 Toast.makeText(requireContext(), "전화번호가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 외부로 해당 정보 공유하기
+        exportBtn.setOnClickListener(v -> {
+            String name = hospitalNameText.getText().toString();
+            String phone = callText.getText().toString();
+
+            if(!name.isEmpty()) {
+                // 현재 마커 위치 가져오기
+                LatLng center = kakaoMap.getCameraPosition().getPosition();
+
+                // 공유 텍스트 구성
+                String shareText = "병원 정보\n" + "병원명 : " + name + "\n" + (phone.isEmpty() ? "" : "전화번호: " + phone);
+                
+                // 공유 인텐트 실행
+                Intent shareIntent = new Intent(Intent.ACTION_SEND);
+                shareIntent.setType("text/plain");
+                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "병원 위치 공유");
+                shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
+                startActivity(Intent.createChooser(shareIntent, "공유하기"));
             }
         });
 
