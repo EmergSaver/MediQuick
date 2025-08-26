@@ -167,7 +167,10 @@ public class MapFragment extends Fragment {
 
                 // 공유 텍스트 구성
                 String shareText = "병원 정보\n" + "병원명 : " + name + "\n" + (phone.isEmpty() ? "" : "전화번호: " + phone);
-                
+
+                // 되돌아와도 카메라 고정
+                keepCameraPos = true;
+
                 // 공유 인텐트 실행
                 Intent shareIntent = new Intent(Intent.ACTION_SEND);
                 shareIntent.setType("text/plain");
