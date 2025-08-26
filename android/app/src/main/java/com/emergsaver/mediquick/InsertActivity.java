@@ -1,5 +1,6 @@
 package com.emergsaver.mediquick;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -22,6 +23,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -32,12 +35,15 @@ import java.util.Map;
 
 public class InsertActivity extends AppCompatActivity {
 
+    //  회원가입 화면: 폼 입력 → 약관 동의 → FirebaseAuth 가입/인증메일 → Firestore 프로필 저장 → 인증 대기 화면 이동
+
     private TextInputEditText etName, etEmail, etPw, etPw2;
     private TextInputLayout tilName, tilEmail, tilPw, tilPw2;
-    private Spinner spYear, spMonth, spDay, spBlood;   // ✅ spBlood 하나만 사용
+    private Spinner spYear, spMonth, spDay, spBlood;
     private MaterialButton btnOk, btnCancel;
 
-    private FirebaseFirestore db; // Firestore 참조
+    private FirebaseFirestore db;
+    private FirebaseAuth auth; // ★ 이메일/비번 인증(Auth) 진입점
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,10 +52,11 @@ public class InsertActivity extends AppCompatActivity {
         setContentView(R.layout.activity_insert);
 
         db = FirebaseFirestore.getInstance(); // Firestore 초기화
+        auth = FirebaseAuth.getInstance(); //  Auth 초기화 (이메일/비번 가입/로그인/인증메일에 사용)
 
         bindViews();
         setupBirthSpinners();
-        setupBloodSpinner();   // ✅ 수정된 메서드 호출
+        setupBloodSpinner();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_InPro), (v, insets) -> {
             Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -58,16 +65,14 @@ public class InsertActivity extends AppCompatActivity {
         });
 
         btnOk.setEnabled(true);
-
-        // ✅ 실시간 유효성 검사 & 색상 피드백
-        setupRealtimeValidation();
+        setupRealtimeValidation(); // ✅ 실시간 유효성 검사 & 색상 피드백
 
         AdapterView.OnItemSelectedListener clearOnSelect = new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (parent == spYear || parent == spMonth) {
-                    refreshDays(getSel(spYear), getSel(spMonth));
+                    refreshDays(getSel(spYear), getSel(spMonth)); // ★ 연/월 바뀌면 일수 갱신
                 }
-                clearInlineErrors();
+                clearInlineErrors(); //  선택 시 인라인 에러 제거
             }
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         };
@@ -75,28 +80,99 @@ public class InsertActivity extends AppCompatActivity {
         spMonth.setOnItemSelectedListener(clearOnSelect);
         spDay.setOnItemSelectedListener(clearOnSelect);
 
-        // ✅ 확인 버튼: 검증 → 약관 바텀시트 → (동의 시) Firestore 저장
+        //  [확인] 클릭 흐름: 입력 검증 → 약관 BottomSheet → (동의) Auth 가입 → 인증메일 발송 → Firestore 저장 → 인증 대기 화면 이동
         btnOk.setOnClickListener(v -> {
-            if (!validateAndShowErrors()) return;
+            if (!validateAndShowErrors()) return; // ★ 폼 검증 실패 시 중단
 
             String name  = textOf(etName).trim();
             String email = textOf(etEmail).trim();
             String pw    = textOf(etPw).trim();
             int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
-            String birth = y + "-" + m + "-" + d;
-            String blood = String.valueOf(spBlood.getSelectedItem()); // ✅ 하나로 가져오기
+            String birth = y + "-" + m + "-" + d; // ★ YYYY-M-D 형식
+            String blood = String.valueOf(spBlood.getSelectedItem());
 
-            Map<String, Object> user = new HashMap<>();
-            user.put("name", name);
-            user.put("email", email);
-            user.put("password", pw);
-            user.put("birth", birth);
-            user.put("bloodType", blood);   // ✅ "A+" 이런 값 바로 저장
+            Map<String, Object> userProfile = new HashMap<>();
+            userProfile.put("name", name);
+            userProfile.put("email", email);
+            userProfile.put("birth", birth);
+            userProfile.put("bloodType", blood);
 
-            showTermsBottomSheet(user); // 🔻 DB 저장 전에 약관 동의부터
+            //  약관 동의가 완료되면 실제 가입/인증/저장 진행
+            showTermsBottomSheet(email, pw, userProfile);
         });
 
-        btnCancel.setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> finish()); //  취소 시 화면 종료
+    }
+
+    // ------------------- 약관 동의 바텀시트 -------------------
+    private void showTermsBottomSheet(String email, String pw, Map<String, Object> profile) {
+        View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
+
+        CheckBox cbService   = sheetView.findViewById(R.id.cbTermsService);
+        CheckBox cbPrivacy   = sheetView.findViewById(R.id.cbTermsPrivacy);
+        CheckBox cbMarketing = sheetView.findViewById(R.id.cbTermsMarketing);
+        MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
+        MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
+
+        BottomSheetDialog dialog = new BottomSheetDialog(this);
+        dialog.setContentView(sheetView);
+        dialog.setCanceledOnTouchOutside(false); // ★ 바깥 터치로 닫히지 않게
+
+        sheetBtnAgree.setOnClickListener(v -> {
+            //  필수 약관 동의 확인
+            if (!cbService.isChecked() || !cbPrivacy.isChecked()) {
+                Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            btnOk.setEnabled(false); //  중복 클릭 방지
+
+            //  1) FirebaseAuth에 이메일/비밀번호로 계정 생성
+            auth.createUserWithEmailAndPassword(email, pw)
+                    .addOnSuccessListener(result -> {
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user == null) {
+                            btnOk.setEnabled(true);
+                            Toast.makeText(this, "가입 중 오류: 사용자 세션이 없습니다.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        //  2) 인증 메일 보내기 (사용자 메일함으로 발송)
+                        user.sendEmailVerification()
+                                .addOnSuccessListener(ignored -> {
+                                    String uid = user.getUid();
+
+                                    //  3) Firestore에 프로필 문서 저장 (비밀번호는 저장하지 않음)
+                                    db.collection("users").document(uid)
+                                            .set(profile)
+                                            .addOnSuccessListener(x -> {
+                                                dialog.dismiss();
+                                                Toast.makeText(this, "가입 완료! 인증 메일을 확인하세요.", Toast.LENGTH_LONG).show();
+
+                                                //  4) 인증 대기 화면으로 이동 (사용자가 메일의 링크를 누른 뒤, 앱에서 확인하도록 유도)
+                                                Intent intent = new Intent(InsertActivity.this, CheckEmail.class);
+                                                intent.putExtra("email", user.getEmail()); // ★ 안내용 이메일 전달
+                                                startActivity(intent);
+                                                finish(); //  가입 화면 종료 (뒤로가기 방지)
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                btnOk.setEnabled(true);
+                                                Toast.makeText(this, "프로필 저장 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    btnOk.setEnabled(true);
+                                    Toast.makeText(this, "인증 메일 발송 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
+                    })
+                    .addOnFailureListener(e -> {
+                        btnOk.setEnabled(true);
+                        Toast.makeText(this, "가입 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    });
+        });
+
+        sheetBtnCancel.setOnClickListener(v -> dialog.dismiss()); //  약관 시트 닫기
+        dialog.show();
     }
 
     // ------------------- 실시간 유효성 검사 -------------------
@@ -167,40 +243,7 @@ public class InsertActivity extends AppCompatActivity {
         });
     }
 
-    // ------------------- 바텀시트 표시 (약관 동의) -------------------
-    private void showTermsBottomSheet(Map<String, Object> userData) {
-        View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
-
-        CheckBox cbService   = sheetView.findViewById(R.id.cbTermsService);
-        CheckBox cbPrivacy   = sheetView.findViewById(R.id.cbTermsPrivacy);
-        CheckBox cbMarketing = sheetView.findViewById(R.id.cbTermsMarketing);
-        MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
-        MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
-
-        BottomSheetDialog dialog = new BottomSheetDialog(this);
-        dialog.setContentView(sheetView);
-        dialog.setCanceledOnTouchOutside(false);
-
-        sheetBtnAgree.setOnClickListener(v -> {
-            if (!cbService.isChecked() || !cbPrivacy.isChecked()) {
-                Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            db.collection("users").add(userData)
-                    .addOnSuccessListener(docRef -> {
-                        dialog.dismiss();
-                        Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                        finish();
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
-        });
-        sheetBtnCancel.setOnClickListener(v -> dialog.dismiss());
-        dialog.show();
-    }
-
-    // ------------------- 이하 기존 유틸 메서드 -------------------
+    // ------------------- 이하 유틸 -------------------
     private void bindViews() {
         etName  = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
@@ -233,7 +276,7 @@ public class InsertActivity extends AppCompatActivity {
 
         spYear.setAdapter(simpleAdapter(years));
         spMonth.setAdapter(simpleAdapter(months));
-        refreshDays(0, 0);
+        refreshDays(0, 0); // ★ 기본값: '월/년' 선택 전이라 0으로 일수 초기화
     }
 
     private void refreshDays(int y, int m) {
@@ -254,7 +297,6 @@ public class InsertActivity extends AppCompatActivity {
         spDay.setAdapter(simpleAdapter(days));
     }
 
-    // ✅ 혈액형 스피너: 하나로 합침
     private void setupBloodSpinner() {
         spBlood.setAdapter(ArrayAdapter.createFromResource(
                 this, R.array.blood_types, android.R.layout.simple_spinner_dropdown_item));
@@ -268,7 +310,7 @@ public class InsertActivity extends AppCompatActivity {
 
     private int getSel(Spinner sp) {
         try { return Integer.parseInt(String.valueOf(sp.getSelectedItem())); }
-        catch (Exception ignore) { return 0; }
+        catch (Exception ignore) { return 0; } // ★ "년/월/일" 같은 플레이스홀더 선택 시 NumberFormat 예외 방지
     }
 
     private boolean validateAndShowErrors() {
@@ -280,33 +322,28 @@ public class InsertActivity extends AppCompatActivity {
         int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
 
         boolean ok = true;
-        TextInputLayout firstErr = null;
 
         if (!name.matches("^[A-Za-z가-힣]{2,16}$")) {
             if (tilName != null) tilName.setError("이름은 2~16자여야 합니다.");
-            if (firstErr == null) firstErr = tilName;
             ok = false;
         }
         if (!( !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches() )) {
             if (tilEmail != null) tilEmail.setError("이메일 형식을 확인해 주세요.");
-            if (firstErr == null) firstErr = tilEmail;
             ok = false;
         }
         if (!isPasswordValid(pw)) {
             if (tilPw != null) tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
-            if (firstErr == null) firstErr = tilPw;
             ok = false;
         }
         if (!pw.equals(pw2)) {
             if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
-            if (firstErr == null) firstErr = tilPw2;
             ok = false;
         }
         if (!isValidDate(y, m, d)) {
             Toast.makeText(this, "생년월일을 확인해 주세요.", Toast.LENGTH_SHORT).show();
             ok = false;
         }
-        return ok;
+        return ok; //  하나라도 실패하면 false → 상단 onClick에서 리턴
     }
 
     private void clearInlineErrors() {
@@ -322,7 +359,7 @@ public class InsertActivity extends AppCompatActivity {
         boolean hasAlpha = pw.matches(".*[A-Za-z].*");
         boolean hasDigit = pw.matches(".*\\d.*");
         boolean hasSpace = pw.matches(".*\\s.*");
-        return hasAlpha && hasDigit && !hasSpace;
+        return hasAlpha && hasDigit && !hasSpace; // ★ 공백 금지
     }
 
     private boolean isValidDate(int y, int m, int d) {

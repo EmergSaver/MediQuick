@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="@android:color/white"
+    android:id="@+id/main_email">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:paddingTop="32dp"
+        android:paddingBottom="32dp">
+
+        <!-- 타이틀 -->
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="이메일 인증"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <!-- 안내 문구 (이메일 주소 포함 안내) -->
+        <TextView
+            android:id="@+id/tvGuide"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="입력하신 이메일로 인증 메일을 보냈습니다.\n메일의 확인(Verify) 링크를 누른 뒤 아래 버튼으로 인증 완료를 확인하세요."
+            android:textSize="14sp"
+            android:lineSpacingExtra="4dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="16dp"
+            app:layout_constraintTop_toBottomOf="@id/tvTitle"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 메일 앱 열기 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnOpenEmail"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="메일 앱 열기"
+            app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/tvGuide"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <!-- 인증 완료 확인 -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVerifyDone"
+            style="@style/Widget.MaterialComponents.Button"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="인증 완료 확인"
+            app:cornerRadius="12dp"
+            app:layout_constraintTop_toBottomOf="@id/btnOpenEmail"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp" />
+
+        <!-- 인증 메일 재전송 (Outlined) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnResend"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:text="인증 메일 재전송"
+            app:cornerRadius="12dp"
+            app:strokeWidth="1dp"
+            app:layout_constraintTop_toBottomOf="@id/btnVerifyDone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginTop="12dp" />
+
+        <!-- 보조 문구 -->
+        <TextView
+            android:id="@+id/tvHint"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="메일이 안 보이면 스팸함을 확인하세요."
+            android:textSize="12sp"
+            android:textColor="#808080"
+            android:paddingTop="10dp"
+            app:layout_constraintTop_toBottomOf="@id/btnResend"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.core.widget.NestedScrollView>
