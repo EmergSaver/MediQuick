@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +21,7 @@ import android.widget.LinearLayout;
 import com.emergsaver.mediquick.R;
 import com.google.android.gms.location.DeviceOrientation;
 import com.google.android.gms.location.DeviceOrientationListener;
+import com.google.android.gms.location.DeviceOrientationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -39,6 +41,9 @@ import com.kakao.vectormap.label.LabelOptions;
 import com.kakao.vectormap.label.LabelStyle;
 import com.kakao.vectormap.label.LabelStyles;
 import com.kakao.vectormap.label.TrackingManager;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -274,6 +279,15 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.resume();
+
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        DeviceOrientationRequest request = new DeviceOrientationRequest
+                .Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
+        orientationProviderClient.requestDeviceOrientationUpdates(
+                request,
+                orientationListener,
+                Looper.getMainLooper() // 메인 스레드에서 콜백 받도록 지정
+        );
 
         // 사용자 위치 업데이트 (10초마다)
         if(ActivityCompat.checkSelfPermission(requireContext(),
