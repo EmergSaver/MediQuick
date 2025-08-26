@@ -18,6 +18,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 
 import com.emergsaver.mediquick.R;
+import com.google.android.gms.location.DeviceOrientation;
+import com.google.android.gms.location.DeviceOrientationListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -36,6 +38,7 @@ import com.kakao.vectormap.label.LabelLayer;
 import com.kakao.vectormap.label.LabelOptions;
 import com.kakao.vectormap.label.LabelStyle;
 import com.kakao.vectormap.label.LabelStyles;
+import com.kakao.vectormap.label.TrackingManager;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,6 +66,14 @@ public class MapFragment extends Fragment {
     // BottomSheet 제어 변수 선언
     private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
 
+    // 현재 위치와 방향 표시 Label 선언
+    private Label locationLabel;
+    private Label headingLabel;
+    private TrackingManager trackingManager;
+    private FusedLocationProviderClient orientationProviderClient;
+    private DeviceOrientationListener orientationListener;
+
+
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
@@ -79,6 +90,17 @@ public class MapFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+        // 방향 센서 초기화
+        orientationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+        orientationListener = new DeviceOrientationListener() {
+            @Override
+            public void onDeviceOrientationChanged(@NonNull DeviceOrientation deviceOrientation) {
+                if(headingLabel != null) {
+                    // 방향에 따른 headingLabel 회전
+                    headingLabel.rotateTo((float) Math.toRadians(deviceOrientation.getHeadingDegrees()));
+                }
+            }
+        };
     }
 
     @Override
@@ -138,7 +160,8 @@ public class MapFragment extends Fragment {
             Log.d("MAP_DEBUG", "카메라 이동 완료");
 
             // 마커 클릭 시 위치 자동 이동 잠시 중단
-            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+//            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+            // 마커 클릭 시 리스너 설정
         });
 
         locationCallback = new LocationCallback() {
@@ -148,12 +171,18 @@ public class MapFragment extends Fragment {
 
                 if(locationResult == null)
                     return;
+
                 for(Location location : locationResult.getLocations()) {
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
                     LatLng currentLng = LatLng.from(lat, lng);
 
                     Log.d("CURRENT_LOCATION", "위도 : " + lat + "경도 : " + lng);
+
+                    // 위치 Label 업데이트
+                    if(locationLabel != null) {
+                        locationLabel.moveTo(currentLng);
+                    }
 
                     // kakaoMap이 준비되어 있으면 카메라 이동
                     if(kakaoMap != null) {
@@ -193,20 +222,44 @@ public class MapFragment extends Fragment {
                 // 지도 제어
                 kakaoMap = map;
 
+                // TrackingManager 초기화
+                trackingManager = kakaoMap.getTrackingManager();
+
                 // 권한 체크 후 마지막 위치 가져오기 (초기 지도 위치 설정)
                 if(ActivityCompat.checkSelfPermission(requireContext(),
                         Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     fusedLocationProviderClient.getLastLocation()
                             .addOnSuccessListener(location -> {
+                                LatLng startPos;
                                 if(location != null) {
-                                    double lat = location.getLatitude();
-                                    double lng = location.getLongitude();
-                                    LatLng currentLng = LatLng.from(lat, lng);
+                                    startPos = LatLng.from(location.getLatitude(), location.getLongitude());
 
-                                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentLng));
-                                } else {
-                                    // null 이면 기본 위치 (서울 시청으로)
-                                    Log.d("LOCATION", "현재 위치 가져올 수 없음");
+                                    if(location != null){
+                                        startPos = LatLng.from(location.getLatitude(), location.getLongitude());
+                                    }
+
+                                    // Label 추가
+                                    LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+
+                                    // 현재 위치 label
+                                    locationLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                                            .setRank(10)
+                                            .setStyles(LabelStyles.from(
+                                                    LabelStyle.from(R.drawable.current_location)
+                                                            .setAnchorPoint(0.5f, 0.5f))));
+
+                                    // 방향 Label
+                                    headingLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                                            .setRank(9)
+                                            .setStyles(LabelStyles.from(
+                                                    LabelStyle.from(R.drawable.direction_area)
+                                                            .setAnchorPoint(0.5f, 1.0f))));
+
+                                    // headingLabel이 locationLabel과 함께 이동
+                                    locationLabel.addSharePosition(headingLabel);
+
+                                    // 카메라 이동
+                                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
                                 }
                             });
                 } else {
@@ -238,29 +291,9 @@ public class MapFragment extends Fragment {
         super.onPause();
         mapView.pause();
 
+        orientationProviderClient.removeDeviceOrientationUpdates(orientationListener);
+
         // 사용자 위치 업데이트 중단 (배터리 절약)
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
-
-//    private void addLabel(LatLng lng) {
-//        if(kakaoMap == null) return;
-//
-//        // LabelLayer 가져오기
-//        LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
-//
-//        // 기존 라벨 제거
-//        Label existing = labelLayer.getLabel("current");
-//        if (existing != null) labelLayer.remove(existing);
-//
-//        // 원(circle) 스타일 설정
-//        LabelStyle circleStyle = LabelStyle.from(R.drawable.ic_marker) // 원 아이콘
-//                .setAnchorPoint(0.5f, 0.5f); // 원 중심점 지정
-//
-//        // 라벨 추가
-//        labelLayer.addLabel(LabelOptions.from("currentLng", lng)
-//                .setStyles(LabelStyles.from(circleStyle)));
-//
-//        // 카메라 이동
-//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(lng, 16));
-//    }
 }
