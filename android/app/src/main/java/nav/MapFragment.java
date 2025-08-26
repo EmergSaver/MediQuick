@@ -17,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.emergsaver.mediquick.R;
 import com.google.android.gms.location.DeviceOrientation;
@@ -126,9 +127,8 @@ public class MapFragment extends Fragment {
         // BottomSheet 초기화
         LinearLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-        // bottomSheet 기본 상태 -> 숨김 설정
-        bottomSheetBehavior.setPeekHeight(0);
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        // 마커 클릭 시 병원 이름 표시 TextView
+        TextView hospitalNameText = view.findViewById(R.id.hospital_name); // 수정: BottomSheet 내부 TextView
 
         // editText 누르면 추천하는 병원 페이지 보여줌
 //        search.setOnClickListener(v -> {
@@ -159,14 +159,13 @@ public class MapFragment extends Fragment {
             // 마커 추가
             Label newLabel = labelLayer.addLabel(LabelOptions.from("searchMarker", targetPos).setStyles(styles));
             Log.d("MAP_DEBUG", "새 마커 추가 완료: " + newLabel + " 위치: " + targetPos);
+            newLabel.setTag("대전 성모 병원");
 
             // 마커로 카메라 이동
             kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(targetPos, 18));
             Log.d("MAP_DEBUG", "카메라 이동 완료");
 
-            // 마커 클릭 시 위치 자동 이동 잠시 중단
-//            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
-            // 마커 클릭 시 리스너 설정
+            fusedLocationProviderClient.removeLocationUpdates(locationCallback);
         });
 
         locationCallback = new LocationCallback() {
@@ -226,6 +225,23 @@ public class MapFragment extends Fragment {
                 
                 // 지도 제어
                 kakaoMap = map;
+
+                // 마커 클릭 이벤트 등록
+                kakaoMap.setOnLabelClickListener(new KakaoMap.OnLabelClickListener() {
+                    @Override
+                    public boolean onLabelClicked(KakaoMap kakaoMap, LabelLayer labelLayer, Label label) {
+                        String hospitalName = (String) label.getTag();
+                        Log.d("MAP_DEBUG", "마커 클릭됨: " + hospitalName);
+                        // BottomSheet 열기
+                        if (hospitalName != null) {
+                            hospitalNameText.setText(hospitalName);
+
+                            // BottomSheet 보이게 변경
+                            bottomSheet.setVisibility(View.VISIBLE);
+                        }
+                        return true;
+                    }
+                });
 
                 // TrackingManager 초기화
                 trackingManager = kakaoMap.getTrackingManager();
