@@ -239,10 +239,6 @@ public class MapFragment extends Fragment {
                                 if(location != null) {
                                     startPos = LatLng.from(location.getLatitude(), location.getLongitude());
 
-                                    if(location != null){
-                                        startPos = LatLng.from(location.getLatitude(), location.getLongitude());
-                                    }
-
                                     // Label 추가
                                     LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
 
@@ -301,13 +297,15 @@ public class MapFragment extends Fragment {
     }
 
     @Override
+    // 배터리 절약을 위함
     public void onPause() {
         super.onPause();
         mapView.pause();
 
+        // 방향 센서 업데이트 중단
         orientationProviderClient.removeDeviceOrientationUpdates(orientationListener);
 
-        // 사용자 위치 업데이트 중단 (배터리 절약)
+        // 사용자 위치 업데이트 중단
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
 }
