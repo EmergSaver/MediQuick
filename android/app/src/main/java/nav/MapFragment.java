@@ -1,8 +1,10 @@
 package nav;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -17,7 +19,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.emergsaver.mediquick.R;
 import com.google.android.gms.location.DeviceOrientation;
@@ -129,6 +133,21 @@ public class MapFragment extends Fragment {
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
         // 마커 클릭 시 병원 이름 표시 TextView
         TextView hospitalNameText = view.findViewById(R.id.hospital_name); // 수정: BottomSheet 내부 TextView
+
+        // 전화 앱 열기
+        ImageButton callBtn = view.findViewById(R.id.callBtn);
+        TextView callText = view.findViewById(R.id.callText);
+
+        callBtn.setOnClickListener(v -> {
+            String phone = callText.getText().toString();
+            if(!phone.isEmpty()) {
+                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
+                startActivity(intent);
+            }
+            else {
+                Toast.makeText(requireContext(), "전화번호가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         // editText 누르면 추천하는 병원 페이지 보여줌
 //        search.setOnClickListener(v -> {
