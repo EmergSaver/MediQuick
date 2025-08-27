@@ -143,6 +143,8 @@ public class MapFragment extends Fragment {
         });
     }
 
+    private boolean isFirstLocationUpdate = true; // 최초 위치 이동 여부
+
     // 현재 위치 가져오기 및 라벨
     private void initCurrentLocation() {
         // TrackingManager 초기화
@@ -177,8 +179,11 @@ public class MapFragment extends Fragment {
                             // headingLabel이 locationLabel과 함께 이동
                             locationLabel.addSharePosition(headingLabel);
 
-                            // 카메라 이동
-                            kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
+                            // 최초 위치이므로 카메라 이동
+                            if(isFirstLocationUpdate) {
+                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
+                                isFirstLocationUpdate = false;
+                            }
                         }
                     });
         } else {
@@ -342,14 +347,7 @@ public class MapFragment extends Fragment {
                     if(locationLabel != null) {
                         locationLabel.moveTo(currentLng);
                     }
-
-                    // kakaoMap이 준비되어 있으면 카메라 이동
-                    if(kakaoMap != null) {
-                        // 카메라 이동
-                        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentLng));
-                    }
                 }
-
             }
         };
 
