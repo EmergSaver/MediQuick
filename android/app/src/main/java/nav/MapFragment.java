@@ -39,6 +39,7 @@ import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
+import com.kakao.vectormap.camera.CameraPosition;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 import com.kakao.vectormap.label.Label;
 import com.kakao.vectormap.label.LabelLayer;
@@ -86,8 +87,8 @@ public class MapFragment extends Fragment {
     private FusedLocationProviderClient orientationProviderClient;
     private DeviceOrientationListener orientationListener;
 
-    // 카메라 위치 제어
-    private boolean keepCameraPos = false;
+    // 카메라 위치 저장
+    private CameraPosition savedCameraPos;
 
     private Hospital hospital;
 
@@ -151,8 +152,8 @@ public class MapFragment extends Fragment {
         callBtn.setOnClickListener(v -> {
             String phone = callText.getText().toString();
             if(!phone.isEmpty()) {
-                // 되돌아와도 카메라 고정
-                keepCameraPos = true;
+                // 현재 카메라 위치 저장
+                savedCameraPos = kakaoMap.getCameraPosition();
                 HospitalUtils.dialPhone(getContext(), phone);
             }
             else {
@@ -166,10 +167,8 @@ public class MapFragment extends Fragment {
             String phone = callText.getText().toString();
 
             if(!name.isEmpty()) {
-                // 되돌아와도 카메라 고정
-                keepCameraPos = true;
-
-                // 공유 인텐트 실행
+                // 현재 카메라 위치 저장
+                savedCameraPos = kakaoMap.getCameraPosition();
                 HospitalUtils.shareHospital(getContext(), hospital);
             }
         });
@@ -265,6 +264,11 @@ public class MapFragment extends Fragment {
                 // 지도 제어
                 kakaoMap = map;
 
+                // 지도 초기 위치 복원
+                if (savedCameraPos != null) {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
+                }
+
                 // 마커 클릭 이벤트 등록
                 kakaoMap.setOnLabelClickListener(new KakaoMap.OnLabelClickListener() {
                     @Override
@@ -336,6 +340,11 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.resume();
+
+        // 저장된 카메라 위치가 있으면 복원
+        if (savedCameraPos != null && kakaoMap != null) {
+            kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
+        }
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         DeviceOrientationRequest request = new DeviceOrientationRequest
