@@ -187,10 +187,12 @@ public class MapFragment extends Fragment {
     }
 
     // 마커 생성
-    private Label addMarker(String id, LatLng pos, String name) {
-        if(kakaoMap == null) {
+    private Label addMarker(Hospital hospital) {
+        if(kakaoMap == null || hospital == null) {
             return null;
         }
+
+        LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
         LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
 
         // 마커 스타일 설정
@@ -205,13 +207,14 @@ public class MapFragment extends Fragment {
         }
 
         // 마커 추가
-        Label newLabel = labelLayer.addLabel(LabelOptions.from(id, pos).setStyles(styles));
-        Log.d("MAP_DEBUG", "새 마커 추가 완료: " + id + " 위치: " + pos);
+        Label newLabel = labelLayer.addLabel(LabelOptions.from(hospital.getPhone(), pos).setStyles(styles));
 
         // 마커로 카메라 이동
-//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
-//        Log.d("MAP_DEBUG", "카메라 이동 완료");
-        newLabel.setTag(name);
+        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
+        Log.d("MAP_DEBUG", "카메라 이동 완료");
+
+        newLabel.setTag(hospital.getHospital_name());
+        Log.d("MAP_DEBUG", "새 마커 추가 완료: " + hospital.getHospital_name() + " 위치: " + pos);
 
         return newLabel;
     }
@@ -400,12 +403,6 @@ public class MapFragment extends Fragment {
         .addOnFailureListener(e -> Log.e("FIREBASE", "병원 데이터 로드 실패", e));
     }
 
-    private Label addMarker(Hospital hospital) {
-        if (hospital == null) return null;
-
-        LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
-        return addMarker(hospital.getPhone(), pos, hospital.getHospital_name());
-    }
     @Override
     public void onResume() {
         super.onResume();
