@@ -4,6 +4,7 @@ public class Hospital {
     private String id;
     private String hospital_name;
     private String phone;
+    private String address;
     private double latitude;
     private double longitude;
     // 추가적으로 상세정보도 추후 추가
@@ -12,10 +13,11 @@ public class Hospital {
     public Hospital() {
     }
 
-    public Hospital(String id, String hospital_name, String phone, Double latitude, Double longitude) {
+    public Hospital(String id, String hospital_name, String phone, String address, Double latitude, Double longitude) {
         this.id = id;
         this.hospital_name = hospital_name;
         this.phone = phone;
+        this.address = address;
         this.latitude = latitude;
         this.longitude = longitude;
     }
@@ -43,6 +45,14 @@ public class Hospital {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public double getLatitude() {

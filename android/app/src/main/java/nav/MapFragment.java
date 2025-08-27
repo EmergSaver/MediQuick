@@ -2,6 +2,8 @@ package nav;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -48,6 +50,9 @@ import com.kakao.vectormap.label.LabelStyle;
 import com.kakao.vectormap.label.LabelStyles;
 import com.kakao.vectormap.label.TrackingManager;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -362,7 +367,31 @@ public class MapFragment extends Fragment {
                         Log.d("FIREBASE_LOG", "Hospital 위도: " + hospital.getLatitude());
                         Log.d("FIREBASE_LOG", "Hospital 경도: " + hospital.getLongitude());
 
-                        addMarker(hospital);
+                        // 주소 있으면 Geocoding으로 위도/경도 변환
+                        String address = hospital.getAddress();
+                        Log.d("FIREBASE_LOG", "Hospital 주소 : " + address);
+
+                        if(address != null && !address.isEmpty()) {
+                            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+                            try {
+                                List<Address> addressList = geocoder.getFromLocationName(address, 1);
+                                if(address != null && !address.isEmpty()) {
+                                    Address location = addressList.get(0);
+                                    hospital.setLatitude(location.getLatitude());
+                                    hospital.setLongitude(location.getLongitude());
+
+                                    Log.d("FIREBASE_LOG", "주소 변환 완료: " + address);
+                                    Log.d("FIREBASE_LOG", "위도: " + location.getLatitude() + ", 경도: " + location.getLongitude());
+
+                                    addMarker(hospital);
+                                } else {
+                                    Log.e("FIREBASE_LOG", "주소를 좌표로 변환할 수 없음: " + address);
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                Log.e("FIREBASE_LOG", "Geocoder 예외 발생", e);
+                            }
+                        }
                     }
                     else {
                         Log.d("FIREBASE_LOG", "해당 문서가 존재하지 않음");
