@@ -1,14 +1,21 @@
 package nav;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 
 import com.emergsaver.mediquick.R;
+import com.emergsaver.mediquick.search.SearchActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,5 +69,36 @@ public class HospitalFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_hospital, container, false);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        EditText search = view.findViewById(R.id.search_text);
+
+        search.setOnClickListener(v -> {
+            // 다이얼로그 UI 불러오기
+            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_searchpopup, null);
+
+            AlertDialog dialog = new AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create();
+
+            // 버튼 연결
+            Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+            Button btnOk = dialogView.findViewById(R.id.btn_ok);
+
+            btnCancel.setOnClickListener(btn -> dialog.dismiss());
+
+            btnOk.setOnClickListener(btn -> {
+                dialog.dismiss();
+                // SearchActivity로 이동
+                Intent intent = new Intent(requireContext(), SearchActivity.class);
+                startActivity(intent);
+            });
+
+            dialog.show();
+        });
     }
 }
