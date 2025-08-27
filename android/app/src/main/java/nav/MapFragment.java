@@ -92,6 +92,87 @@ public class MapFragment extends Fragment {
 
     private Hospital hospital;
 
+    private void initMapView(View view) {
+        mapView = view.findViewById(R.id.map_view);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+
+        mapView.start(new MapLifeCycleCallback() {
+            @Override
+            public void onMapDestroy() {
+                // API가 정상적으로 종료된 경우
+                Log.d("API_CONNECT_END", "API 호출이 정상적으로 종료되었습니다.");
+            }
+
+            @Override
+            public void onMapError(Exception e) {
+                // 지도 사용 중 에러 발생 시
+                Log.e("API_CONNECT_ERROR", e.getMessage());
+            }
+
+        }, new KakaoMapReadyCallback() {
+            @Override
+            public void onMapReady(@NonNull KakaoMap map) {
+                // 인증 후 API가 정상적으로 호출된 경우
+                Log.d("API_CONNECT_SUCCESS", "API가 정상적으로 호출됨");
+
+                // 지도 제어
+                kakaoMap = map;
+
+                // 지도 초기 위치 복원
+                if (savedCameraPos != null) {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
+                }
+
+                // 현재 위치 가져오기
+                initCurrentLocation();
+
+                // 마커 클릭 리스너 등록
+            }
+        });
+    }
+
+    private void initCurrentLocation() {
+        // TrackingManager 초기화
+//        trackingManager = kakaoMap.getTrackingManager();
+
+        // 권한 체크 후 마지막 위치 가져오기 (초기 지도 위치 설정)
+        if(ActivityCompat.checkSelfPermission(requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        LatLng startPos;
+                        if(location != null) {
+                            startPos = LatLng.from(location.getLatitude(), location.getLongitude());
+
+                            // Label 추가
+                            LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+
+                            // 현재 위치 label
+                            locationLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                                    .setRank(10)
+                                    .setStyles(LabelStyles.from(
+                                            LabelStyle.from(R.drawable.current_location)
+                                                    .setAnchorPoint(0.5f, 0.5f))));
+
+                            // 방향 Label
+                            headingLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                                    .setRank(9)
+                                    .setStyles(LabelStyles.from(
+                                            LabelStyle.from(R.drawable.direction_area)
+                                                    .setAnchorPoint(0.5f, 1.0f))));
+
+                            // headingLabel이 locationLabel과 함께 이동
+                            locationLabel.addSharePosition(headingLabel);
+
+                            // 카메라 이동
+                            kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
+                        }
+                    });
+        } else {
+            ActivityCompat.requestPermissions(requireActivity(),
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+        }
+    }
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -134,8 +215,8 @@ public class MapFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         EditText search = view.findViewById(R.id.search_text);
-        mapView = view.findViewById(R.id.map_view);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+//        mapView = view.findViewById(R.id.map_view);
+//        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         // BottomSheet 초기화
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
