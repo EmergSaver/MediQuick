@@ -50,6 +50,9 @@ import com.kakao.vectormap.label.TrackingManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import model.Hospital;
+import util.HospitalUtils;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link MapFragment#newInstance} factory method to
@@ -85,6 +88,8 @@ public class MapFragment extends Fragment {
 
     // 카메라 위치 제어
     private boolean keepCameraPos = false;
+
+    private Hospital hospital;
 
 
     public static MapFragment newInstance(String param1, String param2) {
@@ -148,8 +153,7 @@ public class MapFragment extends Fragment {
             if(!phone.isEmpty()) {
                 // 되돌아와도 카메라 고정
                 keepCameraPos = true;
-                Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + phone));
-                startActivity(intent);
+                HospitalUtils.dialPhone(getContext(), phone);
             }
             else {
                 Toast.makeText(requireContext(), "전화번호가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
@@ -162,29 +166,14 @@ public class MapFragment extends Fragment {
             String phone = callText.getText().toString();
 
             if(!name.isEmpty()) {
-                // 현재 마커 위치 가져오기
-                LatLng center = kakaoMap.getCameraPosition().getPosition();
-
-                // 공유 텍스트 구성
-                String shareText = "병원 정보\n" + "병원명 : " + name + "\n" + (phone.isEmpty() ? "" : "전화번호: " + phone);
-
                 // 되돌아와도 카메라 고정
                 keepCameraPos = true;
 
                 // 공유 인텐트 실행
-                Intent shareIntent = new Intent(Intent.ACTION_SEND);
-                shareIntent.setType("text/plain");
-                shareIntent.putExtra(Intent.EXTRA_SUBJECT, "병원 위치 공유");
-                shareIntent.putExtra(Intent.EXTRA_TEXT, shareText);
-                startActivity(Intent.createChooser(shareIntent, "공유하기"));
+                HospitalUtils.shareHospital(getContext(), hospital);
             }
         });
 
-        // editText 누르면 추천하는 병원 페이지 보여줌
-//        search.setOnClickListener(v -> {
-//            Intent intent = new Intent(requireContext(), CategoryActivity.class);
-//            startActivity(intent);
-//        });
         // editText 누르면 대전 성모 병원으로 이동
         search.setOnClickListener(v -> {
             if (kakaoMap == null) {
@@ -285,6 +274,12 @@ public class MapFragment extends Fragment {
                         // BottomSheet 열기
                         if (hospitalName != null) {
                             hospitalNameText.setText(hospitalName);
+
+                            // hospital 객체 초기화
+                            LatLng pos  = label.getPosition();
+                            hospital = new Hospital(
+                                    hospitalName, callText.getText().toString(), pos.getLatitude(), pos.getLongitude()
+                            );
 
                             // BottomSheet 보이게 변경
                             bottomSheet.setVisibility(View.VISIBLE);
