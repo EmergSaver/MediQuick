@@ -14,10 +14,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-import com.emergsaver.mediquick.CategoryActivity;
-import com.emergsaver.mediquick.MainActivity;
 import com.emergsaver.mediquick.R;
-import com.emergsaver.mediquick.SearchActivity;
+import com.emergsaver.mediquick.search.SearchActivity;
 
 /**
  * A simple {@link Fragment} subclass.
