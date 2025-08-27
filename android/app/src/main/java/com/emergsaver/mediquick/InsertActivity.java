@@ -1,5 +1,6 @@
 package com.emergsaver.mediquick;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -22,6 +24,8 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -32,12 +36,14 @@ import java.util.Map;
 
 public class InsertActivity extends AppCompatActivity {
 
-    private TextInputEditText etName, etEmail, etPw, etPw2;
-    private TextInputLayout tilName, tilEmail, tilPw, tilPw2;
-    private Spinner spYear, spMonth, spDay, spBlood;   // ✅ spBlood 하나만 사용
+    private TextInputEditText etName, etEmail, etPw, etPw2, etPhone;
+    private TextInputLayout tilName, tilEmail, tilPw, tilPw2, tilPhone;
+    private Spinner spYear, spMonth, spDay, spBlood;
+    private RadioGroup rgGender;
     private MaterialButton btnOk, btnCancel;
 
-    private FirebaseFirestore db; // Firestore 참조
+    private FirebaseFirestore db;
+    private FirebaseAuth auth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,11 +51,12 @@ public class InsertActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_insert);
 
-        db = FirebaseFirestore.getInstance(); // Firestore 초기화
+        db = FirebaseFirestore.getInstance();
+        auth = FirebaseAuth.getInstance();
 
         bindViews();
         setupBirthSpinners();
-        setupBloodSpinner();   // ✅ 수정된 메서드 호출
+        setupBloodSpinner();
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_InPro), (v, insets) -> {
             Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -58,8 +65,6 @@ public class InsertActivity extends AppCompatActivity {
         });
 
         btnOk.setEnabled(true);
-
-        // ✅ 실시간 유효성 검사 & 색상 피드백
         setupRealtimeValidation();
 
         AdapterView.OnItemSelectedListener clearOnSelect = new AdapterView.OnItemSelectedListener() {
@@ -75,100 +80,33 @@ public class InsertActivity extends AppCompatActivity {
         spMonth.setOnItemSelectedListener(clearOnSelect);
         spDay.setOnItemSelectedListener(clearOnSelect);
 
-        // ✅ 확인 버튼: 검증 → 약관 바텀시트 → (동의 시) Firestore 저장
         btnOk.setOnClickListener(v -> {
             if (!validateAndShowErrors()) return;
 
             String name  = textOf(etName).trim();
             String email = textOf(etEmail).trim();
             String pw    = textOf(etPw).trim();
+            String phone = textOf(etPhone).trim();
             int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
             String birth = y + "-" + m + "-" + d;
-            String blood = String.valueOf(spBlood.getSelectedItem()); // ✅ 하나로 가져오기
+            String blood = String.valueOf(spBlood.getSelectedItem());
+            String gender = getGender();
 
-            Map<String, Object> user = new HashMap<>();
-            user.put("name", name);
-            user.put("email", email);
-            user.put("password", pw);
-            user.put("birth", birth);
-            user.put("bloodType", blood);   // ✅ "A+" 이런 값 바로 저장
+            Map<String, Object> userProfile = new HashMap<>();
+            userProfile.put("name", name);
+            userProfile.put("email", email);
+            userProfile.put("phone", phone);
+            userProfile.put("birth", birth);
+            userProfile.put("bloodType", blood);
+            userProfile.put("gender", gender);
 
-            showTermsBottomSheet(user); // 🔻 DB 저장 전에 약관 동의부터
+            showTermsBottomSheet(email, pw, userProfile);
         });
 
         btnCancel.setOnClickListener(v -> finish());
     }
 
-    // ------------------- 실시간 유효성 검사 -------------------
-    private void setupRealtimeValidation() {
-        // 이름 검사
-        etName.addTextChangedListener(new TextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
-                String name = s.toString().trim();
-                if (name.matches("^[A-Za-z가-힣]{2,16}$")) {
-                    tilName.setError(null);
-                    tilName.setBoxStrokeColor(getColor(R.color.teal_700)); // ✅ 초록
-                } else {
-                    tilName.setError("이름은 2~16자여야 합니다.");
-                    tilName.setBoxStrokeColor(getColor(R.color.red)); // ❌ 빨강
-                }
-            }
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-        // 이메일 검사
-        etEmail.addTextChangedListener(new TextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
-                String email = s.toString().trim();
-                if (!TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                    tilEmail.setError(null);
-                    tilEmail.setBoxStrokeColor(getColor(R.color.teal_700));
-                } else {
-                    tilEmail.setError("이메일 형식을 확인해 주세요.");
-                    tilEmail.setBoxStrokeColor(getColor(R.color.red));
-                }
-            }
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-        // 비밀번호 검사
-        etPw.addTextChangedListener(new TextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
-                String pw = s.toString();
-                if (isPasswordValid(pw)) {
-                    tilPw.setError(null);
-                    tilPw.setBoxStrokeColor(getColor(R.color.teal_700));
-                } else {
-                    tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
-                    tilPw.setBoxStrokeColor(getColor(R.color.red));
-                }
-            }
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-
-        // 비밀번호 확인 검사
-        etPw2.addTextChangedListener(new TextWatcher() {
-            @Override public void afterTextChanged(Editable s) {
-                String pw = etPw.getText() != null ? etPw.getText().toString() : "";
-                String pw2 = s.toString();
-                if (pw.equals(pw2) && isPasswordValid(pw2)) {
-                    tilPw2.setError(null);
-                    tilPw2.setBoxStrokeColor(getColor(R.color.teal_700));
-                } else {
-                    tilPw2.setError("비밀번호가 일치하지 않습니다.");
-                    tilPw2.setBoxStrokeColor(getColor(R.color.red));
-                }
-            }
-            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
-        });
-    }
-
-    // ------------------- 바텀시트 표시 (약관 동의) -------------------
-    private void showTermsBottomSheet(Map<String, Object> userData) {
+    private void showTermsBottomSheet(String email, String pw, Map<String, Object> profile) {
         View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
 
         CheckBox cbService   = sheetView.findViewById(R.id.cbTermsService);
@@ -186,36 +124,147 @@ public class InsertActivity extends AppCompatActivity {
                 Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
                 return;
             }
-            db.collection("users").add(userData)
-                    .addOnSuccessListener(docRef -> {
-                        dialog.dismiss();
-                        Toast.makeText(this, "회원가입 성공!", Toast.LENGTH_SHORT).show();
-                        finish();
+
+            btnOk.setEnabled(false);
+
+            auth.createUserWithEmailAndPassword(email, pw)
+                    .addOnSuccessListener(result -> {
+                        FirebaseUser user = auth.getCurrentUser();
+                        if (user == null) {
+                            btnOk.setEnabled(true);
+                            Toast.makeText(this, "가입 중 오류: 사용자 세션이 없습니다.", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        user.sendEmailVerification()
+                                .addOnSuccessListener(ignored -> {
+                                    String uid = user.getUid();
+                                    db.collection("users").document(uid)
+                                            .set(profile)
+                                            .addOnSuccessListener(x -> {
+                                                dialog.dismiss();
+                                                Toast.makeText(this, "가입 완료! 인증 메일을 확인하세요.", Toast.LENGTH_LONG).show();
+                                                Intent intent = new Intent(InsertActivity.this, CheckEmail.class);
+                                                intent.putExtra("email", user.getEmail());
+                                                startActivity(intent);
+                                                finish();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                btnOk.setEnabled(true);
+                                                Toast.makeText(this, "프로필 저장 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                            });
+                                })
+                                .addOnFailureListener(e -> {
+                                    btnOk.setEnabled(true);
+                                    Toast.makeText(this, "인증 메일 발송 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                                });
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "저장 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        btnOk.setEnabled(true);
+                        Toast.makeText(this, "가입 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
         });
+
         sheetBtnCancel.setOnClickListener(v -> dialog.dismiss());
         dialog.show();
     }
 
-    // ------------------- 이하 기존 유틸 메서드 -------------------
+    private void setupRealtimeValidation() {
+        etName.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String name = s.toString().trim();
+                if (name.matches("^[A-Za-z가-힣]{2,16}$")) {
+                    tilName.setError(null);
+                    tilName.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilName.setError("이름은 2~16자여야 합니다.");
+                    tilName.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        etEmail.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String email = s.toString().trim();
+                if (!TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                    tilEmail.setError(null);
+                    tilEmail.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilEmail.setError("이메일 형식을 확인해 주세요.");
+                    tilEmail.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        etPw.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String pw = s.toString();
+                if (isPasswordValid(pw)) {
+                    tilPw.setError(null);
+                    tilPw.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
+                    tilPw.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        etPw2.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String pw = etPw.getText() != null ? etPw.getText().toString() : "";
+                String pw2 = s.toString();
+                if (pw.equals(pw2) && isPasswordValid(pw2)) {
+                    tilPw2.setError(null);
+                    tilPw2.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilPw2.setError("비밀번호가 일치하지 않습니다.");
+                    tilPw2.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
+        etPhone.addTextChangedListener(new TextWatcher() {
+            @Override public void afterTextChanged(Editable s) {
+                String d = s.toString().replaceAll("[^0-9]", "");
+                if (d.length() == 11) {
+                    tilPhone.setError(null);
+                    tilPhone.setBoxStrokeColor(getColor(R.color.teal_700));
+                } else {
+                    tilPhone.setError("전화번호 11자리를 입력하세요.");
+                    tilPhone.setBoxStrokeColor(getColor(R.color.red));
+                }
+            }
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+    }
+
     private void bindViews() {
         etName  = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPw    = findViewById(R.id.etPw);
         etPw2   = findViewById(R.id.etPw2);
+        etPhone = findViewById(R.id.etPhone);
 
         tilName  = findViewById(R.id.tilName);
         tilEmail = findViewById(R.id.tilEmail);
         tilPw    = findViewById(R.id.tilPw);
         tilPw2   = findViewById(R.id.tilPw2);
+        tilPhone = findViewById(R.id.tilPhone);
 
         spYear  = findViewById(R.id.spYear);
         spMonth = findViewById(R.id.spMonth);
         spDay   = findViewById(R.id.spDay);
         spBlood = findViewById(R.id.spBlood);
+        rgGender = findViewById(R.id.rgGender);
 
         btnOk     = findViewById(R.id.btnOk);
         btnCancel = findViewById(R.id.btnCancel);
@@ -226,11 +275,9 @@ public class InsertActivity extends AppCompatActivity {
         List<String> years = new ArrayList<>();
         years.add("년");
         for (int y = curYear; y >= 1950; y--) years.add(String.valueOf(y));
-
         List<String> months = new ArrayList<>();
         months.add("월");
         for (int m = 1; m <= 12; m++) months.add(String.valueOf(m));
-
         spYear.setAdapter(simpleAdapter(years));
         spMonth.setAdapter(simpleAdapter(months));
         refreshDays(0, 0);
@@ -254,7 +301,6 @@ public class InsertActivity extends AppCompatActivity {
         spDay.setAdapter(simpleAdapter(days));
     }
 
-    // ✅ 혈액형 스피너: 하나로 합침
     private void setupBloodSpinner() {
         spBlood.setAdapter(ArrayAdapter.createFromResource(
                 this, R.array.blood_types, android.R.layout.simple_spinner_dropdown_item));
@@ -277,29 +323,32 @@ public class InsertActivity extends AppCompatActivity {
         String email = textOf(etEmail).trim();
         String pw    = textOf(etPw);
         String pw2   = textOf(etPw2);
-        int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
 
+        String rawPhone = textOf(etPhone).trim().replaceAll("[^0-9]", "");
+        String phone = (rawPhone.length() == 9)
+                ? rawPhone.substring(0,3) + "-" + rawPhone.substring(3,7) + "-" + rawPhone.substring(7)
+                : textOf(etPhone).trim();
+        int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
         boolean ok = true;
-        TextInputLayout firstErr = null;
 
         if (!name.matches("^[A-Za-z가-힣]{2,16}$")) {
             if (tilName != null) tilName.setError("이름은 2~16자여야 합니다.");
-            if (firstErr == null) firstErr = tilName;
             ok = false;
         }
         if (!( !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches() )) {
             if (tilEmail != null) tilEmail.setError("이메일 형식을 확인해 주세요.");
-            if (firstErr == null) firstErr = tilEmail;
             ok = false;
         }
         if (!isPasswordValid(pw)) {
             if (tilPw != null) tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
-            if (firstErr == null) firstErr = tilPw;
             ok = false;
         }
         if (!pw.equals(pw2)) {
             if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
-            if (firstErr == null) firstErr = tilPw2;
+            ok = false;
+        }
+        if (phone.length() != 11) {
+            if (tilPhone != null) tilPhone.setError("전화번호 11자리를 입력하세요.");
             ok = false;
         }
         if (!isValidDate(y, m, d)) {
@@ -314,6 +363,7 @@ public class InsertActivity extends AppCompatActivity {
         if (tilEmail != null) tilEmail.setError(null);
         if (tilPw    != null) tilPw.setError(null);
         if (tilPw2   != null) tilPw2.setError(null);
+        if (tilPhone != null) tilPhone.setError(null);
     }
 
     private boolean isPasswordValid(String pw) {
@@ -341,5 +391,12 @@ public class InsertActivity extends AppCompatActivity {
 
     private String textOf(TextInputEditText e) {
         return e.getText() == null ? "" : e.getText().toString();
+    }
+
+    private String getGender() {
+        int id = rgGender.getCheckedRadioButtonId();
+        if (id == R.id.rbMale) return "남성";
+        if (id == R.id.rbFemale) return "여성";
+        return "";
     }
 }
