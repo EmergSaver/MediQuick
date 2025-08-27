@@ -52,7 +52,8 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <com.google.android.material.textfield.TextInputEditText
+
+        <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -335,6 +336,7 @@
                 app:strokeWidth="1dp"
                 app:cornerRadius="12dp"/>
         </LinearLayout>
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.core.widget.NestedScrollView>

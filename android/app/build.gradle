@@ -3,9 +3,23 @@ plugins {
     id 'com.google.gms.google-services'
 }
 
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withInputStream { stream ->
+        localProperties.load(stream)
+    }
+}
+def kakaoKey = localProperties.getProperty("kakao_native_key", "")
+
+
 android {
     namespace 'com.emergsaver.mediquick'
     compileSdk 36
+
+    buildFeatures {
+        buildConfig = true
+    }
 
     defaultConfig {
         applicationId "com.emergsaver.mediquick"
@@ -13,8 +27,10 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
-
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        ndk {
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86" // 실제 디바이스 아키텍처 및 애뮬레이션 아키텍쳐
+        }
+        buildConfigField "String", "KAKAO_NATIVE_KEY", "\"${kakaoKey}\""
     }
 
     buildTypes {
@@ -31,6 +47,9 @@ android {
     buildFeatures {
         viewBinding true
     }
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation"
+    }
 }
 
 dependencies {
@@ -44,6 +63,15 @@ dependencies {
     androidTestImplementation libs.espresso.core
     implementation 'androidx.fragment:fragment-ktx:1.6.0'
 
+    implementation 'androidx.appcompat:appcompat:1.7.1'
+    implementation 'com.google.android.material:material:1.12.0'
+
+    // 카카오톡 지도 SDK 의존성 추가
+    implementation 'com.kakao.maps.open:android:2.12.8'
+
+    // 위치 서비스 라이브러리 추가
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+
     implementation platform('com.google.firebase:firebase-bom:32.7.4')
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
@@ -51,7 +79,4 @@ dependencies {
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
-   // implementation 'com.google.android.material:material:1.12.0'
-
-
 }
