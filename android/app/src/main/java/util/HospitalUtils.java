@@ -19,7 +19,7 @@ public class HospitalUtils {
 
     public static void shareHospital(Context context, Hospital hospital) {
         // 공유 텍스트 구성
-        String shareText = "병원 정보\n" + "병원명 : " + hospital.getName() + "\n" + (hospital.getPhone().isEmpty() ? "" : "전화번호: " + hospital.getPhone());
+        String shareText = "병원 정보\n" + "병원명 : " + hospital.getHospital_name() + "\n" + (hospital.getPhone().isEmpty() ? "" : "전화번호: " + hospital.getPhone());
 
         Intent shareIntent = new Intent(Intent.ACTION_SEND);
         shareIntent.setType("text/plain");
