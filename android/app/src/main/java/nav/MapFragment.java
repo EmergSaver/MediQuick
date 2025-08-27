@@ -92,6 +92,7 @@ public class MapFragment extends Fragment {
 
     private Hospital hospital;
 
+    // mapView 초기화
     private void initMapView(View view) {
         mapView = view.findViewById(R.id.map_view);
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
@@ -131,6 +132,7 @@ public class MapFragment extends Fragment {
         });
     }
 
+    // 현재 위치 가져오기 및 라벨
     private void initCurrentLocation() {
         // TrackingManager 초기화
 //        trackingManager = kakaoMap.getTrackingManager();
@@ -172,6 +174,35 @@ public class MapFragment extends Fragment {
             ActivityCompat.requestPermissions(requireActivity(),
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
         }
+    }
+
+    // 마커 생성
+    private Label addMarker(String id, LatLng pos, String name) {
+        if(kakaoMap == null) {
+            return null;
+        }
+        LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+
+        // 마커 스타일 설정
+        LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
+        LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
+        Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
+
+        Label existing = labelLayer.getLabel("searchMarker");
+        if(existing != null) {
+            labelLayer.remove(existing);
+            Log.d("MAP_DEBUG", "기존 마커 제거됨");
+        }
+
+        // 마커 추가
+        Label newLabel = labelLayer.addLabel(LabelOptions.from(id, pos).setStyles(styles));
+        Log.d("MAP_DEBUG", "새 마커 추가 완료: " + id + " 위치: " + pos);
+
+        // 마커로 카메라 이동
+//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
+//        Log.d("MAP_DEBUG", "카메라 이동 완료");
+
+        return newLabel;
     }
 
     public static MapFragment newInstance(String param1, String param2) {
