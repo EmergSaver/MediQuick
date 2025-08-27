@@ -57,6 +57,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import model.Hospital;
+import model.Specialty;
 import util.HospitalUtils;
 
 
@@ -207,34 +208,37 @@ public class MapFragment extends Fragment {
         }
 
         // 마커 추가
-        Label newLabel = labelLayer.addLabel(LabelOptions.from(hospital.getPhone(), pos).setStyles(styles));
+        Label newLabel = labelLayer.addLabel(LabelOptions.from(hospital.getHospital_name(), pos).setStyles(styles));
 
         // 마커로 카메라 이동
         kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
         Log.d("MAP_DEBUG", "카메라 이동 완료");
 
-        newLabel.setTag(hospital.getHospital_name());
+        newLabel.setTag(hospital);
         Log.d("MAP_DEBUG", "새 마커 추가 완료: " + hospital.getHospital_name() + " 위치: " + pos);
 
         return newLabel;
     }
 
     private void handleMarker(Label label) {
-        String hospitalName = (String) label.getTag();
-        if(hospitalName == null)
+        Hospital hospital = (Hospital) label.getTag();
+        if(hospital == null)
             return;
+
+        hospitalModel = hospital;
 
         LatLng pos = label.getPosition();
 
         // 새로운 Hospital 객체 생성 후 값 설정
-        hospitalModel = new Hospital();
-        hospitalModel.setHospital_name(hospitalName);
-        hospitalModel.setPhone("");
-        hospitalModel.setLatitude(pos.getLatitude());
-        hospitalModel.setLongitude(pos.getLongitude());
-
         TextView hospitalNameText = getView().findViewById(R.id.hospital_name);
-        hospitalNameText.setText(hospitalName);
+        TextView callText = getView().findViewById(R.id.callText);
+        TextView addressText = getView().findViewById(R.id.addressText);
+        TextView doctorText = getView().findViewById(R.id.doctorText);
+
+        hospitalNameText.setText(hospital.getHospital_name());
+        callText.setText(hospital.getPhone());
+        addressText.setText(hospital.getAddress());
+        doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
 
         ConstraintLayout bottomSheet = getView().findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
@@ -280,7 +284,6 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        EditText search = view.findViewById(R.id.search_text);
 
         // BottomSheet 초기화
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
@@ -395,6 +398,14 @@ public class MapFragment extends Fragment {
                                 Log.e("FIREBASE_LOG", "Geocoder 예외 발생", e);
                             }
                         }
+
+                        int totalDoctors = 0;
+                        if(hospital.getSpecialties() != null) {
+                            for(Specialty s : hospital.getSpecialties()) {
+                                totalDoctors += s.getDoctor_count();
+                            }
+                        }
+                        hospital.setDoctor_count(totalDoctors);
                     }
                     else {
                         Log.d("FIREBASE_LOG", "해당 문서가 존재하지 않음");
