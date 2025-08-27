@@ -1,10 +1,8 @@
 package nav;
 
 import android.Manifest;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -34,6 +32,8 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.gson.Gson;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
@@ -53,6 +53,7 @@ import java.util.concurrent.Executors;
 
 import model.Hospital;
 import util.HospitalUtils;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -90,7 +91,7 @@ public class MapFragment extends Fragment {
     // 카메라 위치 저장
     private CameraPosition savedCameraPos;
 
-    private Hospital hospital;
+    private Hospital hospitalModel;
 
     // mapView 초기화
     private void initMapView(View view) {
@@ -215,12 +216,17 @@ public class MapFragment extends Fragment {
         if(hospitalName == null)
             return;
 
-        // BottomSheet & TextView 업데이트
+        LatLng pos = label.getPosition();
+
+        // 새로운 Hospital 객체 생성 후 값 설정
+        hospitalModel = new Hospital();
+        hospitalModel.setHospital_name(hospitalName);
+        hospitalModel.setPhone("");
+        hospitalModel.setLatitude(pos.getLatitude());
+        hospitalModel.setLongitude(pos.getLongitude());
+
         TextView hospitalNameText = getView().findViewById(R.id.hospital_name);
         hospitalNameText.setText(hospitalName);
-
-        LatLng pos = label.getPosition();
-        hospital = new Hospital(hospitalName, "", pos.getLatitude(), pos.getLongitude());
 
         ConstraintLayout bottomSheet = getView().findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
@@ -301,7 +307,7 @@ public class MapFragment extends Fragment {
             if(!name.isEmpty()) {
                 // 현재 카메라 위치 저장
                 savedCameraPos = kakaoMap.getCameraPosition();
-                HospitalUtils.shareHospital(getContext(), hospital);
+                HospitalUtils.shareHospital(getContext(), hospitalModel);
             }
         });
 
@@ -337,6 +343,39 @@ public class MapFragment extends Fragment {
         };
 
         initMapView(view);
+
+        // Firebase db 선언
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        // 문서 id 가져오기
+        db.collection("hospitals")
+                .document("0S9cnLGPs8i3kjznsqkf")
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    String jsonStr = documentSnapshot.getString("hospital_json");
+                    if(jsonStr != null) {
+                        // JSON 파싱
+                        Gson gson = new Gson();
+                        Hospital hospital = gson.fromJson(jsonStr, Hospital.class);
+                        Log.d("FIREBASE_LOG", "Hospital 이름: " + hospital.getHospital_name());
+                        Log.d("FIREBASE_LOG", "Hospital 전화: " + hospital.getPhone());
+                        Log.d("FIREBASE_LOG", "Hospital 위도: " + hospital.getLatitude());
+                        Log.d("FIREBASE_LOG", "Hospital 경도: " + hospital.getLongitude());
+
+                        addMarker(hospital);
+                    }
+                    else {
+                        Log.d("FIREBASE_LOG", "해당 문서가 존재하지 않음");
+                    }
+                })
+        .addOnFailureListener(e -> Log.e("FIREBASE", "병원 데이터 로드 실패", e));
+    }
+
+    private Label addMarker(Hospital hospital) {
+        if (hospital == null) return null;
+
+        LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
+        return addMarker(hospital.getPhone(), pos, hospital.getHospital_name());
     }
     @Override
     public void onResume() {
