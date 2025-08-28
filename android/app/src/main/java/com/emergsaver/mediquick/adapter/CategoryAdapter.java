@@ -1,4 +1,4 @@
-package com.emergsaver.mediquick.search;
+package com.emergsaver.mediquick.adapter;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.emergsaver.mediquick.R;
 
 import java.util.List;
+
+import model.Category;
 
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHolder> {
 

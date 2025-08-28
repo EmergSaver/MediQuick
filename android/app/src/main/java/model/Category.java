@@ -1,4 +1,4 @@
-package com.emergsaver.mediquick.search;
+package model;
 
 public class Category {
     private int iconResId; // 아이콘 이미지 리소스 ID

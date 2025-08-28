@@ -12,8 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.fragment.app.Fragment;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+
+import nav.CategoryFragment;
 import nav.MapFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -60,8 +63,9 @@ public class MainActivity extends AppCompatActivity {
                     btnOk.setOnClickListener(v -> {
                         dialog.dismiss();
                         // SearchActivity로 이동
-                        Intent intent = new Intent(MainActivity.this, com.emergsaver.mediquick.search.SearchActivity.class);
-                        startActivity(intent);
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new CategoryFragment())
+                                .commit();
                     });
 
                     dialog.show();

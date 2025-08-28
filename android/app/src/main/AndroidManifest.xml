@@ -23,9 +23,6 @@
         android:theme="@style/Theme.MediQuick"
         android:usesCleartextTraffic="true">
         <activity
-            android:name=".search.SearchActivity"
-            android:exported="false" />
-        <activity
             android:name=".CheckEmail"
             android:exported="false" />
         <activity
