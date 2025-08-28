@@ -362,58 +362,53 @@ public class MapFragment extends Fragment {
 
         // 문서 id 가져오기
         db.collection("hospitals")
-                .document("0S9cnLGPs8i3kjznsqkf")
                 .get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    String jsonStr = documentSnapshot.getString("hospital_json");
-                    if(jsonStr != null) {
-                        // JSON 파싱
-                        Gson gson = new Gson();
-                        Hospital hospital = gson.fromJson(jsonStr, Hospital.class);
-                        Log.d("FIREBASE_LOG", "Hospital 이름: " + hospital.getHospital_name());
-                        Log.d("FIREBASE_LOG", "Hospital 전화: " + hospital.getPhone());
-                        Log.d("FIREBASE_LOG", "Hospital 위도: " + hospital.getLatitude());
-                        Log.d("FIREBASE_LOG", "Hospital 경도: " + hospital.getLongitude());
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (var document : queryDocumentSnapshots.getDocuments()) {
+                        String jsonStr = document.getString("hospital_json");
+                        if (jsonStr != null) {
+                            // JSON 파싱
+                            Gson gson = new Gson();
+                            Hospital hospital = gson.fromJson(jsonStr, Hospital.class);
 
-                        // 주소 있으면 Geocoding으로 위도/경도 변환
-                        String address = hospital.getAddress();
-                        Log.d("FIREBASE_LOG", "Hospital 주소 : " + address);
-
-                        if(address != null && !address.isEmpty()) {
-                            Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
-                            try {
-                                List<Address> addressList = geocoder.getFromLocationName(address, 1);
-                                if(address != null && !address.isEmpty()) {
-                                    Address location = addressList.get(0);
-                                    hospital.setLatitude(location.getLatitude());
-                                    hospital.setLongitude(location.getLongitude());
-
-                                    Log.d("FIREBASE_LOG", "주소 변환 완료: " + address);
-                                    Log.d("FIREBASE_LOG", "위도: " + location.getLatitude() + ", 경도: " + location.getLongitude());
-
-                                    addMarker(hospital);
-                                } else {
-                                    Log.e("FIREBASE_LOG", "주소를 좌표로 변환할 수 없음: " + address);
+                            // 전문의 수 합계 계산
+                            int totalDoctors = 0;
+                            if (hospital.getSpecialties() != null) {
+                                for (Specialty s : hospital.getSpecialties()) {
+                                    totalDoctors += s.getDoctor_count();
                                 }
-                            } catch (IOException e) {
-                                e.printStackTrace();
-                                Log.e("FIREBASE_LOG", "Geocoder 예외 발생", e);
                             }
-                        }
+                            hospital.setDoctor_count(totalDoctors);
 
-                        int totalDoctors = 0;
-                        if(hospital.getSpecialties() != null) {
-                            for(Specialty s : hospital.getSpecialties()) {
-                                totalDoctors += s.getDoctor_count();
+                            // 주소 있으면 Geocoding으로 위도/경도 변환
+                            String address = hospital.getAddress();
+                            Log.d("FIREBASE_LOG", "Hospital 주소 : " + address);
+
+                            if (address != null && !address.isEmpty()) {
+                                Geocoder geocoder = new Geocoder(requireContext(), Locale.getDefault());
+                                try {
+                                    List<Address> addressList = geocoder.getFromLocationName(address, 1);
+                                    if (address != null && !address.isEmpty()) {
+                                        Address location = addressList.get(0);
+                                        hospital.setLatitude(location.getLatitude());
+                                        hospital.setLongitude(location.getLongitude());
+
+                                        Log.d("FIREBASE_LOG", "주소 변환 완료: " + address);
+                                        Log.d("FIREBASE_LOG", "위도: " + location.getLatitude() + ", 경도: " + location.getLongitude());
+
+                                        addMarker(hospital);
+                                    } else {
+                                        Log.e("FIREBASE_LOG", "주소를 좌표로 변환할 수 없음: " + address);
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Log.e("FIREBASE_LOG", "Geocoder 예외 발생", e);
+                                }
                             }
                         }
-                        hospital.setDoctor_count(totalDoctors);
-                    }
-                    else {
-                        Log.d("FIREBASE_LOG", "해당 문서가 존재하지 않음");
                     }
                 })
-        .addOnFailureListener(e -> Log.e("FIREBASE", "병원 데이터 로드 실패", e));
+                .addOnFailureListener(e -> Log.e("FIREBASE", "병원 데이터 로드 실패", e));
     }
 
     @Override
