@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.emergsaver.mediquick.R;
-import com.emergsaver.mediquick.search.Category;
-import com.emergsaver.mediquick.search.CategoryAdapter;
+import model.Category;
+import com.emergsaver.mediquick.adapter.CategoryAdapter;
 
 import java.util.Arrays;
 import java.util.List;
