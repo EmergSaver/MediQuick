@@ -243,7 +243,11 @@ public class MapFragment extends Fragment {
         hospitalNameText.setText(hospital.getHospital_name());
         callText.setText(hospital.getPhone());
         addressText.setText(hospital.getAddress());
-        doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
+        if(hospitalModel.getDoctor_count() >= 100) {
+            doctorText.setText("전문의 100+ 명");
+        } else {
+            doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
+        }
 
         ConstraintLayout bottomSheet = getView().findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
