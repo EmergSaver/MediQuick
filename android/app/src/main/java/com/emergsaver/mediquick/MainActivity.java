@@ -1,16 +1,22 @@
 package com.emergsaver.mediquick;
 
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import androidx.fragment.app.Fragment;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
-import nav.HospitalFragment;
+
+import nav.CategoryFragment;
 import nav.MapFragment;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
         // Fragment 초기화
-        Fragment hospitalFrag = new HospitalFragment();
         Fragment mapFrag = new MapFragment();
         Fragment userFrag = new ProfileFragment();
 
@@ -40,20 +45,41 @@ public class MainActivity extends AppCompatActivity {
         bottomNav.setOnItemSelectedListener(new NavigationBarView.OnItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                Fragment selectedFrag = null;
-
                 int id = menuItem.getItemId();
-                if(id == R.id.nav_hospital) {
-                    selectedFrag = hospitalFrag;
-                } else if(id == R.id.nav_map) {
-                    selectedFrag = mapFrag;
-                } else if(id == R.id.nav_user) {
-                    selectedFrag = userFrag;
-                }
 
-                if(selectedFrag != null) {
+                if (id == R.id.nav_hospital) {
+                    // 병원 추천 버튼 → 팝업 띄우기
+                    View dialogView = getLayoutInflater().inflate(R.layout.dialog_searchpopup, null);
+
+                    AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                            .setView(dialogView)
+                            .create();
+
+                    Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
+                    Button btnOk = dialogView.findViewById(R.id.btn_ok);
+
+                    btnCancel.setOnClickListener(v -> dialog.dismiss());
+
+                    btnOk.setOnClickListener(v -> {
+                        dialog.dismiss();
+                        // SearchActivity로 이동
+                        getSupportFragmentManager().beginTransaction()
+                                .replace(R.id.fragment_container, new CategoryFragment())
+                                .commit();
+                    });
+
+                    dialog.show();
+                    return true; // Fragment 교체는 하지 않음
+                }
+                else if (id == R.id.nav_map) {
                     getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.fragment_container, selectedFrag)
+                            .replace(R.id.fragment_container, mapFrag)
+                            .commit();
+                    return true;
+                }
+                else if (id == R.id.nav_user) {
+                    getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.fragment_container, userFrag)
                             .commit();
                     return true;
                 }
