@@ -15,7 +15,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LogoutActivity extends AppCompatActivity {
 
-    // LoginActivity에서 쓰는 prefs 키와 맞추면 깔끔합니다.
+
     private static final String PREF_LOGIN = "mediquick_login_pref";
     private static final String KEY_AUTO   = "auto_login";
     private static final String KEY_EMAIL  = "auto_email";
@@ -29,7 +29,7 @@ public class LogoutActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_logout);
 
-        // ★ 반드시 setContentView 이후에 바인딩
+
         bLogout = findViewById(R.id.btnLogout);
         bCancel = findViewById(R.id.btnCancel);
 
@@ -54,7 +54,7 @@ public class LogoutActivity extends AppCompatActivity {
 
         bCancel.setOnClickListener(v -> finish());
 
-        // (선택) 에지-투-에지 패딩: 루트 뷰가 있을 때만 적용
+
         if (findViewById(R.id.main_logout) != null) {
             ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_logout), (view, insets) -> {
                 Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
