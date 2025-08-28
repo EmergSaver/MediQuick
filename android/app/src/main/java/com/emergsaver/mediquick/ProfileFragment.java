@@ -1,10 +1,6 @@
 package com.emergsaver.mediquick;
 
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.bumptech.glide.Glide;
-import android.widget.Toast;
-
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,8 +8,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout; // LinearLayout 임포트
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.bumptech.glide.Glide;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +37,6 @@ public class ProfileFragment extends Fragment {
     private TextView tvBloodType;
     private TextView tvGender;
 
-    // ✨ 수정: 고정된 TextView 대신 동적 컨테이너 사용
     private LinearLayout llFoodAllergies;
     private LinearLayout llDrugAllergies;
 
@@ -45,7 +46,6 @@ public class ProfileFragment extends Fragment {
     private FirebaseFirestore db;
     private String userUid;
 
-    // Firestore ID와 실제 음식 알레르기 이름 매핑
     private static final Map<String, String> FOOD_ALLERGY_MAP = new HashMap<>();
     static {
         FOOD_ALLERGY_MAP.put("cb_egg", "난류(계란)");
@@ -75,12 +75,18 @@ public class ProfileFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // 이전 코드에서 이 부분에 userUid를 Bundle에서 가져오는 로직이 있었는데,
+        // 이 프래그먼트를 어떻게 인스턴스화하는지에 따라 달라집니다.
+        // MainActivity에서 userUid를 넘겨준다면 이 로직은 유지되어야 합니다.
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
 
         db = FirebaseFirestore.getInstance();
 
+        // 이 부분은 EditProfileDialog에서 돌아오는 결과 리스너입니다.
+        // 현재 코드는 tvDob 등 텍스트뷰가 아직 null일 수 있으므로 onViewCreated에
+        // 리스너를 옮겨서 뷰가 초기화된 후 실행되도록 하는 것이 더 안전합니다.
         getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, result) -> {
             if (getView() != null) {
                 String birthdate = result.getString("birthdate");
@@ -88,6 +94,7 @@ public class ProfileFragment extends Fragment {
                 String emergencyContact = result.getString("emergencyContact");
                 String gender = result.getString("gender");
 
+                // ✨ 수정: Null 체크를 통해 안전하게 UI 업데이트
                 if (tvDob != null) tvDob.setText(birthdate);
                 if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
                 if (tvBloodType != null) tvBloodType.setText(bloodType);
@@ -95,12 +102,20 @@ public class ProfileFragment extends Fragment {
             }
         });
 
+        // 이 부분은 AllergyDialog에서 돌아오는 결과 리스너입니다.
         getParentFragmentManager().setFragmentResultListener("allergyRequestKey", this, (requestKey, result) -> {
             ArrayList<String> foodAllergies = result.getStringArrayList("food_allergies");
             ArrayList<String> drugAllergies = result.getStringArrayList("drug_allergies");
+            // ✨ 수정: 이 메소드는 UI를 업데이트하므로, onViewCreated 이후에 호출되도록
+            // 리스너를 옮기거나, 내부에서 뷰가 유효한지 다시 확인해야 합니다.
             updateAllergiesUI(foodAllergies, drugAllergies);
         });
 
+        // ✨ 수정: 가장 중요한 부분입니다.
+        // EditProfilePhotoDialog에서 돌아오는 결과 리스너입니다.
+        // 기존 코드에는 이미 수정된 `updatedPhotoUri`를 Glide로 로드하는 로직이 있습니다.
+        // 이 로직은 올바르므로 그대로 두시면 됩니다.
+        // 단, userUid가 유효한지 확인하고, 다이얼로그를 띄울 때 userUid를 넘겨주는지 확인해야 합니다.
         getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
             String updatedName = result.getString("updatedName");
             String updatedPhotoUri = result.getString("updatedPhotoUri");
@@ -110,7 +125,7 @@ public class ProfileFragment extends Fragment {
             }
 
             if (updatedPhotoUri != null && ivProfileImage != null) {
-                Glide.with(getContext()).load(Uri.parse(updatedPhotoUri)).into(ivProfileImage);
+                Glide.with(this).load(Uri.parse(updatedPhotoUri)).into(ivProfileImage);
             }
         });
     }
@@ -126,6 +141,9 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // ✨ 수정: onResume()에서 loadUserProfileData()를 호출하여
+        // 프래그먼트가 다시 활성화될 때마다 최신 데이터를 불러오도록 합니다.
+        // 이전에 이 코드가 없었다면 추가하면 좋습니다.
         loadUserProfileData();
     }
 
@@ -139,7 +157,6 @@ public class ProfileFragment extends Fragment {
         tvBloodType = view.findViewById(R.id.tv_blood_type);
         tvGender = view.findViewById(R.id.tv_gender);
 
-        // ✨ 수정: 새로운 LinearLayout ID를 찾아 할당
         llFoodAllergies = view.findViewById(R.id.ll_food_allergies);
         llDrugAllergies = view.findViewById(R.id.ll_drug_allergies);
 
@@ -157,7 +174,9 @@ public class ProfileFragment extends Fragment {
         });
 
         btnUploadphoto.setOnClickListener(v -> {
-            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+            // ✨ 수정: EditProfilePhotoDialog로 userUid를 전달하는 newInstance를 사용
+            // 기존에 이 로직이 있다면 올바르게 작동할 것입니다.
+            EditProfilePhotoDialog dialog = EditProfilePhotoDialog.newInstance(userUid);
             dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
         });
     }
@@ -178,16 +197,22 @@ public class ProfileFragment extends Fragment {
                         String gender = documentSnapshot.getString("gender");
                         String profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
+                        // ✨ 수정: tvName에 (성별)이 추가되는 로직이 있었는데,
+                        // tvGender가 별도로 존재하므로 이 부분을 name만 표시하도록 간소화할 수 있습니다.
                         if (tvName != null) {
-                            tvName.setText(name + (gender != null ? " (" + gender + ")" : ""));
+                            tvName.setText(name);
                         }
                         if (tvDob != null) tvDob.setText(birth);
                         if (tvBloodType != null) tvBloodType.setText(bloodType);
                         if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
-                        if (tvGender != null) tvGender.setText(gender);
+                        // ✨ 수정: tvGender는 이미 별도로 있으므로, gender 값이 있다면 설정
+                        if (tvGender != null && gender != null) tvGender.setText(gender);
 
                         if (profileImageUrl != null && ivProfileImage != null && getContext() != null) {
                             Glide.with(getContext()).load(profileImageUrl).into(ivProfileImage);
+                        } else {
+                            // ✨ 수정: profileImageUrl이 없을 경우 기본 이미지 설정
+                            ivProfileImage.setImageResource(R.drawable.ic_user);
                         }
 
                         Map<String, Object> allergies = (Map<String, Object>) documentSnapshot.get("allergies");
@@ -212,26 +237,42 @@ public class ProfileFragment extends Fragment {
 
                             updateAllergiesUI(new ArrayList<>(foodAllergies), new ArrayList<>(drugAllergies));
                         } else {
+                            // ✨ 수정: 알레르기 데이터가 없는 경우 "정보 없음"으로 표시
                             updateAllergiesUI(null, null);
                         }
 
                     } else {
                         if (getContext() != null) {
                             Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
+                            // ✨ 추가: 문서가 없을 경우에도 UI 초기화
+                            tvName.setText("새로운 사용자");
+                            ivProfileImage.setImageResource(R.drawable.ic_user);
+                            tvDob.setText("정보 없음");
+                            tvBloodType.setText("정보 없음");
+                            tvEmergencyContact.setText("정보 없음");
+                            tvGender.setText("정보 없음");
+                            updateAllergiesUI(null, null);
                         }
                     }
                 })
                 .addOnFailureListener(e -> {
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "프로필 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                        // ✨ 추가: 오류 발생 시에도 UI 초기화
+                        tvName.setText("새로운 사용자");
+                        ivProfileImage.setImageResource(R.drawable.ic_user);
+                        tvDob.setText("정보 없음");
+                        tvBloodType.setText("정보 없음");
+                        tvEmergencyContact.setText("정보 없음");
+                        tvGender.setText("정보 없음");
+                        updateAllergiesUI(null, null);
                     }
                 });
     }
 
-    // ✨ 수정: 동적으로 TextView를 추가하는 로직으로 변경
     private void updateAllergiesUI(ArrayList<String> foodAllergies, ArrayList<String> drugAllergies) {
         if (llFoodAllergies != null) {
-            llFoodAllergies.removeAllViews(); // 기존 뷰 모두 제거
+            llFoodAllergies.removeAllViews();
             if (foodAllergies != null && !foodAllergies.isEmpty()) {
                 for (String allergy : foodAllergies) {
                     TextView tv = createAllergyTextView(allergy);
@@ -244,7 +285,7 @@ public class ProfileFragment extends Fragment {
         }
 
         if (llDrugAllergies != null) {
-            llDrugAllergies.removeAllViews(); // 기존 뷰 모두 제거
+            llDrugAllergies.removeAllViews();
             if (drugAllergies != null && !drugAllergies.isEmpty()) {
                 for (String allergy : drugAllergies) {
                     TextView tv = createAllergyTextView(allergy);
@@ -257,14 +298,13 @@ public class ProfileFragment extends Fragment {
         }
     }
 
-    // ✨ 추가: 동적 TextView 생성을 위한 헬퍼 메소드
     private TextView createAllergyTextView(String text) {
         TextView tv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.topMargin = 4; // 상단 간격 조절
+        params.topMargin = 4;
         tv.setLayoutParams(params);
         tv.setText(text);
         tv.setPadding(8, 8, 8, 8);

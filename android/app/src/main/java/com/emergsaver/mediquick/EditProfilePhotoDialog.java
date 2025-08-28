@@ -1,6 +1,7 @@
 package com.emergsaver.mediquick;
 
-import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,13 +10,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import android.content.Context; // Context를 사용하기 위해 추가
-import android.content.SharedPreferences; // SharedPreferences를 사용하기 위해 추가
+
+import com.google.firebase.firestore.Blob;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 public class EditProfilePhotoDialog extends DialogFragment {
 
@@ -24,14 +33,31 @@ public class EditProfilePhotoDialog extends DialogFragment {
     private Button btnUploadPhotoDialog;
     private Button btnSave;
 
-    // 갤러리에서 이미지를 선택하기 위한 ActivityResultLauncher
+    // Firebase
+    private FirebaseFirestore db;
+    private String userUid;
+
     private ActivityResultLauncher<String> getContentLauncher;
     private Uri selectedImageUri;
+
+    // ProfileFragment에서 userUid를 받기 위한 newInstance 메소드 추가
+    public static EditProfilePhotoDialog newInstance(String userUid) {
+        EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+        Bundle args = new Bundle();
+        args.putString("userUid", userUid);
+        dialog.setArguments(args);
+        return dialog;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // 갤러리에서 콘텐츠를 가져오는 ActivityResultLauncher 초기화
+        db = FirebaseFirestore.getInstance();
+
+        if (getArguments() != null) {
+            userUid = getArguments().getString("userUid");
+        }
+
         getContentLauncher = registerForActivityResult(
                 new ActivityResultContracts.GetContent(),
                 uri -> {
@@ -58,39 +84,113 @@ public class EditProfilePhotoDialog extends DialogFragment {
         btnUploadPhotoDialog = view.findViewById(R.id.btn_upload_photo_dialog);
         btnSave = view.findViewById(R.id.btn_save);
 
+        // 기존 프로필 정보 불러오기
+        loadUserProfileData();
+
         btnUploadPhotoDialog.setOnClickListener(v -> {
-            // "image/*"는 모든 종류의 이미지 파일을 의미
             getContentLauncher.launch("image/*");
         });
 
         btnSave.setOnClickListener(v -> {
-            String updatedName = etNameDialog.getText().toString();
-
-            // SharedPreferences에 데이터 저장
-            SharedPreferences sharedPref = requireActivity().getSharedPreferences("profile_data", Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putString("user_name", updatedName);
-            if (selectedImageUri != null) {
-                //  URI에 대한 영구적인 접근 권한을 얻습니다.
-                requireActivity().getContentResolver().takePersistableUriPermission(
-                        selectedImageUri,
-                        Intent.FLAG_GRANT_READ_URI_PERMISSION
-                );
-
-
-                editor.putString("user_photo_uri", selectedImageUri.toString());
-            }
-            editor.apply(); // 비동기적으로 저장
-
-            // 결과를 Bundle에 담아 Fragment Result API로 전달
-            Bundle result = new Bundle();
-            result.putString("updatedName", updatedName);
-            if (selectedImageUri != null) {
-                result.putString("updatedPhotoUri", selectedImageUri.toString());
-            }
-
-            getParentFragmentManager().setFragmentResult("profilePhotoRequestKey", result);
-            dismiss();
+            saveUserProfileData();
         });
+    }
+
+    // 기존 프로필 정보 불러오는 메소드 (다이얼로그 열릴 때 실행)
+    private void loadUserProfileData() {
+        if (userUid == null) {
+            Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        db.collection("users").document(userUid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String name = documentSnapshot.getString("name");
+                        Blob profileImageBlob = documentSnapshot.getBlob("profileImage");
+
+                        if (name != null) {
+                            etNameDialog.setText(name);
+                        }
+                        if (profileImageBlob != null && getContext() != null) {
+                            try {
+                                byte[] imageData = profileImageBlob.toBytes();
+                                Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
+                                ivProfilePhotoPreview.setImageBitmap(bitmap);
+                            } catch (Exception e) {
+                                Toast.makeText(getContext(), "이미지 디코딩 실패", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "프로필 정보 불러오기 실패", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void saveUserProfileData() {
+        String updatedName = etNameDialog.getText().toString().trim();
+        if (updatedName.isEmpty()) {
+            Toast.makeText(getContext(), "이름을 입력해주세요.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (userUid == null) {
+            Toast.makeText(getContext(), "사용자 ID를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("name", updatedName);
+
+        // 프로필 사진이 선택된 경우
+        if (selectedImageUri != null) {
+            try {
+                // 이미지를 바이트 배열로 변환
+                InputStream inputStream = requireActivity().getContentResolver().openInputStream(selectedImageUri);
+                ByteArrayOutputStream byteBuffer = new ByteArrayOutputStream();
+                int bufferSize = 1024;
+                byte[] buffer = new byte[bufferSize];
+                int len;
+                while ((len = inputStream.read(buffer)) != -1) {
+                    byteBuffer.write(buffer, 0, len);
+                }
+                byte[] imageData = byteBuffer.toByteArray();
+
+                // Firestore Blob 타입으로 변환 후 저장
+                Blob imageBlob = Blob.fromBytes(imageData);
+                updates.put("profileImage", imageBlob);
+
+                // Firestore에 데이터 업데이트
+                updateFirestore(updates);
+
+            } catch (Exception e) {
+                Toast.makeText(getContext(), "이미지 변환 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // 사진이 선택되지 않은 경우, 이름만 업데이트
+            updateFirestore(updates);
+        }
+    }
+
+    private void updateFirestore(Map<String, Object> updates) {
+        db.collection("users").document(userUid)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(getContext(), "프로필이 성공적으로 업데이트되었습니다.", Toast.LENGTH_SHORT).show();
+
+                    // Fragment Result API로 결과 전달
+                    Bundle result = new Bundle();
+                    result.putString("updatedName", (String) updates.get("name"));
+                    if (updates.containsKey("profileImage")) {
+                        // 바이트 배열을 직접 전달하지 않고, 업데이트가 성공했음을 알리는 플래그 전달
+                        result.putBoolean("photoUpdated", true);
+                    }
+                    getParentFragmentManager().setFragmentResult("profilePhotoRequestKey", result);
+                    dismiss();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getContext(), "프로필 업데이트 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 }
