@@ -216,8 +216,8 @@ public class MapFragment extends Fragment {
         Label newLabel = labelLayer.addLabel(LabelOptions.from(hospital.getHospital_name(), pos).setStyles(styles));
 
         // 마커로 카메라 이동
-        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
-        Log.d("MAP_DEBUG", "카메라 이동 완료");
+//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
+//        Log.d("MAP_DEBUG", "카메라 이동 완료");
 
         newLabel.setTag(hospital);
         Log.d("MAP_DEBUG", "새 마커 추가 완료: " + hospital.getHospital_name() + " 위치: " + pos);
