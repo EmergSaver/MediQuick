@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout; // LinearLayout 임포트
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,8 +35,9 @@ public class ProfileFragment extends Fragment {
     private TextView tvBloodType;
     private TextView tvGender;
 
-    private TextView tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3;
-    private TextView tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3;
+    // ✨ 수정: 고정된 TextView 대신 동적 컨테이너 사용
+    private LinearLayout llFoodAllergies;
+    private LinearLayout llDrugAllergies;
 
     private ImageView ivProfileImage;
     private TextView tvName;
@@ -137,12 +139,9 @@ public class ProfileFragment extends Fragment {
         tvBloodType = view.findViewById(R.id.tv_blood_type);
         tvGender = view.findViewById(R.id.tv_gender);
 
-        tvFoodAllergy1 = view.findViewById(R.id.tv_food_allergy_1);
-        tvFoodAllergy2 = view.findViewById(R.id.tv_food_allergy_2);
-        tvFoodAllergy3 = view.findViewById(R.id.tv_food_allergy_3);
-        tvDrugAllergy1 = view.findViewById(R.id.tv_drug_allergy_1);
-        tvDrugAllergy2 = view.findViewById(R.id.tv_drug_allergy_2);
-        tvDrugAllergy3 = view.findViewById(R.id.tv_drug_allergy_3);
+        // ✨ 수정: 새로운 LinearLayout ID를 찾아 할당
+        llFoodAllergies = view.findViewById(R.id.ll_food_allergies);
+        llDrugAllergies = view.findViewById(R.id.ll_drug_allergies);
 
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
@@ -229,35 +228,47 @@ public class ProfileFragment extends Fragment {
                 });
     }
 
+    // ✨ 수정: 동적으로 TextView를 추가하는 로직으로 변경
     private void updateAllergiesUI(ArrayList<String> foodAllergies, ArrayList<String> drugAllergies) {
-        TextView[] foodTextViews = {tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3};
-        if (foodAllergies != null) {
-            for (int i = 0; i < foodTextViews.length; i++) {
-                if (i < foodAllergies.size() && foodTextViews[i] != null) {
-                    foodTextViews[i].setText(foodAllergies.get(i));
-                } else if (foodTextViews[i] != null) {
-                    foodTextViews[i].setText("");
+        if (llFoodAllergies != null) {
+            llFoodAllergies.removeAllViews(); // 기존 뷰 모두 제거
+            if (foodAllergies != null && !foodAllergies.isEmpty()) {
+                for (String allergy : foodAllergies) {
+                    TextView tv = createAllergyTextView(allergy);
+                    llFoodAllergies.addView(tv);
                 }
-            }
-        } else {
-            for (TextView tv : foodTextViews) {
-                if (tv != null) tv.setText("");
+            } else {
+                TextView tv = createAllergyTextView("정보 없음");
+                llFoodAllergies.addView(tv);
             }
         }
 
-        TextView[] drugTextViews = {tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3};
-        if (drugAllergies != null) {
-            for (int i = 0; i < drugTextViews.length; i++) {
-                if (i < drugAllergies.size() && drugTextViews[i] != null) {
-                    drugTextViews[i].setText(drugAllergies.get(i));
-                } else if (drugTextViews[i] != null) {
-                    drugTextViews[i].setText("");
+        if (llDrugAllergies != null) {
+            llDrugAllergies.removeAllViews(); // 기존 뷰 모두 제거
+            if (drugAllergies != null && !drugAllergies.isEmpty()) {
+                for (String allergy : drugAllergies) {
+                    TextView tv = createAllergyTextView(allergy);
+                    llDrugAllergies.addView(tv);
                 }
-            }
-        } else {
-            for (TextView tv : drugTextViews) {
-                if (tv != null) tv.setText("");
+            } else {
+                TextView tv = createAllergyTextView("정보 없음");
+                llDrugAllergies.addView(tv);
             }
         }
+    }
+
+    // ✨ 추가: 동적 TextView 생성을 위한 헬퍼 메소드
+    private TextView createAllergyTextView(String text) {
+        TextView tv = new TextView(getContext());
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+        params.topMargin = 4; // 상단 간격 조절
+        tv.setLayoutParams(params);
+        tv.setText(text);
+        tv.setPadding(8, 8, 8, 8);
+        tv.setBackgroundResource(R.drawable.rounded_background);
+        return tv;
     }
 }
