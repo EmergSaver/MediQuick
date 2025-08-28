@@ -23,13 +23,13 @@ public class EditProfileDialog extends DialogFragment {
 
     private FragmentEditProfileDialogBinding binding;
 
-    //  Firebase Firestore 인스턴스
+    // Firebase Firestore 인스턴스
     private FirebaseFirestore db;
-    //  사용자 UID를 저장할 변수
+    // 사용자 UID를 저장할 변수
     private String userUid;
 
     /**
-     *  DialogFragment를 생성하고 UID를 전달하는 팩토리 메소드 (권장)
+     * DialogFragment를 생성하고 UID를 전달하는 팩토리 메소드 (권장)
      */
     public static EditProfileDialog newInstance(String userUid) {
         EditProfileDialog dialog = new EditProfileDialog();
@@ -60,7 +60,7 @@ public class EditProfileDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //  뷰 바인딩 인스턴스가 유효한지 확인
+        // 뷰 바인딩 인스턴스가 유효한지 확인
         if (binding == null) {
             return; // 뷰 바인딩이 null이면 아무것도 하지 않고 함수 종료
         }
@@ -68,7 +68,7 @@ public class EditProfileDialog extends DialogFragment {
         // Firebase 인스턴스 초기화
         db = FirebaseFirestore.getInstance();
 
-        //  Bundle에서 UID 가져오기
+        // Bundle에서 UID 가져오기
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
@@ -87,18 +87,28 @@ public class EditProfileDialog extends DialogFragment {
 
             String bloodType = binding.spinnerBloodType.getSelectedItem().toString();
 
+            //  성별 RadioButton에서 선택된 값 가져오기
+            String gender = "";
+            int selectedGenderId = binding.radioGroupGender.getCheckedRadioButtonId();
+            if (selectedGenderId == R.id.radio_male) {
+                gender = "남성";
+            } else if (selectedGenderId == R.id.radio_female) {
+                gender = "여성";
+            }
+
             String emergencyContact = binding.etContact1.getText().toString() + "-"
                     + binding.etContact2.getText().toString() + "-"
                     + binding.etContact3.getText().toString();
 
-            //  수정된 정보를 Firebase에 저장
-            saveUserDataToFirebase(birthdate, bloodType, emergencyContact);
+            // 수정된 정보를 Firebase에 저장
+            saveUserDataToFirebase(birthdate, bloodType, emergencyContact, gender);
 
             // 2. Fragment Result를 통해 데이터 전달 (UI 즉시 업데이트용)
             Bundle result = new Bundle();
             result.putString("birthdate", birthdate);
             result.putString("bloodType", bloodType);
             result.putString("emergencyContact", emergencyContact);
+            result.putString("gender", gender); //  성별 정보 전달
             getParentFragmentManager().setFragmentResult("requestKey", result);
 
             // 3. 팝업 닫기
@@ -107,11 +117,13 @@ public class EditProfileDialog extends DialogFragment {
     }
 
     /**
-     *  Firebase에서 사용자 정보를 불러와 EditText와 Spinner를 채웁니다.
+     * Firebase에서 사용자 정보를 불러와 EditText와 Spinner, RadioGroup을 채웁니다.
      */
     private void loadUserDataFromFirebase() {
         if (userUid == null) {
-            Toast.makeText(getContext(), "사용자 UID가 없습니다. 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "사용자 UID가 없습니다. 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 
@@ -121,6 +133,7 @@ public class EditProfileDialog extends DialogFragment {
                         String birth = documentSnapshot.getString("birth");
                         String bloodType = documentSnapshot.getString("bloodType");
                         String emergencyContact = documentSnapshot.getString("emergencyContact");
+                        String gender = documentSnapshot.getString("gender"); //  성별 정보 가져오기
 
                         // 생년월일 파싱 및 스피너 설정
                         if (birth != null && !birth.isEmpty()) {
@@ -153,12 +166,21 @@ public class EditProfileDialog extends DialogFragment {
                                 binding.etContact3.setText(parts[2]);
                             }
                         }
+
+                        // 성별 RadioButton 설정
+                        if (gender != null) {
+                            if (gender.equals("남성")) {
+                                binding.radioMale.setChecked(true);
+                            } else if (gender.equals("여성")) {
+                                binding.radioFemale.setChecked(true);
+                            }
+                        }
                     }
                 });
     }
 
     /**
-     *  스피너에서 특정 값의 인덱스를 찾아 설정하는 헬퍼 메소드
+     * 스피너에서 특정 값의 인덱스를 찾아 설정하는 헬퍼 메소드
      */
     private void setSpinnerSelection(android.widget.Spinner spinner, String value) {
         ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinner.getAdapter();
@@ -171,11 +193,13 @@ public class EditProfileDialog extends DialogFragment {
     }
 
     /**
-     *  수정된 사용자 정보를 Firebase에 저장합니다.
+     * 수정된 사용자 정보를 Firebase에 저장합니다.
      */
-    private void saveUserDataToFirebase(String birthdate, String bloodType, String emergencyContact) {
+    private void saveUserDataToFirebase(String birthdate, String bloodType, String emergencyContact, String gender) {
         if (userUid == null) {
-            Toast.makeText(getContext(), "사용자 UID가 없어 저장할 수 없습니다.", Toast.LENGTH_SHORT).show();
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "사용자 UID가 없어 저장할 수 없습니다.", Toast.LENGTH_SHORT).show();
+            }
             return;
         }
 
@@ -183,17 +207,16 @@ public class EditProfileDialog extends DialogFragment {
         updates.put("birth", birthdate);
         updates.put("bloodType", bloodType);
         updates.put("emergencyContact", emergencyContact);
+        updates.put("gender", gender); //  성별 정보도 저장
 
         db.collection("users").document(userUid)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    //  getContext()가 null이 아닌지 확인하여 안전하게 Toast 호출
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "개인정보가 성공적으로 업데이트되었습니다.", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    //  getContext()가 null이 아닌지 확인하여 안전하게 Toast 호출
                     if (getContext() != null) {
                         Toast.makeText(getContext(), "업데이트 실패: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
@@ -203,7 +226,7 @@ public class EditProfileDialog extends DialogFragment {
     private void setupSpinners() {
         int currentYear = Calendar.getInstance().get(Calendar.YEAR);
         ArrayList<String> years = new ArrayList<>();
-        years.add("년"); //  초기값 변경
+        years.add("년"); // 초기값 변경
         for (int i = currentYear; i >= 1900; i--) years.add(String.valueOf(i));
         ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, years);
         yearAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -211,7 +234,7 @@ public class EditProfileDialog extends DialogFragment {
         binding.spinnerYear.setSelection(0);
 
         ArrayList<String> months = new ArrayList<>();
-        months.add("월"); //  초기값 변경
+        months.add("월"); // 초기값 변경
         for (int i = 1; i <= 12; i++) months.add(String.valueOf(i));
         ArrayAdapter<String> monthAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, months);
         monthAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -219,7 +242,7 @@ public class EditProfileDialog extends DialogFragment {
         binding.spinnerMonth.setSelection(0);
 
         ArrayList<String> days = new ArrayList<>();
-        days.add("일"); //  초기값 변경
+        days.add("일"); // 초기값 변경
         for (int i = 1; i <= 31; i++) days.add(String.valueOf(i));
         ArrayAdapter<String> dayAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, days);
         dayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);

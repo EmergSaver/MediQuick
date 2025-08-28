@@ -38,6 +38,7 @@ public class ProfileFragment extends Fragment {
     private EditText etDob; // 생년월일
     private EditText etEmergencyContact; // 비상 연락처
     private EditText etBloodType; // 혈액형
+    private EditText etGender; // 성별
 
     // 알러지 정보 표시용 EditText들
     private EditText etFoodAllergy1, etFoodAllergy2, etFoodAllergy3;
@@ -69,14 +70,13 @@ public class ProfileFragment extends Fragment {
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-
-                // getView()가 null이 아닌지 확인하고,
-                // 추가적으로 etDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
+                // getView()가 null이 아닌지 확인하고, etDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
                 if (getView() != null && etDob != null) {
                     // EditProfileDialog로부터 받은 데이터를 EditText에 설정
                     String birthdate = result.getString("birthdate");
                     String bloodType = result.getString("bloodType");
                     String emergencyContact = result.getString("emergencyContact");
+                    String gender = result.getString("gender"); //  성별 정보 가져오기
 
                     if (etDob != null) {
                         etDob.setText(birthdate);
@@ -86,6 +86,9 @@ public class ProfileFragment extends Fragment {
                     }
                     if (etBloodType != null) {
                         etBloodType.setText(bloodType);
+                    }
+                    if (etGender != null) { //  etGender가 null이 아닌지 확인
+                        etGender.setText(gender);
                     }
                 }
             }
@@ -127,7 +130,7 @@ public class ProfileFragment extends Fragment {
             String updatedPhotoUri = result.getString("updatedPhotoUri");
 
             if (updatedName != null) {
-                if (tvName != null) { //  tvName이 이미 초기화되었다고 가정
+                if (tvName != null) { // tvName이 이미 초기화되었다고 가정
                     tvName.setText(updatedName);
                 }
             }
@@ -146,10 +149,10 @@ public class ProfileFragment extends Fragment {
         // fragment_profile.xml 연결
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        //  bindViews 메소드를 호출하여 뷰를 한 곳에서 초기화
+        // 뷰들을 한 곳에서 초기화하는 메소드
         bindViews(view);
 
-        //  Firestore에서 사용자 데이터를 불러와 UI를 업데이트하는 메소드 호출
+        // Firestore에서 사용자 데이터를 불러와 UI를 업데이트하는 메소드 호출
         loadUserProfileData();
 
         // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
@@ -173,7 +176,7 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    //  뷰들을 한 곳에서 초기화하는 메소드
+    // 뷰들을 한 곳에서 초기화하는 메소드
     private void bindViews(View view) {
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
@@ -182,6 +185,7 @@ public class ProfileFragment extends Fragment {
         etDob = view.findViewById(R.id.et_dob);
         etEmergencyContact = view.findViewById(R.id.et_emergency_contact);
         etBloodType = view.findViewById(R.id.et_blood_type);
+        etGender = view.findViewById(R.id.et_gender); //  et_gender 바인딩
 
         etFoodAllergy1 = view.findViewById(R.id.et_food_allergy_1);
         etFoodAllergy2 = view.findViewById(R.id.et_food_allergy_2);
@@ -191,11 +195,10 @@ public class ProfileFragment extends Fragment {
         etDrugAllergy3 = view.findViewById(R.id.et_drug_allergy_3);
 
         ivProfileImage = view.findViewById(R.id.profile_image);
-        // Assuming your profile layout has a TextView for the name
         tvName = view.findViewById(R.id.tv_name);
     }
 
-    //  Firestore에서 사용자 데이터를 가져와 UI를 업데이트하는 메소드
+    // Firestore에서 사용자 데이터를 가져와 UI를 업데이트하는 메소드
     private void loadUserProfileData() {
         if (userUid == null) {
             Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -208,12 +211,22 @@ public class ProfileFragment extends Fragment {
                         String name = documentSnapshot.getString("name");
                         String birth = documentSnapshot.getString("birth");
                         String bloodType = documentSnapshot.getString("bloodType");
+                        String emergencyContact = documentSnapshot.getString("emergencyContact"); //  비상 연락처 가져오기
+                        String gender = documentSnapshot.getString("gender"); //  성별 정보 가져오기
                         String profileImageUrl = documentSnapshot.getString("profileImageUrl"); // 이미지 URL 필드
 
                         // UI 업데이트
-                        if (tvName != null) tvName.setText(name);
+                        if (tvName != null) {
+                            if (gender != null) {
+                                tvName.setText(name + " (" + gender + ")"); // 이름 옆에 성별 표시
+                            } else {
+                                tvName.setText(name);
+                            }
+                        }
                         if (etDob != null) etDob.setText(birth);
                         if (etBloodType != null) etBloodType.setText(bloodType);
+                        if (etEmergencyContact != null) etEmergencyContact.setText(emergencyContact); //  비상 연락처 설정
+                        if (etGender != null) etGender.setText(gender); // 성별 설정
 
                         // Glide 라이브러리를 사용해 URL에서 이미지를 로드
                         if (profileImageUrl != null && ivProfileImage != null && getContext() != null) {
@@ -221,20 +234,22 @@ public class ProfileFragment extends Fragment {
                         }
                     } else {
                         // Firestore에 사용자 정보가 없을 경우 (예: 첫 로그인)
-                        Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
+                        if (getContext() != null) {
+                            Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(getContext(), "프로필 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    if (getContext() != null) {
+                        Toast.makeText(getContext(), "프로필 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    }
                 });
     }
 
-    // 팝업에서 데이터가 수정되면 호출되는 콜백 메서드
-//    @Override
-//    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
-//        // 전달받은 데이터를 UI의 EditText에 반영
-//        etDob.setText(birthdate);
-//        etEmergencyContact.setText(emergencyContact);
-//        etBloodType.setText(bloodType);
-//    }
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // 뷰 바인딩이 아닌 일반 뷰 변수이므로 명시적으로 null 처리할 필요는 없지만,
+        // 메모리 관리를 위해 onDestroyView에서 null 처리하는 것이 좋습니다.
+    }
 }
