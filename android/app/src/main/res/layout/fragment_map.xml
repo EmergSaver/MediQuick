@@ -36,13 +36,13 @@ tools:context="nav.MapFragment">
         <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="right"
+            android:layout_gravity="end"
             android:background="@color/white"
             android:src="@drawable/ic_search"
             app:layout_constraintBottom_toBottomOf="@+id/search_text"
             app:layout_constraintEnd_toEndOf="@+id/search_text"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginEnd="10dp"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.kakao.vectormap.MapView>
     <!-- Bottom Sheet -->
@@ -51,9 +51,18 @@ tools:context="nav.MapFragment">
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:orientation="vertical"
-        android:visibility="gone"
         android:background="@drawable/rounded_top_corners"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="center"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" >
 
         <TextView
             android:id="@+id/hospital_name"
@@ -100,6 +109,7 @@ tools:context="nav.MapFragment">
         </LinearLayout>
 
         <LinearLayout
+            android:id="@+id/linearLayout3"
             android:layout_width="150dp"
             android:layout_height="wrap_content"
             android:gravity="center"
@@ -112,106 +122,121 @@ tools:context="nav.MapFragment">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
+                android:layout_marginTop="26dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="26dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
+                    android:layout_gravity="start"
+                    android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/addressText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
                     android:text="대전 서구 관저동로 158"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    android:clickable="true"
+
+                    android:textSize="12sp" />
             </LinearLayout>
             <!-- 전화번호 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
+                android:layout_marginTop="18dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="18dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
+                    android:layout_gravity="start"
+                    android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/callText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
                     android:text="1577-3330"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
+                    android:textSize="12sp" />
             </LinearLayout>
             <!-- 혼잡도 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:layout_marginTop="18dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="18dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/green_marker"/>
+                    android:src="@drawable/green_marker" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
                     android:text="혼잡도"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
+                    android:textSize="12sp" />
 
                 <ImageView
                     android:layout_width="6dp"
                     android:layout_height="6dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_marginStart="12dp"/>
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/congestionText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
                     android:text="원활"
-                    android:textSize="12sp"
-                    android:layout_marginStart="6dp"/>
+                    android:textSize="12sp" />
             </LinearLayout>
             <!-- 전문의 수 -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
                 android:layout_gravity="center"
+                android:layout_marginTop="18dp"
                 android:gravity="center"
-                android:layout_marginTop="18dp">
+                android:orientation="horizontal">
 
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
+                    android:layout_gravity="start"
+                    android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/doctorText"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="12dp"
                     android:text="전문의 100+명"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
+                    android:textSize="12sp" />
             </LinearLayout>
-
         </LinearLayout>
+
+            <Button
+                android:id="@+id/closeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="닫기"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="20dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
