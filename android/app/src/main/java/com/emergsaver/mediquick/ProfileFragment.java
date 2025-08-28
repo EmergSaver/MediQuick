@@ -1,12 +1,9 @@
 package com.emergsaver.mediquick;
 
-// Firebase 및 Glide 라이브러리 import
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.bumptech.glide.Glide;
 import android.widget.Toast;
-import android.content.Context;
-import android.content.SharedPreferences;
 
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,182 +12,131 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.TextView; // 수정: EditText 대신 TextView를 import 합니다.
+import android.widget.TextView;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
-import java.util.ArrayList;
-import androidx.fragment.app.DialogFragment;
 
-// OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
 
     private Button btnAllergy;
     private Button btnProfile;
     private Button btnUploadphoto;
 
-    // 개인정보를 표시할 TextView
-    // 수정: EditText 변수들을 TextView로 변경합니다.
-    private TextView tvDob; // 생년월일
-    private TextView tvEmergencyContact; // 비상 연락처
-    private TextView tvBloodType; // 혈액형
-    private TextView tvGender; // 성별
+    private TextView tvDob;
+    private TextView tvEmergencyContact;
+    private TextView tvBloodType;
+    private TextView tvGender;
 
-    // 알러지 정보 표시용 TextView들
-    // 수정: EditText 변수들을 TextView로 변경합니다.
     private TextView tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3;
     private TextView tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3;
 
-    // 프로필 이미지를 표시할 ImageView
     private ImageView ivProfileImage;
-    // 프로필 이름 표시용 TextView
     private TextView tvName;
 
-    // Firestore 및 사용자 ID 변수 선언
     private FirebaseFirestore db;
     private String userUid;
+
+    // Firestore ID와 실제 음식 알레르기 이름 매핑
+    private static final Map<String, String> FOOD_ALLERGY_MAP = new HashMap<>();
+    static {
+        FOOD_ALLERGY_MAP.put("cb_egg", "난류(계란)");
+        FOOD_ALLERGY_MAP.put("cb_milk", "밀");
+        FOOD_ALLERGY_MAP.put("cb_peach", "복숭아");
+        FOOD_ALLERGY_MAP.put("cb_dairy", "우유");
+        FOOD_ALLERGY_MAP.put("cb_sesame", "참깨");
+        FOOD_ALLERGY_MAP.put("cb_tomato", "토마토");
+        FOOD_ALLERGY_MAP.put("cb_buckwheat", "메밀");
+        FOOD_ALLERGY_MAP.put("cb_almond", "아몬드");
+        FOOD_ALLERGY_MAP.put("cb_sulfur_dioxide", "아황산류");
+        FOOD_ALLERGY_MAP.put("cb_peanut", "땅콩");
+        FOOD_ALLERGY_MAP.put("cb_mackerel", "고등어");
+        FOOD_ALLERGY_MAP.put("cb_pork", "돼지고기");
+        FOOD_ALLERGY_MAP.put("cb_soybean", "대두");
+        FOOD_ALLERGY_MAP.put("cb_crab", "꽃게");
+        FOOD_ALLERGY_MAP.put("cb_chicken", "닭고기");
+        FOOD_ALLERGY_MAP.put("cb_walnut", "호두");
+        FOOD_ALLERGY_MAP.put("cb_shrimp", "새우");
+        FOOD_ALLERGY_MAP.put("cb_beef", "쇠고기");
+        FOOD_ALLERGY_MAP.put("cb_clam", "잣");
+        FOOD_ALLERGY_MAP.put("cb_squid", "오징어");
+        FOOD_ALLERGY_MAP.put("cb_shellfish", "조개류");
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // MainActivity로부터 전달받은 UID를 가져옵니다.
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
 
-        // Firestore 인스턴스 초기화
         db = FirebaseFirestore.getInstance();
 
-        // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
-        getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
-            @Override
-            public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                // getView()가 null이 아닌지 확인하고, tvDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
-                // 수정: etDob 변수를 tvDob로 변경합니다.
-                if (getView() != null && tvDob != null) {
-                    // EditProfileDialog로부터 받은 데이터를 TextView에 설정
-                    String birthdate = result.getString("birthdate");
-                    String bloodType = result.getString("bloodType");
-                    String emergencyContact = result.getString("emergencyContact");
-                    String gender = result.getString("gender"); // 성별 정보 가져오기
+        getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, result) -> {
+            if (getView() != null) {
+                String birthdate = result.getString("birthdate");
+                String bloodType = result.getString("bloodType");
+                String emergencyContact = result.getString("emergencyContact");
+                String gender = result.getString("gender");
 
-                    // 수정: et.setText()를 tv.setText()로 변경합니다.
-                    if (tvDob != null) {
-                        tvDob.setText(birthdate);
-                    }
-                    if (tvEmergencyContact != null) {
-                        tvEmergencyContact.setText(emergencyContact);
-                    }
-                    if (tvBloodType != null) {
-                        tvBloodType.setText(bloodType);
-                    }
-                    if (tvGender != null) {
-                        tvGender.setText(gender);
-                    }
-                }
+                if (tvDob != null) tvDob.setText(birthdate);
+                if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
+                if (tvBloodType != null) tvBloodType.setText(bloodType);
+                if (tvGender != null) tvGender.setText(gender);
             }
         });
 
-        // 알러지 팝업에서 결과를 받을 리스너
         getParentFragmentManager().setFragmentResultListener("allergyRequestKey", this, (requestKey, result) -> {
             ArrayList<String> foodAllergies = result.getStringArrayList("food_allergies");
             ArrayList<String> drugAllergies = result.getStringArrayList("drug_allergies");
-
-            // 음식 알레르기 TextView 업데이트
-            if (foodAllergies != null) {
-                // 수정: EditText[]를 TextView[]로 변경합니다.
-                TextView[] foodTextViews = {tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3};
-                for (int i = 0; i < foodTextViews.length; i++) {
-                    if (i < foodAllergies.size() && foodTextViews[i] != null) {
-                        foodTextViews[i].setText(foodAllergies.get(i));
-                    } else if (foodTextViews[i] != null) {
-                        foodTextViews[i].setText(""); // 남은 칸은 비움
-                    }
-                }
-            }
-
-            // 약물 알레르기 TextView 업데이트
-            if (drugAllergies != null) {
-                // 수정: EditText[]를 TextView[]로 변경합니다.
-                TextView[] drugTextViews = {tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3};
-                for (int i = 0; i < drugTextViews.length; i++) {
-                    if (i < drugAllergies.size() && drugTextViews[i] != null) {
-                        drugTextViews[i].setText(drugAllergies.get(i));
-                    } else if (drugTextViews[i] != null) {
-                        drugTextViews[i].setText(""); // 남은 칸은 비움
-                    }
-                }
-            }
+            updateAllergiesUI(foodAllergies, drugAllergies);
         });
 
-        // 프로필 사진/이름 팝업에서 결과를 받을 리스너를 추가합니다.
         getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
             String updatedName = result.getString("updatedName");
             String updatedPhotoUri = result.getString("updatedPhotoUri");
 
-            if (updatedName != null) {
-                if (tvName != null) { // tvName이 이미 초기화되었다고 가정
-                    tvName.setText(updatedName);
-                }
+            if (updatedName != null && tvName != null) {
+                tvName.setText(updatedName);
             }
 
             if (updatedPhotoUri != null && ivProfileImage != null) {
-                ivProfileImage.setImageURI(Uri.parse(updatedPhotoUri));
+                Glide.with(getContext()).load(Uri.parse(updatedPhotoUri)).into(ivProfileImage);
             }
         });
     }
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             @Nullable ViewGroup container,
-                             @Nullable Bundle savedInstanceState) {
-        // fragment_profile.xml 연결
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
-
-        // 뷰들을 한 곳에서 초기화하는 메소드
         bindViews(view);
-
-        // Firestore에서 사용자 데이터를 불러와 UI를 업데이트하는 메소드 호출
-        loadUserProfileData();
-
-        // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
-        btnAllergy.setOnClickListener(v -> {
-            AllergyDialog dialog = new AllergyDialog();
-            dialog.show(getParentFragmentManager(), "allergyDialog");
-        });
-
-        // '개인정보 수정' 버튼 이벤트 (팝업 호출로 변경)
-        btnProfile.setOnClickListener(v -> {
-            EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
-            dialog.show(getParentFragmentManager(), "editProfileDialog");
-        });
-
-        // '프로필 수정' 버튼 이벤트 (기존과 동일)
-        btnUploadphoto.setOnClickListener(v -> {
-            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
-            dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
-        });
-
         return view;
     }
 
-    // 뷰들을 한 곳에서 초기화하는 메소드
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadUserProfileData();
+    }
+
     private void bindViews(View view) {
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
         btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
 
-        // 수정: findViewById의 R.id를 tv_ 로 변경합니다.
         tvDob = view.findViewById(R.id.tv_dob);
         tvEmergencyContact = view.findViewById(R.id.tv_emergency_contact);
         tvBloodType = view.findViewById(R.id.tv_blood_type);
         tvGender = view.findViewById(R.id.tv_gender);
 
-        // 수정: findViewById의 R.id를 tv_ 로 변경합니다.
         tvFoodAllergy1 = view.findViewById(R.id.tv_food_allergy_1);
         tvFoodAllergy2 = view.findViewById(R.id.tv_food_allergy_2);
         tvFoodAllergy3 = view.findViewById(R.id.tv_food_allergy_3);
@@ -200,9 +146,23 @@ public class ProfileFragment extends Fragment {
 
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
+
+        btnAllergy.setOnClickListener(v -> {
+            AllergyDialog dialog = AllergyDialog.newInstance(userUid);
+            dialog.show(getParentFragmentManager(), "allergyDialog");
+        });
+
+        btnProfile.setOnClickListener(v -> {
+            EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
+            dialog.show(getParentFragmentManager(), "editProfileDialog");
+        });
+
+        btnUploadphoto.setOnClickListener(v -> {
+            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+            dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
+        });
     }
 
-    // Firestore에서 사용자 데이터를 가져와 UI를 업데이트하는 메소드
     private void loadUserProfileData() {
         if (userUid == null) {
             Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -215,30 +175,48 @@ public class ProfileFragment extends Fragment {
                         String name = documentSnapshot.getString("name");
                         String birth = documentSnapshot.getString("birth");
                         String bloodType = documentSnapshot.getString("bloodType");
-                        String emergencyContact = documentSnapshot.getString("emergencyContact"); // 비상 연락처 가져오기
-                        String gender = documentSnapshot.getString("gender"); // 성별 정보 가져오기
-                        String profileImageUrl = documentSnapshot.getString("profileImageUrl"); // 이미지 URL 필드
+                        String emergencyContact = documentSnapshot.getString("emergencyContact");
+                        String gender = documentSnapshot.getString("gender");
+                        String profileImageUrl = documentSnapshot.getString("profileImageUrl");
 
-                        // UI 업데이트
                         if (tvName != null) {
-                            if (gender != null) {
-                                tvName.setText(name + " (" + gender + ")"); // 이름 옆에 성별 표시
-                            } else {
-                                tvName.setText(name);
-                            }
+                            tvName.setText(name + (gender != null ? " (" + gender + ")" : ""));
                         }
-                        // 수정: et.setText()를 tv.setText()로 변경합니다.
                         if (tvDob != null) tvDob.setText(birth);
                         if (tvBloodType != null) tvBloodType.setText(bloodType);
                         if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
                         if (tvGender != null) tvGender.setText(gender);
 
-                        // Glide 라이브러리를 사용해 URL에서 이미지를 로드
                         if (profileImageUrl != null && ivProfileImage != null && getContext() != null) {
                             Glide.with(getContext()).load(profileImageUrl).into(ivProfileImage);
                         }
+
+                        Map<String, Object> allergies = (Map<String, Object>) documentSnapshot.get("allergies");
+                        if (allergies != null) {
+                            List<String> foodAllergies = new ArrayList<>();
+                            Map<String, Boolean> foodMap = (Map<String, Boolean>) allergies.get("foodAllergies");
+                            if (foodMap != null) {
+                                for (Map.Entry<String, Boolean> entry : foodMap.entrySet()) {
+                                    if (entry.getValue()) {
+                                        String allergyName = FOOD_ALLERGY_MAP.get(entry.getKey());
+                                        if (allergyName != null) {
+                                            foodAllergies.add(allergyName);
+                                        }
+                                    }
+                                }
+                            }
+
+                            List<String> drugAllergies = (List<String>) allergies.get("drugAllergies");
+                            if (drugAllergies == null) {
+                                drugAllergies = new ArrayList<>();
+                            }
+
+                            updateAllergiesUI(new ArrayList<>(foodAllergies), new ArrayList<>(drugAllergies));
+                        } else {
+                            updateAllergiesUI(null, null);
+                        }
+
                     } else {
-                        // Firestore에 사용자 정보가 없을 경우 (예: 첫 로그인)
                         if (getContext() != null) {
                             Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
                         }
@@ -251,10 +229,35 @@ public class ProfileFragment extends Fragment {
                 });
     }
 
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        // 뷰 바인딩이 아닌 일반 뷰 변수이므로 명시적으로 null 처리할 필요는 없지만,
-        // 메모리 관리를 위해 onDestroyView에서 null 처리하는 것이 좋습니다.
+    private void updateAllergiesUI(ArrayList<String> foodAllergies, ArrayList<String> drugAllergies) {
+        TextView[] foodTextViews = {tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3};
+        if (foodAllergies != null) {
+            for (int i = 0; i < foodTextViews.length; i++) {
+                if (i < foodAllergies.size() && foodTextViews[i] != null) {
+                    foodTextViews[i].setText(foodAllergies.get(i));
+                } else if (foodTextViews[i] != null) {
+                    foodTextViews[i].setText("");
+                }
+            }
+        } else {
+            for (TextView tv : foodTextViews) {
+                if (tv != null) tv.setText("");
+            }
+        }
+
+        TextView[] drugTextViews = {tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3};
+        if (drugAllergies != null) {
+            for (int i = 0; i < drugTextViews.length; i++) {
+                if (i < drugAllergies.size() && drugTextViews[i] != null) {
+                    drugTextViews[i].setText(drugAllergies.get(i));
+                } else if (drugTextViews[i] != null) {
+                    drugTextViews[i].setText("");
+                }
+            }
+        } else {
+            for (TextView tv : drugTextViews) {
+                if (tv != null) tv.setText("");
+            }
+        }
     }
 }
