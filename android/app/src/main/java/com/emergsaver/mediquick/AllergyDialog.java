@@ -31,6 +31,7 @@ public class AllergyDialog extends DialogFragment {
     private GridLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
+    private Button btnDeleteDrugSideEffect; // ✨ 추가: 삭제 버튼
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
 
@@ -68,6 +69,7 @@ public class AllergyDialog extends DialogFragment {
         gridLayout = view.findViewById(R.id.grid_food_allergies);
         etDrugSideEffect = view.findViewById(R.id.et_drug_side_effect);
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
+        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); // ✨ 추가: 삭제 버튼 초기화
         tvRegisteredAllergies = view.findViewById(R.id.tv_registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
 
@@ -83,6 +85,32 @@ public class AllergyDialog extends DialogFragment {
                 } else {
                     Toast.makeText(getContext(), "이미 등록된 약물입니다.", Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+
+        // ✨ 추가: 약물 부작용 목록을 길게 누르면 삭제
+        tvRegisteredAllergies.setOnLongClickListener(v -> {
+            String text = tvRegisteredAllergies.getText().toString();
+            if (!text.equals("현재 등록된 정보가 없습니다.")) {
+                // 삭제할 항목을 선택하도록 사용자에게 안내
+                Toast.makeText(getContext(), "삭제할 항목을 입력창에 다시 입력해주세요.", Toast.LENGTH_SHORT).show();
+            }
+            return true;
+        });
+
+        // ✨ 추가: 삭제 버튼 클릭 리스너
+        btnDeleteDrugSideEffect.setOnClickListener(v -> {
+            String drugToDelete = etDrugSideEffect.getText().toString().trim();
+            if (!drugToDelete.isEmpty()) {
+                if (registeredDrugAllergies.remove(drugToDelete)) {
+                    Toast.makeText(getContext(), "'" + drugToDelete + "'가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+                    updateRegisteredAllergiesText();
+                    etDrugSideEffect.setText("");
+                } else {
+                    Toast.makeText(getContext(), "해당 약물은 목록에 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+            } else {
+                Toast.makeText(getContext(), "삭제할 약물 이름을 입력하세요.", Toast.LENGTH_SHORT).show();
             }
         });
 
