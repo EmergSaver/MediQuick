@@ -93,23 +93,21 @@
             android:layout_marginTop="8dp"
             android:gravity="center_vertical"
             android:orientation="horizontal">
-            <EditText
-                android:id="@+id/et_dob"
+            <TextView
+                android:id="@+id/tv_dob"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:hint="2000.03.04"
-                android:inputType="date"
                 android:background="@drawable/rounded_background"
                 android:padding="8dp" />
 
-            <EditText
-                android:id="@+id/et_emergency_contact"
+            <TextView
+                android:id="@+id/tv_emergency_contact"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:hint="연락처를 등록해주세요"
-                android:inputType="phone"
                 android:background="@drawable/rounded_background"
                 android:padding="8dp" />
         </LinearLayout>
@@ -128,13 +126,12 @@
                 android:layout_weight="1"
                 android:text="혈액형"
                 android:textSize="16sp" />
-            <EditText
-                android:id="@+id/et_blood_type"
+            <TextView
+                android:id="@+id/tv_blood_type"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
                 android:hint="혈액형을 등록해주세요"
-                android:inputType="phone"
                 android:background="@drawable/rounded_background"
                 android:padding="8dp" />
 
@@ -145,8 +142,8 @@
                 android:layout_marginStart="16dp"
                 android:text="성별"
                 android:textSize="16sp" />
-            <EditText
-                android:id="@+id/et_gender"
+            <TextView
+                android:id="@+id/tv_gender"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="3"
@@ -195,34 +192,16 @@
             </TableRow>
 
             <TableRow>
-                <EditText
-                    android:id="@+id/et_food_allergy_1"
+                <TextView
+                    android:id="@+id/tv_food_allergy_1"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="입력하세요"
                     android:padding="8dp"
                     android:background="@drawable/rounded_background" />
 
-                <EditText
-                    android:id="@+id/et_drug_allergy_1"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:hint="입력하세요"
-                    android:padding="8dp"
-                    android:background="@drawable/rounded_background" />
-            </TableRow>
-
-            <TableRow>
-                <EditText
-                    android:id="@+id/et_food_allergy_2"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
-                    android:hint="입력하세요"
-                    android:padding="8dp"
-                    android:background="@drawable/rounded_background" />
-
-                <EditText
-                    android:id="@+id/et_drug_allergy_2"
+                <TextView
+                    android:id="@+id/tv_drug_allergy_1"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="입력하세요"
@@ -231,16 +210,34 @@
             </TableRow>
 
             <TableRow>
-                <EditText
-                    android:id="@+id/et_food_allergy_3"
+                <TextView
+                    android:id="@+id/tv_food_allergy_2"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="입력하세요"
                     android:padding="8dp"
                     android:background="@drawable/rounded_background" />
 
-                <EditText
-                    android:id="@+id/et_drug_allergy_3"
+                <TextView
+                    android:id="@+id/tv_drug_allergy_2"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="입력하세요"
+                    android:padding="8dp"
+                    android:background="@drawable/rounded_background" />
+            </TableRow>
+
+            <TableRow>
+                <TextView
+                    android:id="@+id/tv_food_allergy_3"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:hint="입력하세요"
+                    android:padding="8dp"
+                    android:background="@drawable/rounded_background" />
+
+                <TextView
+                    android:id="@+id/tv_drug_allergy_3"
                     android:layout_width="0dp"
                     android:layout_weight="1"
                     android:hint="입력하세요"

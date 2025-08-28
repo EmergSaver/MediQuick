@@ -1,6 +1,6 @@
 package com.emergsaver.mediquick;
 
-//  Firebase 및 Glide 라이브러리 import
+// Firebase 및 Glide 라이브러리 import
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.bumptech.glide.Glide;
@@ -8,16 +8,14 @@ import android.widget.Toast;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.TextView; // 수정: EditText 대신 TextView를 import 합니다.
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +24,6 @@ import androidx.fragment.app.FragmentResultListener;
 import java.util.ArrayList;
 import androidx.fragment.app.DialogFragment;
 
-
 // OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
 
@@ -34,15 +31,17 @@ public class ProfileFragment extends Fragment {
     private Button btnProfile;
     private Button btnUploadphoto;
 
-    // 개인정보를 표시할 EditText
-    private EditText etDob; // 생년월일
-    private EditText etEmergencyContact; // 비상 연락처
-    private EditText etBloodType; // 혈액형
-    private EditText etGender; // 성별
+    // 개인정보를 표시할 TextView
+    // 수정: EditText 변수들을 TextView로 변경합니다.
+    private TextView tvDob; // 생년월일
+    private TextView tvEmergencyContact; // 비상 연락처
+    private TextView tvBloodType; // 혈액형
+    private TextView tvGender; // 성별
 
-    // 알러지 정보 표시용 EditText들
-    private EditText etFoodAllergy1, etFoodAllergy2, etFoodAllergy3;
-    private EditText etDrugAllergy1, etDrugAllergy2, etDrugAllergy3;
+    // 알러지 정보 표시용 TextView들
+    // 수정: EditText 변수들을 TextView로 변경합니다.
+    private TextView tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3;
+    private TextView tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3;
 
     // 프로필 이미지를 표시할 ImageView
     private ImageView ivProfileImage;
@@ -57,38 +56,39 @@ public class ProfileFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // : MainActivity로부터 전달받은 UID를 가져옵니다.
+        // MainActivity로부터 전달받은 UID를 가져옵니다.
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
 
-        //  Firestore 인스턴스 초기화
+        // Firestore 인스턴스 초기화
         db = FirebaseFirestore.getInstance();
 
         // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
-        // 중복된 리스너 코드를 하나만 남기고 삭제했습니다.
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
             @Override
             public void onFragmentResult(@NonNull String requestKey, @NonNull Bundle result) {
-                // getView()가 null이 아닌지 확인하고, etDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
-                if (getView() != null && etDob != null) {
-                    // EditProfileDialog로부터 받은 데이터를 EditText에 설정
+                // getView()가 null이 아닌지 확인하고, tvDob 변수 자체가 null이 아닌지 다시 한번 확인합니다.
+                // 수정: etDob 변수를 tvDob로 변경합니다.
+                if (getView() != null && tvDob != null) {
+                    // EditProfileDialog로부터 받은 데이터를 TextView에 설정
                     String birthdate = result.getString("birthdate");
                     String bloodType = result.getString("bloodType");
                     String emergencyContact = result.getString("emergencyContact");
-                    String gender = result.getString("gender"); //  성별 정보 가져오기
+                    String gender = result.getString("gender"); // 성별 정보 가져오기
 
-                    if (etDob != null) {
-                        etDob.setText(birthdate);
+                    // 수정: et.setText()를 tv.setText()로 변경합니다.
+                    if (tvDob != null) {
+                        tvDob.setText(birthdate);
                     }
-                    if (etEmergencyContact != null) {
-                        etEmergencyContact.setText(emergencyContact);
+                    if (tvEmergencyContact != null) {
+                        tvEmergencyContact.setText(emergencyContact);
                     }
-                    if (etBloodType != null) {
-                        etBloodType.setText(bloodType);
+                    if (tvBloodType != null) {
+                        tvBloodType.setText(bloodType);
                     }
-                    if (etGender != null) { //  etGender가 null이 아닌지 확인
-                        etGender.setText(gender);
+                    if (tvGender != null) {
+                        tvGender.setText(gender);
                     }
                 }
             }
@@ -99,26 +99,28 @@ public class ProfileFragment extends Fragment {
             ArrayList<String> foodAllergies = result.getStringArrayList("food_allergies");
             ArrayList<String> drugAllergies = result.getStringArrayList("drug_allergies");
 
-            // 음식 알레르기 EditText 업데이트
+            // 음식 알레르기 TextView 업데이트
             if (foodAllergies != null) {
-                EditText[] foodEditTexts = {etFoodAllergy1, etFoodAllergy2, etFoodAllergy3};
-                for (int i = 0; i < foodEditTexts.length; i++) {
-                    if (i < foodAllergies.size() && foodEditTexts[i] != null) {
-                        foodEditTexts[i].setText(foodAllergies.get(i));
-                    } else if (foodEditTexts[i] != null) {
-                        foodEditTexts[i].setText(""); // 남은 칸은 비움
+                // 수정: EditText[]를 TextView[]로 변경합니다.
+                TextView[] foodTextViews = {tvFoodAllergy1, tvFoodAllergy2, tvFoodAllergy3};
+                for (int i = 0; i < foodTextViews.length; i++) {
+                    if (i < foodAllergies.size() && foodTextViews[i] != null) {
+                        foodTextViews[i].setText(foodAllergies.get(i));
+                    } else if (foodTextViews[i] != null) {
+                        foodTextViews[i].setText(""); // 남은 칸은 비움
                     }
                 }
             }
 
-            // 약물 알레르기 EditText 업데이트
+            // 약물 알레르기 TextView 업데이트
             if (drugAllergies != null) {
-                EditText[] drugEditTexts = {etDrugAllergy1, etDrugAllergy2, etDrugAllergy3};
-                for (int i = 0; i < drugEditTexts.length; i++) {
-                    if (i < drugAllergies.size() && drugEditTexts[i] != null) {
-                        drugEditTexts[i].setText(drugAllergies.get(i));
-                    } else if (drugEditTexts[i] != null) {
-                        drugEditTexts[i].setText(""); // 남은 칸은 비움
+                // 수정: EditText[]를 TextView[]로 변경합니다.
+                TextView[] drugTextViews = {tvDrugAllergy1, tvDrugAllergy2, tvDrugAllergy3};
+                for (int i = 0; i < drugTextViews.length; i++) {
+                    if (i < drugAllergies.size() && drugTextViews[i] != null) {
+                        drugTextViews[i].setText(drugAllergies.get(i));
+                    } else if (drugTextViews[i] != null) {
+                        drugTextViews[i].setText(""); // 남은 칸은 비움
                     }
                 }
             }
@@ -182,17 +184,19 @@ public class ProfileFragment extends Fragment {
         btnProfile = view.findViewById(R.id.btn_profile);
         btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
 
-        etDob = view.findViewById(R.id.et_dob);
-        etEmergencyContact = view.findViewById(R.id.et_emergency_contact);
-        etBloodType = view.findViewById(R.id.et_blood_type);
-        etGender = view.findViewById(R.id.et_gender); //  et_gender 바인딩
+        // 수정: findViewById의 R.id를 tv_ 로 변경합니다.
+        tvDob = view.findViewById(R.id.tv_dob);
+        tvEmergencyContact = view.findViewById(R.id.tv_emergency_contact);
+        tvBloodType = view.findViewById(R.id.tv_blood_type);
+        tvGender = view.findViewById(R.id.tv_gender);
 
-        etFoodAllergy1 = view.findViewById(R.id.et_food_allergy_1);
-        etFoodAllergy2 = view.findViewById(R.id.et_food_allergy_2);
-        etFoodAllergy3 = view.findViewById(R.id.et_food_allergy_3);
-        etDrugAllergy1 = view.findViewById(R.id.et_drug_allergy_1);
-        etDrugAllergy2 = view.findViewById(R.id.et_drug_allergy_2);
-        etDrugAllergy3 = view.findViewById(R.id.et_drug_allergy_3);
+        // 수정: findViewById의 R.id를 tv_ 로 변경합니다.
+        tvFoodAllergy1 = view.findViewById(R.id.tv_food_allergy_1);
+        tvFoodAllergy2 = view.findViewById(R.id.tv_food_allergy_2);
+        tvFoodAllergy3 = view.findViewById(R.id.tv_food_allergy_3);
+        tvDrugAllergy1 = view.findViewById(R.id.tv_drug_allergy_1);
+        tvDrugAllergy2 = view.findViewById(R.id.tv_drug_allergy_2);
+        tvDrugAllergy3 = view.findViewById(R.id.tv_drug_allergy_3);
 
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
@@ -211,8 +215,8 @@ public class ProfileFragment extends Fragment {
                         String name = documentSnapshot.getString("name");
                         String birth = documentSnapshot.getString("birth");
                         String bloodType = documentSnapshot.getString("bloodType");
-                        String emergencyContact = documentSnapshot.getString("emergencyContact"); //  비상 연락처 가져오기
-                        String gender = documentSnapshot.getString("gender"); //  성별 정보 가져오기
+                        String emergencyContact = documentSnapshot.getString("emergencyContact"); // 비상 연락처 가져오기
+                        String gender = documentSnapshot.getString("gender"); // 성별 정보 가져오기
                         String profileImageUrl = documentSnapshot.getString("profileImageUrl"); // 이미지 URL 필드
 
                         // UI 업데이트
@@ -223,10 +227,11 @@ public class ProfileFragment extends Fragment {
                                 tvName.setText(name);
                             }
                         }
-                        if (etDob != null) etDob.setText(birth);
-                        if (etBloodType != null) etBloodType.setText(bloodType);
-                        if (etEmergencyContact != null) etEmergencyContact.setText(emergencyContact); //  비상 연락처 설정
-                        if (etGender != null) etGender.setText(gender); // 성별 설정
+                        // 수정: et.setText()를 tv.setText()로 변경합니다.
+                        if (tvDob != null) tvDob.setText(birth);
+                        if (tvBloodType != null) tvBloodType.setText(bloodType);
+                        if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
+                        if (tvGender != null) tvGender.setText(gender);
 
                         // Glide 라이브러리를 사용해 URL에서 이미지를 로드
                         if (profileImageUrl != null && ivProfileImage != null && getContext() != null) {
