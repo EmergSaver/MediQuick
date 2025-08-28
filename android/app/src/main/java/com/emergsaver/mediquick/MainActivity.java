@@ -28,10 +28,6 @@ public class MainActivity extends AppCompatActivity {
         Fragment mapFrag = new MapFragment();
         Fragment userFrag = new ProfileFragment();
 
-        // 위도/경도 변환 저장 후 제거 예정
-        HospitalGeoUpdater updater = new HospitalGeoUpdater(this); // this는 Activity 컨텍스트
-        updater.updateHospitalCoordinates();
-
         // 첫 번째 화면일 경우 (지도 보기)
         if(savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
