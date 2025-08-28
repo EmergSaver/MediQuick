@@ -51,6 +51,7 @@ tools:context="nav.MapFragment">
         android:layout_width="match_parent"
         android:layout_height="350dp"
         android:orientation="vertical"
+        android:visibility="gone"
         android:background="@drawable/rounded_top_corners"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
@@ -110,9 +111,9 @@ tools:context="nav.MapFragment">
 
         <LinearLayout
             android:id="@+id/linearLayout3"
-            android:layout_width="150dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:gravity="center"
+            android:gravity="start|center_vertical"
             android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -130,20 +131,27 @@ tools:context="nav.MapFragment">
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_gravity="start"
                     android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/addressText"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="12dp"
+                    android:layout_weight="1"
                     android:text="대전 서구 관저동로 158"
                     android:maxLines="1"
                     android:ellipsize="end"
                     android:clickable="true"
-
                     android:textSize="12sp" />
+                
+                <ImageView
+                    android:id="@+id/addressDetail"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/ic_down"
+                    android:layout_marginStart="10dp"/>
+
             </LinearLayout>
             <!-- 전화번호 -->
             <LinearLayout
@@ -157,12 +165,12 @@ tools:context="nav.MapFragment">
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_gravity="start"
                     android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/callText"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="12dp"
                     android:text="1577-3330"
@@ -214,14 +222,14 @@ tools:context="nav.MapFragment">
                 <ImageView
                     android:layout_width="15dp"
                     android:layout_height="15dp"
-                    android:layout_gravity="start"
                     android:src="@drawable/green_marker" />
 
                 <TextView
                     android:id="@+id/doctorText"
-                    android:layout_width="match_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="12dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
                     android:text="전문의 100+명"
                     android:textSize="12sp" />
             </LinearLayout>

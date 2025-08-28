@@ -14,12 +14,15 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -293,7 +296,6 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
         // BottomSheet 초기화
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
@@ -305,6 +307,29 @@ public class MapFragment extends Fragment {
         TextView callText = view.findViewById(R.id.callText);
 
         ImageButton exportBtn = view.findViewById(R.id.exportBtn);
+
+        Button closeBtn = view.findViewById(R.id.closeBtn);
+        closeBtn.setOnClickListener(v -> {
+            bottomSheet.setVisibility(View.GONE);
+        });
+
+        ImageView addressDetail = view.findViewById(R.id.addressDetail);
+        TextView addressText = view.findViewById(R.id.addressText);
+        boolean[] isExpanded = {false};
+
+        addressDetail.setOnClickListener(v -> {
+            if(isExpanded[0]) {
+                // 축약 상태
+                addressText.setMaxLines(1);
+                addressText.setEllipsize(TextUtils.TruncateAt.END);
+                isExpanded[0] = false;
+            } else {
+                // 전체 주소
+                addressText.setMaxLines(Integer.MAX_VALUE);
+                addressText.setEllipsize(null);
+                isExpanded[0] = true;
+            }
+        });
 
         // 전화걸기
         callBtn.setOnClickListener(v -> {
