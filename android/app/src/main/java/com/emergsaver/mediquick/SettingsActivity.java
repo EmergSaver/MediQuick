@@ -30,11 +30,11 @@ public class SettingsActivity extends AppCompatActivity {
                     startActivity(new Intent(this, LogoutActivity.class))
             );
         }
-        /*if (btnDeleteAccount != null) {
+        if (btnDeleteAccount != null) {
             btnDeleteAccount.setOnClickListener(v ->
-                    startActivity(new Intent(this, DeleteAccountActivity.class))
+                    startActivity(new Intent(this, DeleteUsers.class))
             );
-        }*/
+        }
 
 
 
