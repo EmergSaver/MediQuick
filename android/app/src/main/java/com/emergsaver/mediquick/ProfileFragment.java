@@ -7,11 +7,13 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -22,11 +24,13 @@ import androidx.fragment.app.DialogFragment;
 
 // OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
-//        implements EditProfileDialog.OnProfileEditListener
+// implements EditProfileDialog.OnProfileEditListener
 
     private Button btnAllergy;
     private Button btnProfile;
     private Button btnUploadphoto;
+    private ImageButton btnSettings;
+
 
     // 개인정보를 표시할 EditText
     private EditText etDob; // 생년월일
@@ -43,7 +47,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
 
         // "requestKey"라는 키로 결과를 받을 리스너를 등록합니다.
         getParentFragmentManager().setFragmentResultListener("requestKey", this, new FragmentResultListener() {
@@ -145,6 +148,7 @@ public class ProfileFragment extends Fragment {
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
         btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
+        btnSettings = view.findViewById(R.id.btn_settings);
 
         // 개인 정보 표시 EditText
         etDob = view.findViewById(R.id.et_dob);
@@ -178,46 +182,29 @@ public class ProfileFragment extends Fragment {
             }
         });
 
-
         // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
         btnAllergy.setOnClickListener(v -> {
-            // Intent intent = new Intent(getActivity(), AllergyActivity.class);
-            // startActivity(intent);
             AllergyDialog dialog = new AllergyDialog();
             dialog.show(getParentFragmentManager(), "allergyDialog");
         });
 
-        // '개인정보 수정' 버튼 이벤트 (팝업 호출로 변경)
-
+        // '개인정보 수정' 버튼 이벤트
         btnProfile.setOnClickListener(v -> {
             EditProfileDialog dialog = new EditProfileDialog();
-            //  수정: 팝업창이 닫혔을 때 데이터를 받을 타겟 Fragment를 설정합니다.
-//            dialog.setTargetFragment(ProfileFragment.this, 0);
             dialog.show(getParentFragmentManager(), "editProfileDialog");
         });
 
-        // '프로필 수정' 버튼 이벤트 (기존과 동일)
+        // '프로필 수정' 버튼 이벤트
         btnUploadphoto.setOnClickListener(v -> {
-            // Intent intent = new Intent(getActivity(), UploadPhotoActivity.class);
-            // startActivity(intent);
-            // EditProfilePhotoDialog 팝업 띄우기
             EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
             dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
+        });
+
+        btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SettingsActivity.class);
+            startActivity(intent);
         });
 
         return view;
     }
 }
-
-    // 팝업에서 데이터가 수정되면 호출되는 콜백 메서드
-//    @Override
-//    public void onProfileEdited(String birthdate, String bloodType, String emergencyContact) {
-//        // 전달받은 데이터를 UI의 EditText에 반영
-//        etDob.setText(birthdate);
-//        etEmergencyContact.setText(emergencyContact);
-//        etBloodType.setText(bloodType);
-//    }
-//}
-
-
-

@@ -11,7 +11,7 @@ import android.content.Intent;
 
 import com.google.android.material.button.MaterialButton;
 import com.emergsaver.mediquick.LogoutActivity;
-//import com.emergsaver.mediquick.DeleteAccountActivity;
+import com.emergsaver.mediquick.DeleteUsers;
 
 
 public class SettingsActivity extends AppCompatActivity {
