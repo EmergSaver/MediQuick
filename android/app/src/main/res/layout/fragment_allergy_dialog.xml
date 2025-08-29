@@ -11,8 +11,8 @@
         android:id="@+id/tv_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="알러지 정보 입력"
-        android:textSize="20sp"
+        android:text="알레르기 정보 입력"
+        android:textSize="22sp"
         android:textStyle="bold"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toTopOf="parent"
@@ -26,7 +26,8 @@
         android:text="음식 알레르기"
         android:textSize="16sp"
         android:textStyle="bold"
-        android:layout_marginTop="16dp"
+        android:textColor="@android:color/black"
+        android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/tv_title"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -68,6 +69,7 @@
         android:text="약물 부작용"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:textColor="@android:color/black"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/grid_food_allergies"
         app:layout_constraintStart_toStartOf="parent" />
@@ -79,7 +81,7 @@
         android:layout_marginTop="8dp"
         android:hint="아목시실린"
         android:background="@drawable/rounded_background"
-        android:padding="8dp"
+        android:padding="12dp"
         android:inputType="text"
         app:layout_constraintTop_toBottomOf="@id/tv_drug_side_effect"
         app:layout_constraintStart_toStartOf="parent"
@@ -96,32 +98,36 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_add_drug_side_effect"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="등록"
             android:textSize="12sp"
-            android:layout_marginEnd="4dp" />
+            android:layout_marginEnd="8dp"
+            app:cornerRadius="8dp" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_delete_drug_side_effect"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="삭제"
             android:textSize="12sp"
-            android:layout_marginStart="4dp" />
+            android:layout_marginStart="8dp"
+            app:cornerRadius="8dp"
+            style="?attr/materialButtonOutlinedStyle" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tv_registered_allergies"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="16dp"
         android:text="현재 등록된 정보가 없습니다."
         android:gravity="center"
+        android:textColor="@android:color/black"
         app:layout_constraintTop_toBottomOf="@id/layout_drug_buttons"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -137,5 +143,4 @@
         app:layout_constraintTop_toBottomOf="@id/tv_registered_allergies"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

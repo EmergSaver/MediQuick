@@ -26,6 +26,11 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.app.Dialog;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.ViewGroup; // 이미 있을 수도 있지만, 혹시 없다면 추가
+
 public class EditProfilePhotoDialog extends DialogFragment {
 
     private ImageView ivProfilePhotoPreview;
@@ -94,6 +99,28 @@ public class EditProfilePhotoDialog extends DialogFragment {
         btnSave.setOnClickListener(v -> {
             saveUserProfileData();
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        // 팝업 창의 가로와 세로 크기를 설정하는 코드
+        if (getDialog() != null) {
+            Dialog dialog = getDialog();
+            Window window = dialog.getWindow();
+            if (window != null) {
+                WindowManager.LayoutParams params = window.getAttributes();
+
+                // 가로를 화면 전체 폭의 90%로 설정
+                params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
+
+                // 높이를 WRAP_CONTENT로 설정 (내용에 맞게 자동 조절)
+                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+                window.setAttributes(params);
+            }
+        }
     }
 
     // 기존 프로필 정보 불러오는 메소드 (다이얼로그 열릴 때 실행)

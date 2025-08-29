@@ -24,6 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.app.Dialog;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.ViewGroup; // 이미 있을 수도 있지만, 혹시 없다면 추가
+
 public class AllergyDialog extends DialogFragment {
 
     private static final String TAG = "AllergyDialog";
@@ -31,7 +36,7 @@ public class AllergyDialog extends DialogFragment {
     private GridLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
-    private Button btnDeleteDrugSideEffect; // ✨ 추가: 삭제 버튼
+    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
 
@@ -63,13 +68,35 @@ public class AllergyDialog extends DialogFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        // 팝업 창의 가로와 세로 크기를 설정하는 코드
+        if (getDialog() != null) {
+            Dialog dialog = getDialog();
+            Window window = dialog.getWindow();
+            if (window != null) {
+                WindowManager.LayoutParams params = window.getAttributes();
+
+                // 가로를 화면 전체 폭의 90%로 설정
+                params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
+
+                // 높이를 WRAP_CONTENT로 설정 (내용에 맞게 자동 조절)
+                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+                window.setAttributes(params);
+            }
+        }
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         gridLayout = view.findViewById(R.id.grid_food_allergies);
         etDrugSideEffect = view.findViewById(R.id.et_drug_side_effect);
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
-        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); // ✨ 추가: 삭제 버튼 초기화
+        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화
         tvRegisteredAllergies = view.findViewById(R.id.tv_registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
 
@@ -88,7 +115,7 @@ public class AllergyDialog extends DialogFragment {
             }
         });
 
-        // ✨ 추가: 약물 부작용 목록을 길게 누르면 삭제
+        // 추가: 약물 부작용 목록을 길게 누르면 삭제
         tvRegisteredAllergies.setOnLongClickListener(v -> {
             String text = tvRegisteredAllergies.getText().toString();
             if (!text.equals("현재 등록된 정보가 없습니다.")) {
@@ -98,7 +125,7 @@ public class AllergyDialog extends DialogFragment {
             return true;
         });
 
-        // ✨ 추가: 삭제 버튼 클릭 리스너
+        // 추가: 삭제 버튼 클릭 리스너
         btnDeleteDrugSideEffect.setOnClickListener(v -> {
             String drugToDelete = etDrugSideEffect.getText().toString().trim();
             if (!drugToDelete.isEmpty()) {
