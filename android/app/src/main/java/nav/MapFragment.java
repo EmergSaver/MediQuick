@@ -1,6 +1,7 @@
 package nav;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -21,6 +22,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -274,36 +276,40 @@ public class MapFragment extends Fragment {
 
     private void initSearchBar(View view) {
         EditText searchEditText = view.findViewById(R.id.search_text);
-        searchEditText.addTextChangedListener(new TextWatcher() {
+        ImageButton searchBtn = view.findViewById(R.id.search_btn);
+
+        searchBtn.setOnClickListener(v -> {
+            String query = searchEditText.getText().toString().trim();
+            performSearch(query);
+        });
+    }
+
+    private void performSearch(String query) {
+        if (TextUtils.isEmpty(query)) {
+            searchAdapter.setItems(new ArrayList<>());
+            return;
+        }
+
+        HospitalRepository repository = new HospitalRepository();
+        repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
             @Override
-            public void afterTextChanged(Editable s) {
-                String query = s.toString().trim();
+            public void onLoaded(List<Hospital> hospitals) {
+                searchAdapter.setItems(hospitals);
 
-                HospitalRepository repository = new HospitalRepository();
-                repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
-                    @Override
-                    public void onLoaded(List<Hospital> hospitals) {
-                        searchAdapter.setItems(hospitals);
-
-                        RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
-                        searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
-                    }
-
-                    @Override
-                    public void onError(Exception e) {
-                        Log.e("SEARCH_ERROR", "검색 실패 ", e);
-                    }
-                });
+                RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
+                searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            public void onError(Exception e) {
+                Log.e("SEARCH_ERROR", "검색 실패 ", e);
             }
         });
+        View view = getView();
+        if(view != null) {
+            InputMethodManager input = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            input.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     private void showHospitalInfo(View view, Hospital hospital) {
