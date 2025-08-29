@@ -9,11 +9,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.emergsaver.mediquick.R;
-import com.emergsaver.mediquick.search.Category;
-import com.emergsaver.mediquick.search.CategoryAdapter;
+import com.emergsaver.mediquick.adapter.CategoryAdapter;
 
 import java.util.Arrays;
 import java.util.List;
+
+import model.Category;
 
 public class SearchActivity extends AppCompatActivity {
 
@@ -26,7 +27,7 @@ public class SearchActivity extends AppCompatActivity {
         recycler.setLayoutManager(new GridLayoutManager(this, 3)); // 한 줄에 3개씩
 
         // 카테고리 목록 데이터
-        List<Category> categories = Arrays.asList(
+        List<model.Category> categories = Arrays.asList(
                 new Category(R.drawable.ic_launcher_foreground, "신경계"),
                 new Category(R.drawable.ic_launcher_foreground, "눈"),
                 new Category(R.drawable.ic_launcher_foreground, "코/귀"),
