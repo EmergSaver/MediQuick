@@ -6,13 +6,12 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 
 import com.emergsaver.mediquick.R;
+import com.google.android.gms.location.DeviceOrientationListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
@@ -32,7 +31,10 @@ import model.Hospital;
 
 public class MapManager {
     private KakaoMap kakaoMap;
+
+    // 센서 데이터 제공
     private FusedLocationProviderClient fusedLocationProviderClient;
+
     private Label locationLabel, headingLabel;
     private TrackingManager trackingManager;
 
@@ -43,9 +45,20 @@ public class MapManager {
     // 최초 위치 이동 여부
     private boolean isFirstLocationUpdate = true;
 
-    public MapManager (KakaoMap kakaoMap, FusedLocationProviderClient client) {
-        this.kakaoMap = kakaoMap;
+    public interface onMapReadyCallback {
+        void onMapReady(KakaoMap kakaoMap);
+        void onMarkerClick(Hospital hospital);
+    }
+
+    private onMapReadyCallback callback;
+
+    public MapManager(FusedLocationProviderClient client) {
         this.fusedLocationProviderClient = client;
+    }
+
+    // getter 추가
+    public KakaoMap getKakaoMap() {
+        return kakaoMap;
     }
 
     public void initCurrentLocation(Context context) {
@@ -89,12 +102,14 @@ public class MapManager {
                         }
                     });
         } else {
-            ActivityCompat.requestPermissions(new Activity(),
+            ActivityCompat.requestPermissions((Activity) context,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
         }
     }
 
-    public void initMapView(MapView mapView, FusedLocationProviderClient fusedLocationProviderClient) {
+    public void initMapView(MapView mapView, onMapReadyCallback callback) {
+        this.callback = callback;
+
         // initMapView 로직
         mapView.start(new MapLifeCycleCallback() {
             @Override
@@ -128,9 +143,16 @@ public class MapManager {
 
                 // 마커 클릭 리스너 등록
                 kakaoMap.setOnLabelClickListener((kakao, layer, label) -> {
-                    handleMarker(label, mapView);
+                    Hospital hospital = (Hospital) label.getTag();
+                    if(hospital != null) {
+                        callback.onMarkerClick(hospital);
+                    }
                     return true;
                 });
+
+                if(callback != null) {
+                    callback.onMapReady(kakaoMap);
+                }
             }
         });
     }
@@ -169,33 +191,5 @@ public class MapManager {
         LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
         kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
         Log.d("MAP_DEBUG", "카메라 이동 완료");
-    }
-
-    private void handleMarker(Label label, View view) {
-        Hospital hospital = (Hospital) label.getTag();
-        if(hospital == null)
-            return;
-
-        hospitalModel = hospital;
-
-        LatLng pos = label.getPosition();
-
-        // 새로운 Hospital 객체 생성 후 값 설정
-        TextView hospitalNameText = view.findViewById(R.id.hospital_name);
-        TextView callText = view.findViewById(R.id.callText);
-        TextView addressText = view.findViewById(R.id.addressText);
-        TextView doctorText = view.findViewById(R.id.doctorText);
-
-        hospitalNameText.setText(hospital.getHospital_name());
-        callText.setText(hospital.getPhone());
-        addressText.setText(hospital.getAddress());
-        if(hospitalModel.getDoctor_count() >= 100) {
-            doctorText.setText("전문의 100+ 명");
-        } else {
-            doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
-        }
-
-        ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
-        bottomSheet.setVisibility(View.VISIBLE);
     }
 }
