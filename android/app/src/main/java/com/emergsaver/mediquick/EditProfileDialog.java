@@ -249,7 +249,7 @@ public class EditProfileDialog extends DialogFragment {
         binding.spinnerDay.setAdapter(dayAdapter);
         binding.spinnerDay.setSelection(0);
 
-        String[] bloodTypes = {"A형", "B형", "O형", "AB형"};
+        String[] bloodTypes = {"A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"};
         ArrayAdapter<String> bloodTypeAdapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, bloodTypes);
         bloodTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         binding.spinnerBloodType.setAdapter(bloodTypeAdapter);
