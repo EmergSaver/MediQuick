@@ -1,4 +1,4 @@
-package util;
+package repository;
 
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.gson.Gson;
