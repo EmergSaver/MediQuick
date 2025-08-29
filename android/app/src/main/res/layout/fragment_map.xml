@@ -11,207 +11,263 @@ tools:context="nav.MapFragment">
 <com.kakao.vectormap.MapView
     android:id="@+id/map_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" >
+    android:layout_height="match_parent" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="40dp">
+        android:layout_height="match_parent">
 
-        <EditText
-            android:id="@+id/search_text"
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/search_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:background="@drawable/rounded_edittext"
-            android:hint="검색어를 입력하세요."
-            android:padding="15dp"
-            android:textSize="13sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageButton
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="right"
-            android:background="@color/white"
-            android:src="@drawable/ic_search"
-            app:layout_constraintBottom_toBottomOf="@+id/search_text"
-            app:layout_constraintEnd_toEndOf="@+id/search_text"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginRight="10dp"/>
+            android:layout_marginTop="40dp">
+
+            <EditText
+                android:id="@+id/search_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:background="@drawable/rounded_edittext"
+                android:hint="검색어를 입력하세요."
+                android:padding="15dp"
+                android:textSize="13sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageButton
+                android:id="@+id/search_btn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:background="@color/white"
+                android:src="@drawable/ic_search"
+                app:layout_constraintBottom_toBottomOf="@+id/search_text"
+                app:layout_constraintEnd_toEndOf="@+id/search_text"
+                app:layout_constraintTop_toTopOf="parent"
+                android:layout_marginEnd="10dp"/>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/search_result_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/search_container"
+            android:layout_marginHorizontal="20dp"
+            android:background="@color/white"
+            android:padding="8dp"
+            android:visibility="gone"
+            app:layout_constraintTop_toBottomOf="@+id/search_container" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-</com.kakao.vectormap.MapView>
+    <!--  검색 결과 리스트  -->
+
     <!-- Bottom Sheet -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="350dp"
+        android:background="@drawable/rounded_top_corners"
         android:orientation="vertical"
         android:visibility="gone"
-        android:background="@drawable/rounded_top_corners"
-        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior" >
 
-        <TextView
-            android:id="@+id/hospital_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="건양대학병원"
-            android:textColor="@color/black"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginTop="36dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <LinearLayout
-            android:id="@+id/linearLayout2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:gravity="center"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="@+id/hospital_name"
-            app:layout_constraintStart_toStartOf="@+id/hospital_name"
-            app:layout_constraintTop_toBottomOf="@+id/hospital_name">
-
-            <ImageButton
-                android:id="@+id/callBtn"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:scaleType="centerInside"
-                android:background="@drawable/rounded_btn"
-                android:src="@drawable/ic_call"/>
-
-            <Space
-                android:layout_width="30dp"
-                android:layout_height="0dp" />
-
-            <ImageButton
-                android:id="@+id/exportBtn"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="@drawable/rounded_btn"
-                android:src="@drawable/ic_export"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="150dp"
-            android:layout_height="wrap_content"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
             android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!-- 위치 -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <TextView
+                android:id="@+id/hospital_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="26dp">
+                android:layout_marginTop="36dp"
+                android:text="건양대학병원"
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
-
-                <TextView
-                    android:id="@+id/addressText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="대전 서구 관저동로 158"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
-            </LinearLayout>
-            <!-- 전화번호 -->
             <LinearLayout
-                android:layout_width="match_parent"
+                android:id="@+id/linearLayout2"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center"
-                android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="18dp">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
-
-                <TextView
-                    android:id="@+id/callText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="1577-3330"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
-            </LinearLayout>
-            <!-- 혼잡도 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical|center_horizontal"
-                android:layout_marginTop="18dp">
-
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/green_marker"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="혼잡도"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
-
-                <ImageView
-                    android:layout_width="6dp"
-                    android:layout_height="6dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_marginStart="12dp"/>
-
-                <TextView
-                    android:id="@+id/congestionText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="원활"
-                    android:textSize="12sp"
-                    android:layout_marginStart="6dp"/>
-            </LinearLayout>
-            <!-- 전문의 수 -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_gravity="center"
+                android:layout_marginTop="20dp"
                 android:gravity="center"
-                android:layout_marginTop="18dp">
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="@+id/hospital_name"
+                app:layout_constraintStart_toStartOf="@+id/hospital_name"
+                app:layout_constraintTop_toBottomOf="@+id/hospital_name">
 
-                <ImageView
-                    android:layout_width="15dp"
-                    android:layout_height="15dp"
-                    android:src="@drawable/green_marker"
-                    android:layout_gravity="start"/>
+                <ImageButton
+                    android:id="@+id/callBtn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_btn"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_call" />
 
-                <TextView
-                    android:id="@+id/doctorText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="전문의 100+명"
-                    android:textSize="12sp"
-                    android:layout_marginLeft="12dp"/>
+                <Space
+                    android:layout_width="30dp"
+                    android:layout_height="0dp" />
+
+                <ImageButton
+                    android:id="@+id/exportBtn"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:background="@drawable/rounded_btn"
+                    android:src="@drawable/ic_export" />
             </LinearLayout>
 
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/linearLayout3"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:gravity="start|center_vertical"
+                android:orientation="vertical"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout2">
+
+                <!-- 위치 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="26dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/green_marker" />
+
+                    <TextView
+                        android:id="@+id/addressText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:clickable="true"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:text="대전 서구 관저동로 158"
+                        android:textSize="12sp" />
+
+                    <ImageView
+                        android:id="@+id/addressDetail"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="10dp"
+                        android:src="@drawable/ic_down" />
+
+                </LinearLayout>
+                <!-- 전화번호 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/green_marker" />
+
+                    <TextView
+                        android:id="@+id/callText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="12dp"
+                        android:layout_weight="1"
+                        android:text="1577-3330"
+                        android:textSize="12sp" />
+                </LinearLayout>
+                <!-- 혼잡도 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center_vertical|center_horizontal"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/green_marker" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="12dp"
+                        android:text="혼잡도"
+                        android:textSize="12sp" />
+
+                    <ImageView
+                        android:layout_width="6dp"
+                        android:layout_height="6dp"
+                        android:layout_marginStart="12dp"
+                        android:src="@drawable/green_marker" />
+
+                    <TextView
+                        android:id="@+id/congestionText"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:text="원활"
+                        android:textSize="12sp" />
+                </LinearLayout>
+                <!-- 전문의 수 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="18dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/green_marker" />
+
+                    <TextView
+                        android:id="@+id/doctorText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="12dp"
+                        android:layout_weight="1"
+                        android:text="전문의 100+명"
+                        android:textSize="12sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/closeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="10dp"
+                android:layout_marginEnd="20dp"
+                android:text="닫기"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -19,6 +19,7 @@ import com.google.android.material.navigation.NavigationBarView;
 
 import nav.CategoryFragment;
 import nav.MapFragment;
+import util.HospitalGeoUpdater;
 
 public class MainActivity extends AppCompatActivity {
 

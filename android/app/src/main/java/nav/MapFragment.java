@@ -1,10 +1,9 @@
 package nav;
 
 import android.Manifest;
-import android.content.Intent;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -12,18 +11,25 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Looper;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.emergsaver.mediquick.R;
+import com.emergsaver.mediquick.adapter.MapSearchAdapter;
 import com.google.android.gms.location.DeviceOrientation;
 import com.google.android.gms.location.DeviceOrientationListener;
 import com.google.android.gms.location.DeviceOrientationRequest;
@@ -35,38 +41,28 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.kakao.vectormap.KakaoMap;
-import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
-import com.kakao.vectormap.MapLifeCycleCallback;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraPosition;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 import com.kakao.vectormap.label.Label;
-import com.kakao.vectormap.label.LabelLayer;
-import com.kakao.vectormap.label.LabelOptions;
-import com.kakao.vectormap.label.LabelStyle;
-import com.kakao.vectormap.label.LabelStyles;
 import com.kakao.vectormap.label.TrackingManager;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import model.Hospital;
+import repository.HospitalRepository;
 import util.HospitalUtils;
+import util.MapManager;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link MapFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class MapFragment extends Fragment {
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
 
@@ -90,141 +86,14 @@ public class MapFragment extends Fragment {
     // 카메라 위치 저장
     private CameraPosition savedCameraPos;
 
-    private Hospital hospital;
+    private Hospital hospitalModel;
+    private MapManager mapManager;
 
-    // mapView 초기화
-    private void initMapView(View view) {
-        mapView = view.findViewById(R.id.map_view);
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
+    private boolean isFirstLocationUpdate = true; // 최초 위치 이동 여부
 
-        mapView.start(new MapLifeCycleCallback() {
-            @Override
-            public void onMapDestroy() {
-                // API가 정상적으로 종료된 경우
-                Log.d("API_CONNECT_END", "API 호출이 정상적으로 종료되었습니다.");
-            }
+    private List<Hospital> allHospitals = new ArrayList<>();
+    private MapSearchAdapter searchAdapter;
 
-            @Override
-            public void onMapError(Exception e) {
-                // 지도 사용 중 에러 발생 시
-                Log.e("API_CONNECT_ERROR", e.getMessage());
-            }
-
-        }, new KakaoMapReadyCallback() {
-            @Override
-            public void onMapReady(@NonNull KakaoMap map) {
-                // 인증 후 API가 정상적으로 호출된 경우
-                Log.d("API_CONNECT_SUCCESS", "API가 정상적으로 호출됨");
-
-                // 지도 제어
-                kakaoMap = map;
-
-                // 지도 초기 위치 복원
-                if (savedCameraPos != null) {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
-                }
-
-                // 현재 위치 가져오기
-                initCurrentLocation();
-
-                // 마커 클릭 리스너 등록
-                kakaoMap.setOnLabelClickListener((kakao, layer, label) -> {
-                    handleMarker(label);
-                    return true;
-                });
-            }
-        });
-    }
-
-    // 현재 위치 가져오기 및 라벨
-    private void initCurrentLocation() {
-        // TrackingManager 초기화
-        trackingManager = kakaoMap.getTrackingManager();
-
-        // 권한 체크 후 마지막 위치 가져오기 (초기 지도 위치 설정)
-        if(ActivityCompat.checkSelfPermission(requireContext(),
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(location -> {
-                        LatLng startPos;
-                        if(location != null) {
-                            startPos = LatLng.from(location.getLatitude(), location.getLongitude());
-
-                            // Label 추가
-                            LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
-
-                            // 현재 위치 label
-                            locationLabel = labelLayer.addLabel(LabelOptions.from(startPos)
-                                    .setRank(10)
-                                    .setStyles(LabelStyles.from(
-                                            LabelStyle.from(R.drawable.current_location)
-                                                    .setAnchorPoint(0.5f, 0.5f))));
-
-                            // 방향 Label
-                            headingLabel = labelLayer.addLabel(LabelOptions.from(startPos)
-                                    .setRank(9)
-                                    .setStyles(LabelStyles.from(
-                                            LabelStyle.from(R.drawable.direction_area)
-                                                    .setAnchorPoint(0.5f, 1.0f))));
-
-                            // headingLabel이 locationLabel과 함께 이동
-                            locationLabel.addSharePosition(headingLabel);
-
-                            // 카메라 이동
-                            kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
-                        }
-                    });
-        } else {
-            ActivityCompat.requestPermissions(requireActivity(),
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
-        }
-    }
-
-    // 마커 생성
-    private Label addMarker(String id, LatLng pos, String name) {
-        if(kakaoMap == null) {
-            return null;
-        }
-        LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
-
-        // 마커 스타일 설정
-        LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
-        LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
-        Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
-
-        Label existing = labelLayer.getLabel("searchMarker");
-        if(existing != null) {
-            labelLayer.remove(existing);
-            Log.d("MAP_DEBUG", "기존 마커 제거됨");
-        }
-
-        // 마커 추가
-        Label newLabel = labelLayer.addLabel(LabelOptions.from(id, pos).setStyles(styles));
-        Log.d("MAP_DEBUG", "새 마커 추가 완료: " + id + " 위치: " + pos);
-
-        // 마커로 카메라 이동
-//        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
-//        Log.d("MAP_DEBUG", "카메라 이동 완료");
-        newLabel.setTag(name);
-
-        return newLabel;
-    }
-
-    private void handleMarker(Label label) {
-        String hospitalName = (String) label.getTag();
-        if(hospitalName == null)
-            return;
-
-        // BottomSheet & TextView 업데이트
-        TextView hospitalNameText = getView().findViewById(R.id.hospital_name);
-        hospitalNameText.setText(hospitalName);
-
-        LatLng pos = label.getPosition();
-        hospital = new Hospital(hospitalName, "", pos.getLatitude(), pos.getLongitude());
-
-        ConstraintLayout bottomSheet = getView().findViewById(R.id.bottom_sheet);
-        bottomSheet.setVisibility(View.VISIBLE);
-    }
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -266,45 +135,8 @@ public class MapFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        EditText search = view.findViewById(R.id.search_text);
-
-        // BottomSheet 초기화
-        ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
-        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
-
-        // 마커 클릭 시 병원 이름 표시 TextView
-        TextView hospitalNameText = view.findViewById(R.id.hospital_name);
-
-        ImageButton callBtn = view.findViewById(R.id.callBtn);
-        TextView callText = view.findViewById(R.id.callText);
-
-        ImageButton exportBtn = view.findViewById(R.id.exportBtn);
-
-        // 전화걸기
-        callBtn.setOnClickListener(v -> {
-            String phone = callText.getText().toString();
-            if(!phone.isEmpty()) {
-                // 현재 카메라 위치 저장
-                savedCameraPos = kakaoMap.getCameraPosition();
-                HospitalUtils.dialPhone(getContext(), phone);
-            }
-            else {
-                Toast.makeText(requireContext(), "전화번호가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // 외부로 해당 정보 공유하기
-        exportBtn.setOnClickListener(v -> {
-            String name = hospitalNameText.getText().toString();
-            String phone = callText.getText().toString();
-
-            if(!name.isEmpty()) {
-                // 현재 카메라 위치 저장
-                savedCameraPos = kakaoMap.getCameraPosition();
-                HospitalUtils.shareHospital(getContext(), hospital);
-            }
-        });
-
+        mapView = view.findViewById(R.id.map_view);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(requireActivity());
 
         locationCallback = new LocationCallback() {
             @Override
@@ -325,19 +157,186 @@ public class MapFragment extends Fragment {
                     if(locationLabel != null) {
                         locationLabel.moveTo(currentLng);
                     }
-
-                    // kakaoMap이 준비되어 있으면 카메라 이동
-                    if(kakaoMap != null) {
-                        // 카메라 이동
-                        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentLng));
-                    }
                 }
-
             }
         };
 
-        initMapView(view);
+        initBottomSheet(view);
+        initRecyclerView(view);
+        initButtons(view);
+        initSearchBar(view);
+
+        // MapManager 생성 및 초기화
+        mapManager = new MapManager(fusedLocationProviderClient);
+        mapManager.initMapView(mapView, new MapManager.onMapReadyCallback() {
+            @Override
+            public void onMapReady(KakaoMap kakaoMap) {
+                // 지도 준비 완료 후 병원 데이터 로드
+                loadHospitalData();
+            }
+
+            @Override
+            public void onMarkerClick(Hospital hospital) {
+                // 마커 클릭 시 UI 업데이트
+                hospitalModel = hospital;
+                showHospitalInfo(view, hospital);
+            }
+        });
     }
+
+    private void initBottomSheet(View view) {
+        ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+
+        Button closeBtn = view.findViewById(R.id.closeBtn);
+        closeBtn.setOnClickListener(v -> bottomSheet.setVisibility(View.GONE));
+    }
+
+    private void initRecyclerView(View view) {
+        RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
+        searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
+
+        searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
+            mapManager.moveCameraToHospital(hospital);
+            hospitalModel = hospital;
+            showHospitalInfo(view, hospital);
+        });
+        searchResultList.setAdapter(searchAdapter);
+
+        searchResultList.setVisibility(View.GONE);
+    }
+
+    private void initButtons(View view) {
+        ImageButton callBtn = view.findViewById(R.id.callBtn);
+        TextView callText = view.findViewById(R.id.callText);
+        ImageButton exportBtn = view.findViewById(R.id.exportBtn);
+        // 마커 클릭 시 병원 이름 표시 TextView
+        TextView hospitalNameText = view.findViewById(R.id.hospital_name);
+
+        // 전화걸기
+        callBtn.setOnClickListener(v -> {
+            if(hospitalModel != null && !TextUtils.isEmpty(hospitalModel.getPhone())) {
+                HospitalUtils.dialPhone(getContext(), hospitalModel.getPhone());
+            } else {
+                Toast.makeText(requireContext(), "전화번호가 존재하지 않습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // 외부로 해당 정보 공유하기
+        exportBtn.setOnClickListener(v -> {
+            if(hospitalModel != null) {
+                HospitalUtils.shareHospital(getContext(), hospitalModel);
+            } else {
+                Toast.makeText(requireContext(), "공유할 병원 정보가 없습니다.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        ImageView addressDetail = view.findViewById(R.id.addressDetail);
+        TextView addressText = view.findViewById(R.id.addressText);
+        boolean[] isExpanded = {false};
+
+        addressDetail.setOnClickListener(v -> {
+            toggleAddress(addressText, isExpanded);
+        });
+    }
+
+    private void toggleAddress(TextView addressText, boolean[] isExpanded) {
+        if(isExpanded[0]) {
+            addressText.setMaxLines(1);
+            addressText.setEllipsize(TextUtils.TruncateAt.END);
+            isExpanded[0] = false;
+        } else {
+            addressText.setMaxLines(Integer.MAX_VALUE);
+            addressText.setEllipsize(null);
+            isExpanded[0] = true;
+        }
+    }
+
+    private void loadHospitalData() {
+        HospitalRepository repository = new HospitalRepository();
+        repository.fetchHospitals(new HospitalRepository.OnHospitalsLoaded() {
+            @Override
+            public void onLoaded(List<Hospital> hospitals) {
+                allHospitals.clear();
+                allHospitals.addAll(hospitals);
+
+                for(Hospital h : hospitals) {
+                    mapManager.addHospitalMarker(h);
+                }
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("FIREBASE", "병원 데이터 로드 실패", e);
+            }
+        });
+    }
+
+    private void initSearchBar(View view) {
+        EditText searchEditText = view.findViewById(R.id.search_text);
+        ImageButton searchBtn = view.findViewById(R.id.search_btn);
+
+        searchBtn.setOnClickListener(v -> {
+            String query = searchEditText.getText().toString().trim();
+            performSearch(query);
+        });
+
+        // 키보드 엔터키 처리
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            String query = searchEditText.getText().toString().trim();
+            performSearch(query);
+            return true;
+        });
+    }
+
+    private void performSearch(String query) {
+        if (TextUtils.isEmpty(query)) {
+            searchAdapter.setItems(new ArrayList<>());
+            return;
+        }
+
+        HospitalRepository repository = new HospitalRepository();
+        repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
+            @Override
+            public void onLoaded(List<Hospital> hospitals) {
+                searchAdapter.setItems(hospitals);
+
+                RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
+                searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
+            }
+
+            @Override
+            public void onError(Exception e) {
+                Log.e("SEARCH_ERROR", "검색 실패 ", e);
+            }
+        });
+        View view = getView();
+        if(view != null) {
+            InputMethodManager input = (InputMethodManager) requireContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+            input.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
+
+    private void showHospitalInfo(View view, Hospital hospital) {
+        // 새로운 Hospital 객체 생성 후 값 설정
+        TextView hospitalNameText = view.findViewById(R.id.hospital_name);
+        TextView callText = view.findViewById(R.id.callText);
+        TextView addressText = view.findViewById(R.id.addressText);
+        TextView doctorText = view.findViewById(R.id.doctorText);
+
+        hospitalNameText.setText(hospital.getHospital_name());
+        callText.setText(hospital.getPhone());
+        addressText.setText(hospital.getAddress());
+        if(hospitalModel.getDoctor_count() >= 100) {
+            doctorText.setText("전문의 100+ 명");
+        } else {
+            doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
+        }
+
+        ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
+        bottomSheet.setVisibility(View.VISIBLE);
+    }
+
     @Override
     public void onResume() {
         super.onResume();
