@@ -282,6 +282,13 @@ public class MapFragment extends Fragment {
             String query = searchEditText.getText().toString().trim();
             performSearch(query);
         });
+
+        // 키보드 엔터키 처리
+        searchEditText.setOnEditorActionListener((v, actionId, event) -> {
+            String query = searchEditText.getText().toString().trim();
+            performSearch(query);
+            return true;
+        });
     }
 
     private void performSearch(String query) {
