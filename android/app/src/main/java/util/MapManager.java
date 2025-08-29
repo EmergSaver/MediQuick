@@ -5,13 +5,11 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.emergsaver.mediquick.R;
-import com.google.android.gms.location.DeviceOrientationListener;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
