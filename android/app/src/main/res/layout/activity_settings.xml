@@ -30,29 +30,38 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnFavorites"
             android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="즐겨찾기 관리" android:layout_marginTop="12dp"/>
+            android:text="즐겨찾기 관리"
+            android:layout_marginTop="12dp"/>
 
         <View
-            android:layout_width="match_parent" android:layout_height="1dp"
-            android:layout_marginVertical="20dp" android:background="#DDDDDD"/>
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="20dp"
+            android:background="#DDDDDD"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnChangePw"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="비밀번호 변경" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnDeleteAccount"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:text="회원 탈퇴" android:layout_marginTop="12dp"/>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="회원 탈퇴"
+            android:layout_marginTop="12dp"/>
 
         <View
-            android:layout_width="match_parent" android:layout_height="1dp"
-            android:layout_marginVertical="20dp" android:background="#DDDDDD"/>
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="20dp"
+            android:background="#DDDDDD"/>
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnLogout"
             style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:text="로그아웃" />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

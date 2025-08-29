@@ -10,8 +10,8 @@ import androidx.core.view.WindowInsetsCompat;
 import android.content.Intent;
 
 import com.google.android.material.button.MaterialButton;
-import com.emergsaver.mediquick.LogoutActivity;
-import com.emergsaver.mediquick.DeleteUsers;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 
 public class SettingsActivity extends AppCompatActivity {
@@ -22,6 +22,7 @@ public class SettingsActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
 
+        MaterialButton btnChangePassword = findViewById(R.id.btnChangePw);
         MaterialButton btnLogout = findViewById(R.id.btnLogout);
         MaterialButton btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
 
@@ -35,7 +36,20 @@ public class SettingsActivity extends AppCompatActivity {
                     startActivity(new Intent(this, DeleteUsers.class))
             );
         }
+        if (btnChangePassword != null) {
+            boolean hasPasswordProvider = false;
+            FirebaseUser cur = FirebaseAuth.getInstance().getCurrentUser();
+            if (cur != null) {
+                for (com.google.firebase.auth.UserInfo p : cur.getProviderData()) {
+                    if ("password".equals(p.getProviderId())) { hasPasswordProvider = true; break; }
+                }
+            }
+            btnChangePassword.setEnabled(hasPasswordProvider);
 
+            btnChangePassword.setOnClickListener(v ->
+                    startActivity(new Intent(this, ChangePassActivity.class))
+            );
+        }
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_settings), (v, insets) -> {
