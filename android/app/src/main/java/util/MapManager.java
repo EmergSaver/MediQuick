@@ -94,7 +94,7 @@ public class MapManager {
         }
     }
 
-    public MapManager(MapView mapView, FusedLocationProviderClient fusedLocationProviderClient) {
+    public void initMapView(MapView mapView, FusedLocationProviderClient fusedLocationProviderClient) {
         // initMapView 로직
         mapView.start(new MapLifeCycleCallback() {
             @Override
