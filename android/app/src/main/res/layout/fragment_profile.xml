@@ -117,8 +117,29 @@
                         android:textSize="16sp"
                         android:textStyle="bold"
                         tools:text="2000.03.04"/>
-                </LinearLayout>
 
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <!-- 왼쪽 여백(가중치로 버튼을 오른쪽으로 밀기) -->
+                    <View
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:layout_weight="1" />
+
+                    <ImageButton
+                        android:id="@+id/btn_settings"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_margin="8dp"
+                        android:background="@android:color/transparent"
+                        android:contentDescription="설정"
+                        android:src="@drawable/ic_settings"
+                        android:padding="4dp" />
+                </LinearLayout>
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

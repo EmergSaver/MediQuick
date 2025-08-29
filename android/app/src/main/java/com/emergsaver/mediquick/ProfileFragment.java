@@ -8,6 +8,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,17 +24,26 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.Intent;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentResultListener;
+import java.util.ArrayList;
+import androidx.fragment.app.DialogFragment;
 
+// OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
+//        implements EditProfileDialog.OnProfileEditListener
 
     private Button btnAllergy;
     private Button btnProfile;
     private Button btnUploadphoto;
+    private ImageButton btnSettings;
+
 
     private TextView tvDob;
     private TextView tvEmergencyContact;
@@ -142,6 +153,7 @@ public class ProfileFragment extends Fragment {
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
         btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
+        btnSettings = view.findViewById(R.id.btn_settings);
 
         tvDob = view.findViewById(R.id.tv_dob);
         tvEmergencyContact = view.findViewById(R.id.tv_emergency_contact);
@@ -154,25 +166,39 @@ public class ProfileFragment extends Fragment {
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
 
+        // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
         btnAllergy.setOnClickListener(v -> {
             if (userUid != null) {
                 AllergyDialog dialog = AllergyDialog.newInstance(userUid);
                 dialog.show(getParentFragmentManager(), "allergyDialog");
             }
+            AllergyDialog dialog = new AllergyDialog();
+            dialog.show(getParentFragmentManager(), "allergyDialog");
         });
 
+
+        // '개인정보 수정' 버튼 이벤트
         btnProfile.setOnClickListener(v -> {
             if (userUid != null) {
                 EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
                 dialog.show(getParentFragmentManager(), "editProfileDialog");
             }
+            EditProfileDialog dialog = new EditProfileDialog();
+            dialog.show(getParentFragmentManager(), "editProfileDialog");
         });
 
+        // '프로필 수정' 버튼 이벤트
         btnUploadphoto.setOnClickListener(v -> {
             if (userUid != null) {
                 EditProfilePhotoDialog dialog = EditProfilePhotoDialog.newInstance(userUid);
                 dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
             }
+            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+            dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
+        });
+        btnSettings.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), SettingsActivity.class);
+            startActivity(intent);
         });
     }
 
