@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main_changepw"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ChangePassActivity">
+
+    <com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/tilCurrent" android:layout_width="0dp" android:layout_height="wrap_content"
+    app:endIconMode="password_toggle"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent">
+
+ <com.google.android.material.textfield.TextInputEditText
+     android:id="@+id/etCurrent"
+     android:layout_width="match_parent"
+     android:layout_height="wrap_content"
+     android:hint="현재 비밀번호"
+     android:inputType="textPassword"/>
+ </com.google.android.material.textfield.TextInputLayout>
+
+<com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/tilNew"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    app:endIconMode="password_toggle"
+    app:layout_constraintTop_toBottomOf="@id/tilCurrent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="16dp">
+<com.google.android.material.textfield.TextInputEditText
+    android:id="@+id/etNew"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="새 비밀번호(영문+숫자 8~20자)"
+    android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+<com.google.android.material.textfield.TextInputLayout
+    android:id="@+id/tilConfirm"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    app:endIconMode="password_toggle"
+    app:layout_constraintTop_toBottomOf="@id/tilNew"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginTop="16dp">
+
+<com.google.android.material.textfield.TextInputEditText
+    android:id="@+id/etConfirm"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="새 비밀번호 확인"
+    android:inputType="textPassword"/>
+    </com.google.android.material.textfield.TextInputLayout>
+
+ <com.google.android.material.button.MaterialButton
+     android:id="@+id/btnChange" android:layout_width="0dp" android:layout_height="wrap_content"
+     android:text="변경"
+     app:layout_constraintTop_toBottomOf="@id/tilConfirm" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="24dp"/>
+
+<com.google.android.material.button.MaterialButton
+    android:id="@+id/btnCancel"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    style="?attr/materialButtonOutlinedStyle"
+    android:text="취소"
+    app:layout_constraintTop_toBottomOf="@id/btnChange"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintEnd_toEndOf="parent" android:layout_marginTop="8dp"/>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
