@@ -56,4 +56,32 @@ public class HospitalRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+
+    public void searchHospitalByName(String query, OnHospitalsLoaded callback) {
+        if(query == null || query.trim().isEmpty()) {
+            // 검색어가 없는 경우 빈리스트 반환
+            return;
+        }
+
+        db.collection("hospitals")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Hospital> hospitals = new ArrayList<>();
+                    for(var document: queryDocumentSnapshots.getDocuments()) {
+                        String jsonStr = document.getString("hospital_json");
+                        if(jsonStr != null) {
+                            Gson gson = new Gson();
+                            Hospital hospital = gson.fromJson(jsonStr, Hospital.class);
+
+                            // 검색어 포함 여부 확인 (대소문자 무시)
+                            if(hospital.getHospital_name() != null && hospital.getHospital_name().
+                                    toLowerCase().contains(query.toLowerCase())) {
+                                hospitals.add(hospital);
+                            }
+                        }
+                    }
+                    callback.onLoaded(hospitals);
+                })
+                .addOnFailureListener(callback::onError);
+    }
 }

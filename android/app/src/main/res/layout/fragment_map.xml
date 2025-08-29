@@ -59,6 +59,7 @@ tools:context="nav.MapFragment">
             android:layout_marginHorizontal="20dp"
             android:background="@color/white"
             android:padding="8dp"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/search_container" />
     </androidx.constraintlayout.widget.ConstraintLayout>
     <!--  검색 결과 리스트  -->
