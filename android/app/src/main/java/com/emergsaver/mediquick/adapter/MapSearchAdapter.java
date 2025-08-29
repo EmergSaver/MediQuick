@@ -49,6 +49,15 @@ public class MapSearchAdapter extends RecyclerView.Adapter<MapSearchAdapter.View
         });
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    public void setItems(List<Hospital> newList) {
+        hospitals.clear();
+        if(newList != null) {
+            hospitals.addAll(newList);
+        }
+        notifyDataSetChanged();
+    }
+
     @Override
     public int getItemCount() {
         return hospitals == null ? 0 : hospitals.size();
@@ -70,7 +79,7 @@ public class MapSearchAdapter extends RecyclerView.Adapter<MapSearchAdapter.View
         if(hospitals == null)
             hospitals = new ArrayList<>();
         if(newList != null)
-            hospitals.addAll(newList);
+            hospitals = new ArrayList<>(newList);
         notifyDataSetChanged();
     }
 }

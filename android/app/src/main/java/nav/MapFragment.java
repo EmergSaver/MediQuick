@@ -14,12 +14,15 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Looper;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -87,6 +90,10 @@ public class MapFragment extends Fragment {
     private MapManager mapManager;
 
     private boolean isFirstLocationUpdate = true; // 최초 위치 이동 여부
+
+    private List<Hospital> allHospitals = new ArrayList<>();
+    private MapSearchAdapter searchAdapter;
+
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -157,6 +164,7 @@ public class MapFragment extends Fragment {
         initBottomSheet(view);
         initRecyclerView(view);
         initButtons(view);
+        initSearchBar(view);
 
         // MapManager 생성 및 초기화
         mapManager = new MapManager(fusedLocationProviderClient);
@@ -188,11 +196,14 @@ public class MapFragment extends Fragment {
         RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
         searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
 
-        MapSearchAdapter adapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
+        searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
             mapManager.moveCameraToHospital(hospital);
             hospitalModel = hospital;
+            showHospitalInfo(view, hospital);
         });
-        searchResultList.setAdapter(adapter);
+        searchResultList.setAdapter(searchAdapter);
+
+        searchResultList.setVisibility(View.GONE);
     }
 
     private void initButtons(View view) {
@@ -246,6 +257,9 @@ public class MapFragment extends Fragment {
         repository.fetchHospitals(new HospitalRepository.OnHospitalsLoaded() {
             @Override
             public void onLoaded(List<Hospital> hospitals) {
+                allHospitals.clear();
+                allHospitals.addAll(hospitals);
+
                 for(Hospital h : hospitals) {
                     mapManager.addHospitalMarker(h);
                 }
@@ -254,6 +268,40 @@ public class MapFragment extends Fragment {
             @Override
             public void onError(Exception e) {
                 Log.e("FIREBASE", "병원 데이터 로드 실패", e);
+            }
+        });
+    }
+
+    private void initSearchBar(View view) {
+        EditText searchEditText = view.findViewById(R.id.search_text);
+        searchEditText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void afterTextChanged(Editable s) {
+                String query = s.toString().trim();
+
+                HospitalRepository repository = new HospitalRepository();
+                repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
+                    @Override
+                    public void onLoaded(List<Hospital> hospitals) {
+                        searchAdapter.setItems(hospitals);
+
+                        RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
+                        searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onError(Exception e) {
+                        Log.e("SEARCH_ERROR", "검색 실패 ", e);
+                    }
+                });
+            }
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
     }
