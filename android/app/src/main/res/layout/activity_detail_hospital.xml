@@ -21,8 +21,8 @@
             android:textStyle="bold" />
 
         <!-- 미니맵(이미지 자리) -->
-        <ImageView
-            android:id="@+id/imgMiniMap"
+        <com.kakao.vectormap.MapView
+            android:id="@+id/miniMap"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="12dp"

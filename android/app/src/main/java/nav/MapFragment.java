@@ -2,6 +2,7 @@ package nav;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.emergsaver.mediquick.DetailHospitalActivity;
 import com.emergsaver.mediquick.R;
 import com.emergsaver.mediquick.adapter.MapSearchAdapter;
 import com.google.android.gms.location.DeviceOrientation;
@@ -199,7 +201,9 @@ public class MapFragment extends Fragment {
         searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
             mapManager.moveCameraToHospital(hospital);
             hospitalModel = hospital;
-            showHospitalInfo(view, hospital);
+            Intent intent = new Intent(requireContext(), DetailHospitalActivity.class);
+            intent.putExtra("hospital", String.valueOf(hospital));
+            startActivity(intent);
         });
         searchResultList.setAdapter(searchAdapter);
 
