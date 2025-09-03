@@ -42,6 +42,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
@@ -173,6 +174,7 @@ public class MapFragment extends Fragment {
         initRecyclerView(view);
         initButtons(view);
         initSearchBar(view);
+        currentBtn(view);
 
         // MapManager 생성 및 초기화
         mapManager = new MapManager(fusedLocationProviderClient);
@@ -349,6 +351,16 @@ public class MapFragment extends Fragment {
 
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
+    }
+
+
+    // 현재 위치로 카메라 이동
+    private void currentBtn(View view) {
+        FloatingActionButton floatBtn = view.findViewById(R.id.btn_current);
+
+        floatBtn.setOnClickListener(v -> {
+            mapManager.moveCameraToCurrent(view.getContext());
+        });
     }
 
     @Override
