@@ -94,7 +94,7 @@ public class MapManager {
 
                             // 최초 위치이므로 카메라 이동
                             if(isFirstLocationUpdate) {
-                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos, 1));
+                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos, 16));
                                 isFirstLocationUpdate = false;
                             }
                         }

@@ -62,10 +62,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
             public void onMapReady(KakaoMap map) {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
-                LatLng hospitalLatLng = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
-                Log.d("DetailHospital", "Lat: " + hospital.getLatitude() + ", Lng: " + hospital.getLongitude());
-
-                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalLatLng, 18));
+                mapManager.moveCameraToHospital(hospital);
 
                 // 마커 추가
                 mapManager.addHospitalMarker(hospital);
