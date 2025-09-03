@@ -105,7 +105,7 @@ public class MapManager {
         }
     }
 
-    public void initMapView(MapView mapView, onMapReadyCallback callback) {
+    public void initMapView(MapView mapView, LatLng initialPosition, onMapReadyCallback callback) {
         this.callback = callback;
 
         // initMapView 로직
@@ -132,12 +132,12 @@ public class MapManager {
                 kakaoMap = map;
 
                 // 지도 초기 위치 복원
-                if (savedCameraPos != null) {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
-                }
-
-                // 현재 위치 가져오기
-                initCurrentLocation(mapView.getContext());
+//                if (savedCameraPos != null) {
+//                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
+//                }
+//
+//                // 현재 위치 가져오기
+//                initCurrentLocation(mapView.getContext());
 
                 // 마커 클릭 리스너 등록
                 kakaoMap.setOnLabelClickListener((kakao, layer, label) -> {
@@ -147,6 +147,12 @@ public class MapManager {
                     }
                     return true;
                 });
+
+                if(initialPosition != null) {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(initialPosition, 18));
+                } else {
+                    initCurrentLocation(mapView.getContext());
+                }
 
                 if(callback != null) {
                     callback.onMapReady(kakaoMap);

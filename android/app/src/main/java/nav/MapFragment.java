@@ -178,7 +178,7 @@ public class MapFragment extends Fragment {
 
         // MapManager 생성 및 초기화
         mapManager = new MapManager(fusedLocationProviderClient);
-        mapManager.initMapView(mapView, new MapManager.onMapReadyCallback() {
+        mapManager.initMapView(mapView, null, new MapManager.onMapReadyCallback() {
             @Override
             public void onMapReady(KakaoMap kakaoMap) {
                 // 지도 준비 완료 후 병원 데이터 로드

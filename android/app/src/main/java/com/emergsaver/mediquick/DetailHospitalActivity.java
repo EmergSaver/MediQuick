@@ -1,21 +1,16 @@
 package com.emergsaver.mediquick;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
-import com.kakao.vectormap.camera.CameraUpdateFactory;
 
 import model.Hospital;
 import util.MapManager;
@@ -55,14 +50,16 @@ public class DetailHospitalActivity extends AppCompatActivity {
         hospitalAddress.setText(hospital.getAddress());
         hospitalPhone.setText(hospital.getPhone());
 
+        LatLng hospitalPos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
+
         // 미니맵 초기화
         MapManager mapManager = new MapManager(fusedLocationProviderClient);
-        mapManager.initMapView(miniMap, new MapManager.onMapReadyCallback() {
+        mapManager.initMapView(miniMap, hospitalPos, new MapManager.onMapReadyCallback() {
             @Override
             public void onMapReady(KakaoMap map) {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
-                mapManager.moveCameraToHospital(hospital);
+//                mapManager.moveCameraToHospital(hospital);
 
                 // 마커 추가
                 mapManager.addHospitalMarker(hospital);
