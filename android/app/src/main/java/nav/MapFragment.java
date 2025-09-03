@@ -96,6 +96,10 @@ public class MapFragment extends Fragment {
     private List<Hospital> allHospitals = new ArrayList<>();
     private MapSearchAdapter searchAdapter;
 
+    private EditText searchEditText;
+
+    private RecyclerView searchResultList;
+
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -283,7 +287,7 @@ public class MapFragment extends Fragment {
     }
 
     private void initSearchBar(View view) {
-        EditText searchEditText = view.findViewById(R.id.search_text);
+        searchEditText = view.findViewById(R.id.search_text);
         ImageButton searchBtn = view.findViewById(R.id.search_btn);
 
         searchBtn.setOnClickListener(v -> {
@@ -311,7 +315,7 @@ public class MapFragment extends Fragment {
             public void onLoaded(List<Hospital> hospitals) {
                 searchAdapter.setItems(hospitals);
 
-                RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
+                searchResultList = getView().findViewById(R.id.search_result_list);
                 searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
             }
 
@@ -374,6 +378,16 @@ public class MapFragment extends Fragment {
             ). build();
 
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+
+        // 검생창 초기화
+        if (searchAdapter != null) {
+            searchEditText.setText("");
+            searchEditText.clearFocus();
+        }
+
+        if(searchResultList != null) {
+            searchResultList.setVisibility(View.GONE);
         }
     }
 
