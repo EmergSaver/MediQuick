@@ -129,8 +129,10 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = view.findViewById(R.id.map_view);
+
+        return view;
     }
 
     @Override
@@ -198,8 +200,12 @@ public class MapFragment extends Fragment {
         RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
         searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // 리스트 클릭 시
         searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
-            mapManager.moveCameraToHospital(hospital);
+//            mapManager.moveCameraToHospital(hospital);
+            if(kakaoMap != null) {
+                savedCameraPos = kakaoMap.getCameraPosition();
+            }
             hospitalModel = hospital;
             Intent intent = new Intent(requireContext(), DetailHospitalActivity.class);
             intent.putExtra("hospital", String.valueOf(hospital));
