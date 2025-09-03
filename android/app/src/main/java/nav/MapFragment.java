@@ -212,7 +212,7 @@ public class MapFragment extends Fragment {
             }
             hospitalModel = hospital;
             Intent intent = new Intent(requireContext(), DetailHospitalActivity.class);
-            intent.putExtra("hospital", String.valueOf(hospital));
+            intent.putExtra("hospital", hospital);
             startActivity(intent);
         });
         searchResultList.setAdapter(searchAdapter);
