@@ -26,8 +26,12 @@ import com.google.firebase.functions.HttpsCallableResult;
 import com.kakao.sdk.auth.model.OAuthToken;
 import com.kakao.sdk.user.UserApiClient;
 
-import java.util.Arrays;
+import com.kakao.sdk.user.model.Account;   // ★ KakaoAccount → Account
+import com.kakao.sdk.user.model.Profile;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
@@ -139,27 +143,21 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
-        // ───────────────── 카카오 로그인(B안) ─────────────────
+        // ───────────────── 카카오 로그인 (A안: 단순 팝업) ─────────────────
         btKakao.setOnClickListener(v -> {
-            if (UserApiClient.getInstance().isKakaoTalkLoginAvailable(this)) {
-                UserApiClient.getInstance().loginWithKakaoTalk(this, (token, error) -> {
-                    if (error != null) {
-                        Log.e("KAKAO", "loginWithKakaoTalk error: " + error.getMessage(), error);
-                        UserApiClient.getInstance().loginWithKakaoAccount(this, (t2, e2) -> {
-                            handleKakaoResult(t2, e2);
-                            return null;
-                        });
-                    } else {
-                        handleKakaoResult(token, null);
-                    }
+            UserApiClient.getInstance().loginWithKakaoAccount(this, (token, error) -> {
+                if (error != null) {
+                    Log.e("KAKAO", "loginWithKakaoAccount FAILED: " + error, error);
+                    Toast.makeText(this, "카카오 로그인 실패: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     return null;
-                });
-            } else {
-                UserApiClient.getInstance().loginWithKakaoAccount(this, (token, error) -> {
-                    handleKakaoResult(token, error);
-                    return null;
-                });
-            }
+                }
+                if (token != null) {
+                    fetchKakaoUserAndGoMain(); // 토큰 OK → 사용자 정보 조회
+                }
+                return null;
+            });
+
+            // (B안: Firebase 연동은 주석 유지)
         });
 
         btSignup.setOnClickListener(v ->
@@ -167,7 +165,71 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
-    // ───────────────── 카카오 콜백 공통 처리 ─────────────────
+    // 사용자 정보 조회 + (필요 시) scope 동의 재요청 후 메인으로 이동
+    private void fetchKakaoUserAndGoMain() {
+        UserApiClient.getInstance().me((user, meError) -> {
+            if (meError != null) {
+                Log.e("KAKAO", "me() FAILED: " + meError, meError);
+                Toast.makeText(this, "사용자 정보 조회 실패: " + meError.getMessage(), Toast.LENGTH_LONG).show();
+                return null;
+            }
+            if (user == null) {
+                Toast.makeText(this, "사용자 정보가 비어 있습니다.", Toast.LENGTH_LONG).show();
+                return null;
+            }
+
+            Account account = user.getKakaoAccount();
+            String nickname = null;
+
+            if (account != null) {
+                Profile profile = account.getProfile();
+                if (profile != null && profile.getNickname() != null) {
+                    nickname = profile.getNickname();
+                }
+            }
+
+            // ★ Boolean 체크 + loginWithNewScopes에 nonce(null) 추가
+            if (nickname == null &&
+                    account != null &&
+                    Boolean.TRUE.equals(account.getProfileNeedsAgreement())) {
+
+                List<String> scopes = new ArrayList<>();
+                scopes.add("profile_nickname");
+                // 필요하면 이메일도 함께:
+                // if (Boolean.TRUE.equals(account.getEmailNeedsAgreement())) scopes.add("account_email");
+
+                Log.i("KAKAO", "추가 동의 요청: " + scopes);
+                UserApiClient.getInstance()
+                        .loginWithNewScopes(this, scopes, /* nonce */ null, (scopeToken, scopeError) -> { // ★ 여기 수정
+                            if (scopeError != null) {
+                                Log.e("KAKAO", "추가 동의 실패", scopeError);
+                                Toast.makeText(this, "추가 동의 실패: " + scopeError.getMessage(), Toast.LENGTH_LONG).show();
+                            } else {
+                                Log.i("KAKAO", "추가 동의 성공 → 사용자 정보 재조회");
+                                fetchKakaoUserAndGoMain(); // 재조회
+                            }
+                            return null;
+                        });
+                return null; // 동의 플로우 진행 중
+            }
+
+            // 닉네임이 여전히 없으면 안전한 대체값 사용
+            if (nickname == null) {
+                nickname = "kakao_" + String.valueOf(user.getId());
+            }
+
+            Log.i("KAKAO", "닉네임: " + nickname);
+
+            // ✅ 메인으로 이동
+            Intent i = new Intent(LoginActivity.this, MainActivity.class);
+            i.putExtra("kakao_nickname", nickname);
+            startActivity(i);
+            finish();
+            return null;
+        });
+    }
+
+    // ───────────────── 카카오 콜백 공통 처리 (B안에서 사용) ─────────────────
     private void handleKakaoResult(OAuthToken token, Throwable error) {
         if (error != null) {
             Toast.makeText(this, "카카오 로그인 실패: " + error.getMessage(), Toast.LENGTH_LONG).show();
@@ -183,19 +245,15 @@ public class LoginActivity extends AppCompatActivity {
         sendKakaoTokenToFirebase(kakaoAccessToken);
     }
 
-    // ───────────────── 카카오 토큰 → Functions → 커스텀 토큰 ─────────────────
-
+    // ───────────────── 카카오 토큰 → Functions → 커스텀 토큰 (B안에서만 사용) ─────────────────
     private void sendKakaoTokenToFirebase(String kakaoAccessToken) {
-        // ➊ 디버그: 앱이 바라보는 Firebase 프로젝트/스위치/리전 확인
         String projectId = com.google.firebase.FirebaseApp.getInstance().getOptions().getProjectId();
         Log.d("FUNC", "projectId=" + projectId
                 + " USE_EMU=" + BuildConfig.USE_FUNCTIONS_EMULATOR
                 + " region=asia-northeast3");
 
-        // ➋ 리전 고정 (에뮬/운영 공통)
         FirebaseFunctions functions = FirebaseFunctions.getInstance("asia-northeast3");
 
-        // ➌ 에뮬레이터일 때만 로컬로 연결 (AVD면 10.0.2.2, 실기기면 PC IP)
         if (BuildConfig.USE_FUNCTIONS_EMULATOR) {
             functions.useEmulator("10.0.2.2", BuildConfig.FUNCTIONS_EMULATOR_PORT);
         }
@@ -248,7 +306,6 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(this, "Function 호출 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
-
 
     // ───────────────── 유틸 ─────────────────
     private String safe(TextInputEditText e) {
