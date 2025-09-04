@@ -12,7 +12,11 @@ if (localPropertiesFile.exists()) {
 }
 def kakaoKey = localProperties.getProperty("kakao_native_key", "")
 
+def kakaoMapKey   = localProperties.getProperty("kakao_map_key", "")
+def kakaoLoginKey = localProperties.getProperty("kakao_login_key", "")
 
+def useFunctionsEmu = localProperties.getProperty("functions_emulator", "false")
+def functionsEmuPort = localProperties.getProperty("functions_emulator_port", "5001")
 android {
     namespace 'com.emergsaver.mediquick'
     compileSdk 36
@@ -30,7 +34,12 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86" // 실제 디바이스 아키텍처 및 애뮬레이션 아키텍쳐
         }
-        buildConfigField "String", "KAKAO_NATIVE_KEY", "\"${kakaoKey}\""
+        buildConfigField "String", "KAKAO_MAP_KEY",   "\"${kakaoMapKey}\""
+        buildConfigField "String", "KAKAO_LOGIN_KEY", "\"${kakaoLoginKey}\""
+        buildConfigField "boolean", "USE_FUNCTIONS_EMULATOR", useFunctionsEmu.toBoolean().toString()
+        buildConfigField "int",     "FUNCTIONS_EMULATOR_PORT", functionsEmuPort
+        manifestPlaceholders = [ KAKAO_SCHEME: "kakao${kakaoLoginKey}" ]
+        def kakaoOidcProvider = localProperties.getProperty("kakao_oidc_provider", "oidc.kakao")
     }
 
     buildTypes {
@@ -61,6 +70,7 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
     implementation 'androidx.fragment:fragment-ktx:1.6.0'
 
     implementation 'androidx.appcompat:appcompat:1.7.1'
@@ -68,7 +78,8 @@ dependencies {
 
     // 카카오톡 지도 SDK 의존성 추가
     implementation 'com.kakao.maps.open:android:2.12.8'
-
+    // 카카오톡 로그인 SDK 의존성 추가
+    implementation "com.kakao.sdk:v2-user:2.20.0"
     // 위치 서비스 라이브러리 추가
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
