@@ -5,7 +5,6 @@ import android.content.SharedPreferences;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,6 +23,8 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.Blob;
+import com.google.firebase.firestore.Blob;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -31,14 +32,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 public class ProfileFragment extends Fragment {
 
     private static final String TAG = "ProfileFragment";
 
-    private Button btnAllergy;
+    private ImageButton btnAllergy;
     private Button btnProfile;
-    private Button btnUploadphoto;
-    private ImageButton btnSettings;
+//    private Button btnUploadphoto; // `fragment_profile.xml`에서 삭제했으므로, 이 변수도 삭제하는 것이 좋습니다.
 
     private TextView tvDob;
     private TextView tvEmergencyContact;
@@ -63,12 +67,16 @@ public class ProfileFragment extends Fragment {
     private static final String PREF_AUTH = "auth_cache";
     private static final String KEY_FB_UID = "firebase_uid";
 
+    // ✨ 수정: `bindViews` 내에서 지역 변수로 재선언하지 않고, 클래스 멤버 변수를 사용하도록 수정
+    private Button btnEditProfileIcon;
+    private Button btnModifyInfo;
+
     private static final Map<String, String> FOOD_ALLERGY_MAP = new HashMap<>();
     static {
         FOOD_ALLERGY_MAP.put("cb_egg", "난류(계란)");
-        FOOD_ALLERGY_MAP.put("cb_milk", "밀");
+        FOOD_ALLERGY_MAP.put("cb_wheat", "밀");
         FOOD_ALLERGY_MAP.put("cb_peach", "복숭아");
-        FOOD_ALLERGY_MAP.put("cb_dairy", "우유");
+        FOOD_ALLERGY_MAP.put("cb_milk", "우유");
         FOOD_ALLERGY_MAP.put("cb_sesame", "참깨");
         FOOD_ALLERGY_MAP.put("cb_tomato", "토마토");
         FOOD_ALLERGY_MAP.put("cb_buckwheat", "메밀");
@@ -137,6 +145,15 @@ public class ProfileFragment extends Fragment {
             String updatedName = result.getString("updatedName");
             boolean photoUpdated = result.getBoolean("photoUpdated", false);
 
+            if (updatedName != null) {
+                if (tvName != null) {
+                    tvName.setText(updatedName);
+                }
+            }
+
+            if (photoUpdated) {
+                loadUserProfileData();
+            }
             if (updatedName != null && tvName != null) tvName.setText(updatedName);
             if (photoUpdated && userUid != null) loadUserProfileData();
         });
@@ -170,6 +187,7 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        loadUserProfileData();
 
         // 늦게 저장된 UID가 있으면 재보강
         if (userUid == null && getContext() != null) {
@@ -198,8 +216,11 @@ public class ProfileFragment extends Fragment {
     private void bindViews(View view) {
         btnAllergy = view.findViewById(R.id.btn_allergy);
         btnProfile = view.findViewById(R.id.btn_profile);
-        btnUploadphoto = view.findViewById(R.id.btn_upload_photo);
-        btnSettings = view.findViewById(R.id.btn_settings);
+
+        // ✨ 수정: `Button` 타입을 제거하여 클래스 멤버 변수에 할당하도록 변경
+        // 이렇게 해야 이전에 선언한 `btnEditProfileIcon`과 `btnModifyInfo` 변수가 초기화됩니다.
+        btnEditProfileIcon = view.findViewById(R.id.btn_edit_profile_icon);
+        btnModifyInfo = view.findViewById(R.id.btn_modify_info);
 
         tvDob = view.findViewById(R.id.tv_dob);
         tvEmergencyContact = view.findViewById(R.id.tv_emergency_contact);
@@ -212,49 +233,48 @@ public class ProfileFragment extends Fragment {
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
 
-        btnAllergy.setOnClickListener(v -> {
-            if (userUid != null) {
-                Bundle args = new Bundle();
-                args.putString("userUid", userUid);
-                AllergyDialog dialog = new AllergyDialog();
-                dialog.setArguments(args);
-                dialog.show(getParentFragmentManager(), "allergyDialog");
-            } else {
-                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // ✨ 수정: `btnAllergy`에 대한 null 체크 추가. 안전성을 높입니다.
+        if (btnAllergy != null) {
+            btnAllergy.setOnClickListener(v -> {
+                if (userUid != null) {
+                    AllergyDialog dialog = AllergyDialog.newInstance(userUid);
+                    dialog.show(getParentFragmentManager(), "allergyDialog");
+                }
+            });
+        }
 
-        btnProfile.setOnClickListener(v -> {
-            if (userUid != null) {
-                Bundle args = new Bundle();
-                args.putString("userUid", userUid);
-                EditProfileDialog dialog = new EditProfileDialog();
-                dialog.setArguments(args);
-                dialog.show(getParentFragmentManager(), "editProfileDialog");
-            } else {
-                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // ✨ 수정: `btnProfile`에 대한 null 체크 추가.
+        if (btnProfile != null) {
+            btnProfile.setOnClickListener(v -> {
+                if (userUid != null) {
+                    EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
+                    dialog.show(getParentFragmentManager(), "editProfileDialog");
+                }
+            });
+        }
 
-        btnUploadphoto.setOnClickListener(v -> {
-            if (userUid != null) {
-                Bundle args = new Bundle();
-                args.putString("userUid", userUid);
-                EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
-                dialog.setArguments(args);
-                dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
-            } else {
-                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
-            }
-        });
+        // `btnUploadphoto` 관련 리스너는 XML에 해당 ID가 없으므로 삭제합니다.
 
-        btnSettings.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), SettingsActivity.class);
-            startActivity(intent);
-        });
+        // ✨ 수정: 새로운 버튼들에 대한 리스너 설정
+        if (btnEditProfileIcon != null) {
+            btnEditProfileIcon.setOnClickListener(v -> {
+                if (userUid != null) {
+                    EditProfilePhotoDialog dialog = EditProfilePhotoDialog.newInstance(userUid);
+                    dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
+                }
+            });
+        }
+
+        if (btnModifyInfo != null) {
+            btnModifyInfo.setOnClickListener(v -> {
+                if (userUid != null) {
+                    EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
+                    dialog.show(getParentFragmentManager(), "editProfileDialog");
+                }
+            });
+        }
     }
 
-    /** Firestore에서 사용자 프로필 데이터를 불러와 UI 업데이트 */
     private void loadUserProfileData() {
         if (userUid == null) {
             Log.d(TAG, "loadUserProfileData(): userUid is null, skip Firestore");
@@ -277,23 +297,22 @@ public class ProfileFragment extends Fragment {
                         tvEmergencyContact.setText(emergencyContact != null ? emergencyContact : "정보 없음");
                         tvGender.setText(gender != null ? gender : "정보 없음");
 
-                        if (profileImageBlob != null) {
+                        if (profileImageBlob != null && ivProfileImage != null) {
                             try {
                                 byte[] imageData = profileImageBlob.toBytes();
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                                 ivProfileImage.setImageBitmap(bitmap);
                             } catch (Exception e) {
+                                // 이미지 변환 실패 시 기본 이미지로 설정
                                 ivProfileImage.setImageResource(R.drawable.ic_user);
                                 Toast.makeText(getContext(), "프로필 사진 불러오기 실패", Toast.LENGTH_SHORT).show();
                             }
-                        } else if (ivProfileImage.getDrawable() == null) {
+                        } else {
                             ivProfileImage.setImageResource(R.drawable.ic_user);
                         }
-
                         ivProfileImage.setBackgroundResource(R.drawable.circular_background);
                         ivProfileImage.setClipToOutline(true);
 
-                        @SuppressWarnings("unchecked")
                         Map<String, Object> allergies = (Map<String, Object>) documentSnapshot.get("allergies");
                         if (allergies != null) {
                             List<String> foodAllergies = new ArrayList<>();
