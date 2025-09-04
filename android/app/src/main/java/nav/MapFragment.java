@@ -213,6 +213,10 @@ public class MapFragment extends Fragment {
                 savedCameraPos = kakaoMap.getCameraPosition();
             }
             hospitalModel = hospital;
+            Log.d("SEARCH_LIST_CLICK", "hospital: " + hospital.getHospital_name()
+                    + " lat=" + hospital.getLatitude()
+                    + " lng=" + hospital.getLongitude());
+
             Intent intent = new Intent(requireContext(), DetailHospitalActivity.class);
             intent.putExtra("hospital", hospital);
             startActivity(intent);

@@ -76,6 +76,15 @@ public class HospitalRepository {
                             // 검색어 포함 여부 확인 (대소문자 무시)
                             if(hospital.getHospital_name() != null && hospital.getHospital_name().
                                     toLowerCase().contains(query.toLowerCase())) {
+
+                                // 주소 가져오기
+                                Double lat = document.getDouble("latitude");
+                                Double lon = document.getDouble("longitude");
+
+                                if(lat != null && lon != null) {
+                                    hospital.setLatitude(lat);
+                                    hospital.setLongitude(lon);
+                                }
                                 hospitals.add(hospital);
                             }
                         }

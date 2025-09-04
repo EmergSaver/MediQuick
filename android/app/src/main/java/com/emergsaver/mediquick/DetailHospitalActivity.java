@@ -1,16 +1,16 @@
 package com.emergsaver.mediquick;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
+import com.kakao.vectormap.camera.CameraUpdateFactory;
 
 import model.Hospital;
 import util.MapManager;
@@ -21,7 +21,6 @@ public class DetailHospitalActivity extends AppCompatActivity {
 
     private TextView hospitalName, hospitalAddress, hospitalPhone;
     private Hospital hospital;
-    private FusedLocationProviderClient fusedLocationProviderClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,11 +28,11 @@ public class DetailHospitalActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_hospital);
 
-        // FusedLocationProviderClient 초기화
-        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-
         // Intent로 전달된 병원 정보 받기
         hospital = (Hospital) getIntent().getSerializableExtra("hospital");
+
+        Log.d("DETAIL_HOSPITAL", "lat=" + hospital.getLatitude() + " lng=" + hospital.getLongitude());
+
 
         if(hospital == null) {
             finish();
@@ -53,13 +52,15 @@ public class DetailHospitalActivity extends AppCompatActivity {
         LatLng hospitalPos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
 
         // 미니맵 초기화
-        MapManager mapManager = new MapManager(fusedLocationProviderClient);
+        MapManager mapManager = new MapManager(null);
         mapManager.initMapView(miniMap, hospitalPos, new MapManager.onMapReadyCallback() {
             @Override
             public void onMapReady(KakaoMap map) {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
-//                mapManager.moveCameraToHospital(hospital);
+                if(hospitalPos != null) {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 18));
+                }
 
                 // 마커 추가
                 mapManager.addHospitalMarker(hospital);
