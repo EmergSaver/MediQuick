@@ -93,4 +93,12 @@ public class HospitalRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+
+    // 진료과목 리스트 가져오기
+    public List<Specialty> getHospitalSpecialties(Hospital hospital) {
+        if(hospital == null || hospital.getSpecialties() == null) {
+            return new ArrayList<>();
+        }
+        return hospital.getSpecialties();
+    }
 }
