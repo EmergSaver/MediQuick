@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -14,7 +15,10 @@ import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 
+import org.w3c.dom.Text;
+
 import model.Hospital;
+import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
 
@@ -47,6 +51,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         initView();
         initMiniMap();
         initCongestion();
+        addTable();
     }
 
     private void initView() {
@@ -107,8 +112,25 @@ public class DetailHospitalActivity extends AppCompatActivity {
         tableLayout = findViewById(R.id.tableDepts);
         tableLayout.removeAllViews();
 
-        if(hospital.getSpecialties() != null) {
+        if(hospital.getSpecialties() == null) {
             return;
+        }
+
+        for(Specialty s : hospital.getSpecialties()) {
+            TableRow row = new TableRow(this);
+
+            TextView deptName = new TextView(this);
+            deptName.setText(s.getDept_name());
+            deptName.setPadding(8, 8, 8, 8);
+
+            TextView doctorCount = new TextView(this);
+            doctorCount.setText(s.getDoctor_count() + " 명");
+            doctorCount.setPadding(8, 8, 8, 8);
+
+            row.addView(deptName);
+            row.addView(doctorCount);
+
+            tableLayout.addView(row);
         }
     }
 
