@@ -31,11 +31,13 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
+
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86" // 실제 디바이스 아키텍처 및 애뮬레이션 아키텍쳐
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86"
         }
-        buildConfigField "String", "KAKAO_MAP_KEY",   "\"${kakaoMapKey}\""
-        buildConfigField "String", "KAKAO_LOGIN_KEY", "\"${kakaoLoginKey}\""
+
+        buildConfigField "String",  "KAKAO_MAP_KEY",   "\"${kakaoMapKey}\""
+        buildConfigField "String",  "KAKAO_LOGIN_KEY", "\"${kakaoLoginKey}\""
         buildConfigField "boolean", "USE_FUNCTIONS_EMULATOR", useFunctionsEmu.toBoolean().toString()
         buildConfigField "int",     "FUNCTIONS_EMULATOR_PORT", functionsEmuPort
         manifestPlaceholders = [ KAKAO_SCHEME: "kakao${kakaoLoginKey}" ]
@@ -54,6 +56,7 @@ android {
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
     tasks.withType(JavaCompile) {
@@ -83,11 +86,16 @@ dependencies {
     // 위치 서비스 라이브러리 추가
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
+    // Firebase
     implementation platform('com.google.firebase:firebase-bom:32.7.4')
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-storage'
 
+    implementation 'com.google.firebase:firebase-storage'   // 필요시 사용
+    implementation 'com.google.firebase:firebase-functions' // LoginActivity에서 사용
+
+    // Networking
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'

@@ -2,13 +2,15 @@ package com.emergsaver.mediquick;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,13 +29,19 @@ import java.util.Map;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.Intent;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentResultListener;
+
+import com.google.firebase.firestore.Blob;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.util.ArrayList;
-import androidx.fragment.app.DialogFragment;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 // OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
@@ -44,6 +52,10 @@ public class ProfileFragment extends Fragment {
     private Button btnUploadphoto;
     private ImageButton btnSettings;
 
+    private TextView tvDob;
+    private TextView tvEmergencyContact;
+    private TextView tvBloodType;
+    private TextView tvGender;
 
     private TextView tvDob;
     private TextView tvEmergencyContact;
