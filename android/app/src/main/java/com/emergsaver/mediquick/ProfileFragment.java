@@ -1,7 +1,5 @@
 package com.emergsaver.mediquick;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,20 +15,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.firebase.firestore.Blob; // Blob 타입 임포트
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.bumptech.glide.Glide; // Glide는 이제 프로필 이미지에는 사용하지 않음
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.Intent;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -43,9 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// OnProfileEditListener 인터페이스를 구현합니다.
 public class ProfileFragment extends Fragment {
-//        implements EditProfileDialog.OnProfileEditListener
 
     private Button btnAllergy;
     private Button btnProfile;
@@ -56,7 +38,6 @@ public class ProfileFragment extends Fragment {
     private TextView tvEmergencyContact;
     private TextView tvBloodType;
     private TextView tvGender;
-
 
     private LinearLayout llFoodAllergies;
     private LinearLayout llDrugAllergies;
@@ -99,10 +80,9 @@ public class ProfileFragment extends Fragment {
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
-
         db = FirebaseFirestore.getInstance();
 
-        // 다른 다이얼로그에서 돌아오는 결과 리스너들 (기존 로직 유지)
+        // 개인정보/알러지 편집 다이얼로그 결과 수신
         getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, result) -> {
             if (getView() != null) {
                 String birthdate = result.getString("birthdate");
@@ -123,20 +103,15 @@ public class ProfileFragment extends Fragment {
             updateAllergiesUI(foodAllergies, drugAllergies);
         });
 
-        // ✨ 수정: EditProfilePhotoDialog에서 돌아오는 결과 리스너 수정
-        // 바이트 배열을 직접 전달받는 대신, 업데이트가 성공했음을 알리고 다시 Firestore를 불러옴
+        // 프로필 사진/이름 편집 후 성공 시 → Firestore 재조회
         getParentFragmentManager().setFragmentResultListener("profilePhotoRequestKey", this, (requestKey, result) -> {
             String updatedName = result.getString("updatedName");
             boolean photoUpdated = result.getBoolean("photoUpdated", false);
 
-            if (updatedName != null) {
-                if (tvName != null) {
-                    tvName.setText(updatedName);
-                }
+            if (updatedName != null && tvName != null) {
+                tvName.setText(updatedName);
             }
-
             if (photoUpdated) {
-                // 사진이 업데이트된 경우, Firestore에서 최신 데이터를 다시 불러와서 UI를 갱신합니다.
                 loadUserProfileData();
             }
         });
@@ -153,7 +128,6 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // 프래그먼트가 화면에 나타날 때마다 데이터를 다시 불러와서 최신 상태를 유지합니다.
         loadUserProfileData();
     }
 
@@ -174,45 +148,43 @@ public class ProfileFragment extends Fragment {
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
 
-        // '알러지 정보 수정' 버튼 이벤트 (기존과 동일)
         btnAllergy.setOnClickListener(v -> {
             if (userUid != null) {
-                AllergyDialog dialog = AllergyDialog.newInstance(userUid);
+                Bundle args = new Bundle();
+                args.putString("userUid", userUid);
+                AllergyDialog dialog = new AllergyDialog();
+                dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "allergyDialog");
             }
-            AllergyDialog dialog = new AllergyDialog();
-            dialog.show(getParentFragmentManager(), "allergyDialog");
         });
 
-
-        // '개인정보 수정' 버튼 이벤트
         btnProfile.setOnClickListener(v -> {
             if (userUid != null) {
-                EditProfileDialog dialog = EditProfileDialog.newInstance(userUid);
+                Bundle args = new Bundle();
+                args.putString("userUid", userUid);
+                EditProfileDialog dialog = new EditProfileDialog();
+                dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "editProfileDialog");
             }
-            EditProfileDialog dialog = new EditProfileDialog();
-            dialog.show(getParentFragmentManager(), "editProfileDialog");
         });
 
-        // '프로필 수정' 버튼 이벤트
         btnUploadphoto.setOnClickListener(v -> {
             if (userUid != null) {
-                EditProfilePhotoDialog dialog = EditProfilePhotoDialog.newInstance(userUid);
+                Bundle args = new Bundle();
+                args.putString("userUid", userUid);
+                EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
+                dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
             }
-            EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
-            dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
         });
+
         btnSettings.setOnClickListener(v -> {
             Intent intent = new Intent(getActivity(), SettingsActivity.class);
             startActivity(intent);
         });
     }
 
-    /**
-     * Firebase Firestore에서 현재 사용자의 프로필 데이터를 불러와 UI를 업데이트하는 메소드입니다.
-     */
+    /** Firestore에서 사용자 프로필 데이터를 불러와 UI 업데이트 */
     private void loadUserProfileData() {
         if (userUid == null) {
             Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
@@ -227,37 +199,28 @@ public class ProfileFragment extends Fragment {
                         String bloodType = documentSnapshot.getString("bloodType");
                         String emergencyContact = documentSnapshot.getString("emergencyContact");
                         String gender = documentSnapshot.getString("gender");
-                        // ✨ 수정: 프로필 이미지를 Blob 타입으로 가져옴
                         Blob profileImageBlob = documentSnapshot.getBlob("profileImage");
 
-                        if (tvName != null) {
-                            tvName.setText(name);
-                        }
+                        if (tvName != null) tvName.setText(name);
                         if (tvDob != null) tvDob.setText(birth);
                         if (tvBloodType != null) tvBloodType.setText(bloodType);
                         if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
                         if (tvGender != null && gender != null) tvGender.setText(gender);
 
-                        // ✨ 수정: Blob을 비트맵으로 변환하여 ImageView에 설정
                         if (profileImageBlob != null && ivProfileImage != null) {
                             try {
                                 byte[] imageData = profileImageBlob.toBytes();
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
                                 ivProfileImage.setImageBitmap(bitmap);
                             } catch (Exception e) {
-                                // 이미지 변환 실패 시 기본 이미지로 설정
                                 ivProfileImage.setImageResource(R.drawable.ic_user);
                                 Toast.makeText(getContext(), "프로필 사진 불러오기 실패", Toast.LENGTH_SHORT).show();
                             }
                         } else {
-                            // 프로필 이미지가 없는 경우 기본 이미지로 설정
                             ivProfileImage.setImageResource(R.drawable.ic_user);
                         }
-                        // ✨ 추가: 뷰에 동그란 배경을 적용하여 이미지를 동그랗게 만듭니다.
-                        // XML에서 ImageView의 background를 @drawable/circular_background로 설정해야 합니다.
                         ivProfileImage.setBackgroundResource(R.drawable.circular_background);
                         ivProfileImage.setClipToOutline(true);
-
 
                         Map<String, Object> allergies = (Map<String, Object>) documentSnapshot.get("allergies");
                         if (allergies != null) {
@@ -267,23 +230,16 @@ public class ProfileFragment extends Fragment {
                                 for (Map.Entry<String, Boolean> entry : foodMap.entrySet()) {
                                     if (entry.getValue()) {
                                         String allergyName = FOOD_ALLERGY_MAP.get(entry.getKey());
-                                        if (allergyName != null) {
-                                            foodAllergies.add(allergyName);
-                                        }
+                                        if (allergyName != null) foodAllergies.add(allergyName);
                                     }
                                 }
                             }
-
                             List<String> drugAllergies = (List<String>) allergies.get("drugAllergies");
-                            if (drugAllergies == null) {
-                                drugAllergies = new ArrayList<>();
-                            }
-
+                            if (drugAllergies == null) drugAllergies = new ArrayList<>();
                             updateAllergiesUI(new ArrayList<>(foodAllergies), new ArrayList<>(drugAllergies));
                         } else {
                             updateAllergiesUI(null, null);
                         }
-
                     } else {
                         if (getContext() != null) {
                             Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
@@ -315,26 +271,18 @@ public class ProfileFragment extends Fragment {
         if (llFoodAllergies != null) {
             llFoodAllergies.removeAllViews();
             if (foodAllergies != null && !foodAllergies.isEmpty()) {
-                for (String allergy : foodAllergies) {
-                    TextView tv = createAllergyTextView(allergy);
-                    llFoodAllergies.addView(tv);
-                }
+                for (String allergy : foodAllergies) llFoodAllergies.addView(createAllergyTextView(allergy));
             } else {
-                TextView tv = createAllergyTextView("정보 없음");
-                llFoodAllergies.addView(tv);
+                llFoodAllergies.addView(createAllergyTextView("정보 없음"));
             }
         }
 
         if (llDrugAllergies != null) {
             llDrugAllergies.removeAllViews();
             if (drugAllergies != null && !drugAllergies.isEmpty()) {
-                for (String allergy : drugAllergies) {
-                    TextView tv = createAllergyTextView(allergy);
-                    llDrugAllergies.addView(tv);
-                }
+                for (String allergy : drugAllergies) llDrugAllergies.addView(createAllergyTextView(allergy));
             } else {
-                TextView tv = createAllergyTextView("정보 없음");
-                llDrugAllergies.addView(tv);
+                llDrugAllergies.addView(createAllergyTextView("정보 없음"));
             }
         }
     }
