@@ -15,6 +15,7 @@ import com.kakao.vectormap.camera.CameraUpdateFactory;
 
 import model.Hospital;
 import repository.CongestionRepository;
+import util.CongestionManager;
 import util.MapManager;
 
 public class DetailHospitalActivity extends AppCompatActivity {
@@ -23,11 +24,8 @@ public class DetailHospitalActivity extends AppCompatActivity {
 
     private TextView hospitalName, hospitalAddress, hospitalPhone, congestion;
     private Hospital hospital;
+    private CongestionManager congestionManager;
 
-    private Handler handler = new Handler();
-    private final int REFRESH_INTERVAL_MS = 3 * 60 * 1000;     // 3분
-
-    private CongestionRepository congestionRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,35 +77,17 @@ public class DetailHospitalActivity extends AppCompatActivity {
             }
         });
 
-        congestionRepository = new CongestionRepository();
-        startCongestionUpdates();
-    }
-
-    private void startCongestionUpdates() {
-        handler.postDelayed(new Runnable() {
+        congestionManager = new CongestionManager();
+        congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
-            public void run() {
-                fetchCongestion();
-                handler.postDelayed(this, REFRESH_INTERVAL_MS);
-            }
-        }, 0); // 첫 실행 바로
-    }
-
-    private void fetchCongestion() {
-        congestionRepository.fetchLatestAnalysis(new CongestionRepository.OnAnalysisLoaded() {
-            @Override
-            public void onLoaded(Object peopleCount) {
-                runOnUiThread(() -> {
-                    if (peopleCount != null) {
-                        // 타입 상관없이 문자열로 변환 후 표시
-                        congestion.setText(String.valueOf(peopleCount));
-                    }
-                });
+            public void onUpdate(Object peopleCount) {
+                runOnUiThread(() ->
+                        congestion.setText(String.valueOf(peopleCount)));
             }
 
             @Override
             public void onError(Exception e) {
-                Log.e("DETAIL_HOSPITAL", "Error fetching congestion", e);
+                Log.d("DETAIL_HOSPITAL", "ERROR : ", e);
             }
         });
     }
@@ -115,6 +95,8 @@ public class DetailHospitalActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        handler.removeCallbacksAndMessages(null); // Handler 해제
+        if(congestionManager != null) {
+            congestionManager.stopUpdates();
+        }
     }
 }
