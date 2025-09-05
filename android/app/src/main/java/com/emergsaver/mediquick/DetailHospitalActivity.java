@@ -15,8 +15,6 @@ import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 
-import org.w3c.dom.Text;
-
 import model.Hospital;
 import model.Specialty;
 import util.CongestionManager;
