@@ -3,6 +3,7 @@ package com.emergsaver.mediquick;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.widget.TableLayout;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -14,7 +15,6 @@ import com.kakao.vectormap.MapView;
 import com.kakao.vectormap.camera.CameraUpdateFactory;
 
 import model.Hospital;
-import repository.CongestionRepository;
 import util.CongestionManager;
 import util.MapManager;
 
@@ -25,6 +25,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private TextView hospitalName, hospitalAddress, hospitalPhone, congestion;
     private Hospital hospital;
     private CongestionManager congestionManager;
+    private TableLayout tableLayout;
 
 
     @Override
@@ -43,6 +44,12 @@ public class DetailHospitalActivity extends AppCompatActivity {
             return;
         }
 
+        initView();
+        initMiniMap();
+        initCongestion();
+    }
+
+    private void initView() {
         hospitalName = findViewById(R.id.tvHospitalName);
         hospitalAddress = findViewById(R.id.tvAddress);
         hospitalPhone = findViewById(R.id.tvPhone);
@@ -53,7 +60,9 @@ public class DetailHospitalActivity extends AppCompatActivity {
         hospitalName.setText(hospital.getHospital_name());
         hospitalAddress.setText(hospital.getAddress());
         hospitalPhone.setText(hospital.getPhone());
+    }
 
+    private void initMiniMap() {
         LatLng hospitalPos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
 
         // 미니맵 초기화
@@ -63,7 +72,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
             public void onMapReady(KakaoMap map) {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
-                if(hospitalPos != null) {
+                if (hospitalPos != null) {
                     kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 18));
                 }
 
@@ -76,7 +85,9 @@ public class DetailHospitalActivity extends AppCompatActivity {
                 // 마커 클릭 시 동작 없음
             }
         });
+    }
 
+    private void initCongestion() {
         congestionManager = new CongestionManager();
         congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
@@ -90,6 +101,15 @@ public class DetailHospitalActivity extends AppCompatActivity {
                 Log.d("DETAIL_HOSPITAL", "ERROR : ", e);
             }
         });
+    }
+
+    private void addTable() {
+        tableLayout = findViewById(R.id.tableDepts);
+        tableLayout.removeAllViews();
+
+        if(hospital.getSpecialties() != null) {
+            return;
+        }
     }
 
     @Override
