@@ -57,10 +57,6 @@ public class ProfileFragment extends Fragment {
     private TextView tvBloodType;
     private TextView tvGender;
 
-    private TextView tvDob;
-    private TextView tvEmergencyContact;
-    private TextView tvBloodType;
-    private TextView tvGender;
 
     private LinearLayout llFoodAllergies;
     private LinearLayout llDrugAllergies;
