@@ -2,6 +2,7 @@ package nav;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -28,6 +29,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.emergsaver.mediquick.DetailHospitalActivity;
 import com.emergsaver.mediquick.R;
 import com.emergsaver.mediquick.adapter.MapSearchAdapter;
 import com.google.android.gms.location.DeviceOrientation;
@@ -40,6 +42,7 @@ import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
@@ -94,6 +97,10 @@ public class MapFragment extends Fragment {
     private List<Hospital> allHospitals = new ArrayList<>();
     private MapSearchAdapter searchAdapter;
 
+    private EditText searchEditText;
+
+    private RecyclerView searchResultList;
+
 
     public static MapFragment newInstance(String param1, String param2) {
         MapFragment fragment = new MapFragment();
@@ -127,8 +134,10 @@ public class MapFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        View view = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = view.findViewById(R.id.map_view);
+
+        return view;
     }
 
     @Override
@@ -165,10 +174,11 @@ public class MapFragment extends Fragment {
         initRecyclerView(view);
         initButtons(view);
         initSearchBar(view);
+        currentBtn(view);
 
         // MapManager 생성 및 초기화
         mapManager = new MapManager(fusedLocationProviderClient);
-        mapManager.initMapView(mapView, new MapManager.onMapReadyCallback() {
+        mapManager.initMapView(mapView, null, new MapManager.onMapReadyCallback() {
             @Override
             public void onMapReady(KakaoMap kakaoMap) {
                 // 지도 준비 완료 후 병원 데이터 로드
@@ -196,10 +206,20 @@ public class MapFragment extends Fragment {
         RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
         searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
 
+        // 리스트 클릭 시
         searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
-            mapManager.moveCameraToHospital(hospital);
+//            mapManager.moveCameraToHospital(hospital);
+            if(kakaoMap != null) {
+                savedCameraPos = kakaoMap.getCameraPosition();
+            }
             hospitalModel = hospital;
-            showHospitalInfo(view, hospital);
+            Log.d("SEARCH_LIST_CLICK", "hospital: " + hospital.getHospital_name()
+                    + " lat=" + hospital.getLatitude()
+                    + " lng=" + hospital.getLongitude());
+
+            Intent intent = new Intent(requireContext(), DetailHospitalActivity.class);
+            intent.putExtra("hospital", hospital);
+            startActivity(intent);
         });
         searchResultList.setAdapter(searchAdapter);
 
@@ -273,7 +293,7 @@ public class MapFragment extends Fragment {
     }
 
     private void initSearchBar(View view) {
-        EditText searchEditText = view.findViewById(R.id.search_text);
+        searchEditText = view.findViewById(R.id.search_text);
         ImageButton searchBtn = view.findViewById(R.id.search_btn);
 
         searchBtn.setOnClickListener(v -> {
@@ -301,7 +321,7 @@ public class MapFragment extends Fragment {
             public void onLoaded(List<Hospital> hospitals) {
                 searchAdapter.setItems(hospitals);
 
-                RecyclerView searchResultList = getView().findViewById(R.id.search_result_list);
+                searchResultList = getView().findViewById(R.id.search_result_list);
                 searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
             }
 
@@ -337,6 +357,16 @@ public class MapFragment extends Fragment {
         bottomSheet.setVisibility(View.VISIBLE);
     }
 
+
+    // 현재 위치로 카메라 이동
+    private void currentBtn(View view) {
+        FloatingActionButton floatBtn = view.findViewById(R.id.btn_current);
+
+        floatBtn.setOnClickListener(v -> {
+            mapManager.moveCameraToCurrent(view.getContext());
+        });
+    }
+
     @Override
     public void onResume() {
         super.onResume();
@@ -364,6 +394,16 @@ public class MapFragment extends Fragment {
             ). build();
 
             fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+        }
+
+        // 검생창 초기화
+        if (searchAdapter != null) {
+            searchEditText.setText("");
+            searchEditText.clearFocus();
+        }
+
+        if(searchResultList != null) {
+            searchResultList.setVisibility(View.GONE);
         }
     }
 

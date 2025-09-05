@@ -1,8 +1,9 @@
 package model;
 
 import java.util.List;
+import java.io.Serializable;
 
-public class Hospital {
+public class Hospital implements Serializable{
     private String id;
     private String hospital_name;
     private String phone;

@@ -9,7 +9,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="20dp"
+        android:layout_marginTop="30dp">
 
         <!-- 제목 -->
         <TextView
@@ -21,11 +22,11 @@
             android:textStyle="bold" />
 
         <!-- 미니맵(이미지 자리) -->
-        <ImageView
-            android:id="@+id/imgMiniMap"
+        <com.kakao.vectormap.MapView
+            android:id="@+id/miniMap"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="42dp"
             android:scaleType="centerCrop"
             android:background="#EDEDED" />
 
@@ -84,29 +85,13 @@
             android:text="진료 정보"
             android:textStyle="bold" />
 
-        <LinearLayout
-            android:id="@+id/boxDepts"
+        <TableLayout
+            android:id="@+id/tableDepts"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
+            android:stretchColumns="1"
             android:padding="8dp"
-            android:background="#F5F6F7">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="내과 · 40명" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="외과 · 15명" />
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="영상의학과 · 14명" />
-        </LinearLayout>
+            android:background="@color/white"/>
 
     </LinearLayout>
 </ScrollView>

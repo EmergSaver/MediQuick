@@ -94,7 +94,7 @@ public class MapManager {
 
                             // 최초 위치이므로 카메라 이동
                             if(isFirstLocationUpdate) {
-                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos));
+                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos, 16));
                                 isFirstLocationUpdate = false;
                             }
                         }
@@ -105,7 +105,7 @@ public class MapManager {
         }
     }
 
-    public void initMapView(MapView mapView, onMapReadyCallback callback) {
+    public void initMapView(MapView mapView, LatLng initialPosition, onMapReadyCallback callback) {
         this.callback = callback;
 
         // initMapView 로직
@@ -132,12 +132,12 @@ public class MapManager {
                 kakaoMap = map;
 
                 // 지도 초기 위치 복원
-                if (savedCameraPos != null) {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
-                }
-
-                // 현재 위치 가져오기
-                initCurrentLocation(mapView.getContext());
+//                if (savedCameraPos != null) {
+//                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
+//                }
+//
+//                // 현재 위치 가져오기
+//                initCurrentLocation(mapView.getContext());
 
                 // 마커 클릭 리스너 등록
                 kakaoMap.setOnLabelClickListener((kakao, layer, label) -> {
@@ -147,6 +147,12 @@ public class MapManager {
                     }
                     return true;
                 });
+
+                if(initialPosition != null) {
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(initialPosition, 18));
+                } else {
+                    initCurrentLocation(mapView.getContext());
+                }
 
                 if(callback != null) {
                     callback.onMapReady(kakaoMap);
@@ -182,6 +188,20 @@ public class MapManager {
         Log.d("MAP_DEBUG", "새 마커 추가 완료: " + hospital.getHospital_name() + " 위치: " + pos);
 
         return newLabel;
+    }
+
+    public void moveCameraToCurrent(Context context) {
+        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if(location != null && kakaoMap != null) {
+                            LatLng currentPos = LatLng.from(location.getLatitude(), location.getLongitude());
+                            kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentPos, 16));
+                        }
+                    });
+        } else {
+            ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+        }
     }
 
     // 카메라 이동
