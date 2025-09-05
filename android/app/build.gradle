@@ -6,23 +6,17 @@ plugins {
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
-    localPropertiesFile.withInputStream { stream ->
-        localProperties.load(stream)
-    }
+    localPropertiesFile.withInputStream { stream -> localProperties.load(stream) }
 }
 
 def kakaoMapKey   = localProperties.getProperty("kakao_map_key", "")
 def kakaoLoginKey = localProperties.getProperty("kakao_login_key", "")
-
 def useFunctionsEmu = localProperties.getProperty("functions_emulator", "false")
 def functionsEmuPort = localProperties.getProperty("functions_emulator_port", "5001")
+
 android {
     namespace 'com.emergsaver.mediquick'
     compileSdk 36
-
-    buildFeatures {
-        buildConfig = true
-    }
 
     defaultConfig {
         applicationId "com.emergsaver.mediquick"
@@ -30,15 +24,17 @@ android {
         targetSdk 36
         versionCode 1
         versionName "1.0"
+
         ndk {
-            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86" // 실제 디바이스 아키텍처 및 애뮬레이션 아키텍쳐
+            abiFilters "armeabi-v7a", "arm64-v8a", "x86_64", "x86"
         }
-        buildConfigField "String", "KAKAO_MAP_KEY",   "\"${kakaoMapKey}\""
-        buildConfigField "String", "KAKAO_LOGIN_KEY", "\"${kakaoLoginKey}\""
+
+        buildConfigField "String",  "KAKAO_MAP_KEY",   "\"${kakaoMapKey}\""
+        buildConfigField "String",  "KAKAO_LOGIN_KEY", "\"${kakaoLoginKey}\""
         buildConfigField "boolean", "USE_FUNCTIONS_EMULATOR", useFunctionsEmu.toBoolean().toString()
         buildConfigField "int",     "FUNCTIONS_EMULATOR_PORT", functionsEmuPort
+
         manifestPlaceholders = [ KAKAO_SCHEME: "kakao${kakaoLoginKey}" ]
-        def kakaoOidcProvider = localProperties.getProperty("kakao_oidc_provider", "oidc.kakao")
     }
 
     buildTypes {
@@ -47,21 +43,23 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
 
     buildFeatures {
+        buildConfig true
         viewBinding true
     }
+
     tasks.withType(JavaCompile) {
         options.compilerArgs << "-Xlint:deprecation"
     }
 }
 
 dependencies {
-
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
@@ -74,21 +72,26 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.google.android.material:material:1.12.0'
 
-    // 카카오톡 지도 SDK 의존성 추가
+    // Kakao
     implementation 'com.kakao.maps.open:android:2.12.8'
-    // 카카오톡 로그인 SDK 의존성 추가
     implementation "com.kakao.sdk:v2-user:2.20.0"
-    // 위치 서비스 라이브러리 추가
+
+    // Location
     implementation 'com.google.android.gms:play-services-location:21.3.0'
 
+    // Firebase
     implementation platform('com.google.firebase:firebase-bom:32.7.4')
     implementation 'com.google.firebase:firebase-firestore'
     implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-functions'
+    implementation 'com.google.firebase:firebase-storage'   // 필요시 사용
+    implementation 'com.google.firebase:firebase-functions' // LoginActivity에서 사용
 
-    implementation "com.kakao.sdk:v2-user:2.20.0"
-
+    // Networking
     implementation 'com.squareup.retrofit2:retrofit:2.11.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.11.0'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.12.0'
+
+    // Image
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.16.0'
 }
