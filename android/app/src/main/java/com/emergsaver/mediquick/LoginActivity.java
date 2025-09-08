@@ -10,6 +10,7 @@ import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -21,20 +22,20 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.functions.FirebaseFunctions;
-import com.google.firebase.functions.HttpsCallableResult;
-import com.kakao.sdk.auth.model.OAuthToken;
 import com.kakao.sdk.user.UserApiClient;
-
-import com.kakao.sdk.user.model.Account;   // ★ KakaoAccount → Account
+import com.kakao.sdk.user.model.Account;
 import com.kakao.sdk.user.model.Profile;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+/**
+ * 로그인 화면
+ * - 이메일/비번 로그인 (미인증 → CheckEmail 유도)
+ * - 자동로그인 복원/저장
+ * - 카카오 로그인
+ * - ✅ 변경: '가입완료!' 토스트 로직 제거 (여기선 절대 안 뜸)
+ */
 public class LoginActivity extends AppCompatActivity {
+
+    private static final String TAG = "LoginActivity";
 
     private TextInputLayout tilEmail, tilPw;
     private TextInputEditText etEmail, etPwEdit;
@@ -75,7 +76,7 @@ public class LoginActivity extends AppCompatActivity {
 
         restoreAutoFill();
 
-        // ───────────────── 이메일/비번 로그인 ─────────────────
+        // ───── 이메일/비번 로그인 ─────
         btLogin.setOnClickListener(v -> {
             tilEmail.setError(null);
             tilPw.setError(null);
@@ -129,6 +130,8 @@ public class LoginActivity extends AppCompatActivity {
                                     i.putExtra("email", email);
                                     i.putExtra("birth", birth);
                                     i.putExtra("bloodType", bloodType);
+
+                                    // ✅ 여기서는 '가입완료!' 토스트를 절대 띄우지 않는다
                                     startActivity(i);
                                     finish();
                                 })
@@ -143,21 +146,82 @@ public class LoginActivity extends AppCompatActivity {
                     });
         });
 
-        // ───────────────── 카카오 로그인 (A안: 단순 팝업) ─────────────────
+        // ───── 카카오 로그인 ─────
         btKakao.setOnClickListener(v -> {
             UserApiClient.getInstance().loginWithKakaoAccount(this, (token, error) -> {
                 if (error != null) {
-                    Log.e("KAKAO", "loginWithKakaoAccount FAILED: " + error, error);
+                    String msg = String.valueOf(error.getMessage()).toLowerCase();
+                    if (msg.contains("cancel")) return null;
+                    Log.e("KAKAO", "loginWithKakaoAccount FAILED", error);
                     Toast.makeText(this, "카카오 로그인 실패: " + error.getMessage(), Toast.LENGTH_LONG).show();
                     return null;
                 }
-                if (token != null) {
-                    fetchKakaoUserAndGoMain(); // 토큰 OK → 사용자 정보 조회
-                }
+                if (token == null) return null;
+
+                UserApiClient.getInstance().me((user, meError) -> {
+                    if (meError != null || user == null) {
+                        Log.e("KAKAO", "me() FAILED", meError);
+                        Toast.makeText(this, "사용자 정보 조회 실패", Toast.LENGTH_LONG).show();
+                        return null;
+                    }
+
+                    final String newKakaoId = String.valueOf(user.getId());
+                    Account account = user.getKakaoAccount();
+
+                    String nickname = null;
+                    String email    = null;
+                    String profile  = null;
+
+                    if (account != null) {
+                        Profile p = account.getProfile();
+                        if (p != null) {
+                            nickname = p.getNickname();
+                            profile  = p.getThumbnailImageUrl();
+                        }
+                        email = account.getEmail();
+                    }
+                    if (nickname == null) nickname = "kakao_" + newKakaoId;
+
+                    SharedPreferences sp = getSharedPreferences("kakao_user", MODE_PRIVATE);
+                    String lastId = sp.getString("kakao_id", null);
+                    if (lastId == null || !lastId.equals(newKakaoId)) {
+                        clearKakaoCache();
+                        try { FirebaseAuth.getInstance().signOut(); } catch (Exception ignore) {}
+                    }
+
+                    sp.edit()
+                            .putString("kakao_id",  newKakaoId)
+                            .putString("nickname",  nickname)
+                            .putString("email",     email != null ? email : "")
+                            .putString("profileImg",profile != null ? profile : "")
+                            .apply();
+
+                    final String kakaoDocId = "kakao_" + newKakaoId;
+                    final String nicknameF  = nickname;
+                    final String emailF     = email != null ? email : "";
+
+                    FirebaseFirestore.getInstance()
+                            .collection("user_by_kakao")
+                            .document(kakaoDocId)
+                            .get()
+                            .addOnSuccessListener(doc -> {
+                                String linkedUid = (doc.exists() ? doc.getString("uid") : null);
+                                if (linkedUid != null && !linkedUid.isEmpty()) {
+                                    goMainWithUid(linkedUid, nicknameF, emailF);
+                                } else {
+                                    startSignupForKakao(kakaoDocId, nicknameF, emailF);
+                                }
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e(TAG, "user_by_kakao 조회 실패", e);
+                                startSignupForKakao(kakaoDocId, nicknameF, emailF);
+                            });
+
+                    return null;
+                });
+
                 return null;
             });
-
-            // (B안: Firebase 연동은 주석 유지)
         });
 
         btSignup.setOnClickListener(v ->
@@ -165,149 +229,31 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
-    // 사용자 정보 조회 + (필요 시) scope 동의 재요청 후 메인으로 이동
-    private void fetchKakaoUserAndGoMain() {
-        UserApiClient.getInstance().me((user, meError) -> {
-            if (meError != null) {
-                Log.e("KAKAO", "me() FAILED: " + meError, meError);
-                Toast.makeText(this, "사용자 정보 조회 실패: " + meError.getMessage(), Toast.LENGTH_LONG).show();
-                return null;
-            }
-            if (user == null) {
-                Toast.makeText(this, "사용자 정보가 비어 있습니다.", Toast.LENGTH_LONG).show();
-                return null;
-            }
-
-            Account account = user.getKakaoAccount();
-            String nickname = null;
-
-            if (account != null) {
-                Profile profile = account.getProfile();
-                if (profile != null && profile.getNickname() != null) {
-                    nickname = profile.getNickname();
-                }
-            }
-
-            // ★ Boolean 체크 + loginWithNewScopes에 nonce(null) 추가
-            if (nickname == null &&
-                    account != null &&
-                    Boolean.TRUE.equals(account.getProfileNeedsAgreement())) {
-
-                List<String> scopes = new ArrayList<>();
-                scopes.add("profile_nickname");
-                // 필요하면 이메일도 함께:
-                // if (Boolean.TRUE.equals(account.getEmailNeedsAgreement())) scopes.add("account_email");
-
-                Log.i("KAKAO", "추가 동의 요청: " + scopes);
-                UserApiClient.getInstance()
-                        .loginWithNewScopes(this, scopes, /* nonce */ null, (scopeToken, scopeError) -> { // ★ 여기 수정
-                            if (scopeError != null) {
-                                Log.e("KAKAO", "추가 동의 실패", scopeError);
-                                Toast.makeText(this, "추가 동의 실패: " + scopeError.getMessage(), Toast.LENGTH_LONG).show();
-                            } else {
-                                Log.i("KAKAO", "추가 동의 성공 → 사용자 정보 재조회");
-                                fetchKakaoUserAndGoMain(); // 재조회
-                            }
-                            return null;
-                        });
-                return null; // 동의 플로우 진행 중
-            }
-
-            // 닉네임이 여전히 없으면 안전한 대체값 사용
-            if (nickname == null) {
-                nickname = "kakao_" + String.valueOf(user.getId());
-            }
-
-            Log.i("KAKAO", "닉네임: " + nickname);
-
-            // ✅ 메인으로 이동
-            Intent i = new Intent(LoginActivity.this, MainActivity.class);
-            i.putExtra("kakao_nickname", nickname);
-            startActivity(i);
-            finish();
-            return null;
-        });
+    private void clearKakaoCache() {
+        getSharedPreferences("kakao_user", MODE_PRIVATE).edit().clear().apply();
     }
 
-    // ───────────────── 카카오 콜백 공통 처리 (B안에서 사용) ─────────────────
-    private void handleKakaoResult(OAuthToken token, Throwable error) {
-        if (error != null) {
-            Toast.makeText(this, "카카오 로그인 실패: " + error.getMessage(), Toast.LENGTH_LONG).show();
-            Log.e("KAKAO", "login error", error);
-            return;
-        }
-        if (token == null) {
-            Toast.makeText(this, "카카오 토큰이 비어 있습니다.", Toast.LENGTH_LONG).show();
-            Log.e("KAKAO", "OAuthToken is null");
-            return;
-        }
-        String kakaoAccessToken = token.getAccessToken();
-        sendKakaoTokenToFirebase(kakaoAccessToken);
+    private void startSignupForKakao(@NonNull String kakaoId,
+                                     @NonNull String nickname,
+                                     @NonNull String email) {
+        Intent i = new Intent(LoginActivity.this, InsertActivity.class);
+        i.putExtra("kakao_id", kakaoId);
+        i.putExtra("prefill_name", nickname);
+        i.putExtra("prefill_email", email);
+        startActivity(i);
     }
 
-    // ───────────────── 카카오 토큰 → Functions → 커스텀 토큰 (B안에서만 사용) ─────────────────
-    private void sendKakaoTokenToFirebase(String kakaoAccessToken) {
-        String projectId = com.google.firebase.FirebaseApp.getInstance().getOptions().getProjectId();
-        Log.d("FUNC", "projectId=" + projectId
-                + " USE_EMU=" + BuildConfig.USE_FUNCTIONS_EMULATOR
-                + " region=asia-northeast3");
-
-        FirebaseFunctions functions = FirebaseFunctions.getInstance("asia-northeast3");
-
-        if (BuildConfig.USE_FUNCTIONS_EMULATOR) {
-            functions.useEmulator("10.0.2.2", BuildConfig.FUNCTIONS_EMULATOR_PORT);
-        }
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("token", kakaoAccessToken);
-
-        functions
-                .getHttpsCallable("kakaoLogin")
-                .call(data)
-                .addOnSuccessListener((HttpsCallableResult result) -> {
-                    Map map = (Map) result.getData();
-                    String customToken = (String) map.get("token");
-                    FirebaseAuth.getInstance()
-                            .signInWithCustomToken(customToken)
-                            .addOnSuccessListener(authResult -> {
-                                FirebaseUser user = authResult.getUser();
-                                if (user == null) {
-                                    Toast.makeText(this, "로그인 오류: 사용자 세션 없음", Toast.LENGTH_LONG).show();
-                                    return;
-                                }
-                                String uid = user.getUid();
-                                db.collection("users").document(uid).get()
-                                        .addOnSuccessListener(doc -> {
-                                            String name = doc.getString("name");
-                                            String birth = doc.getString("birth");
-                                            String bloodType = doc.getString("bloodType");
-
-                                            Intent i = new Intent(LoginActivity.this, MainActivity.class);
-                                            i.putExtra("uid", uid);
-                                            i.putExtra("name", name);
-                                            i.putExtra("email", user.getEmail()); // 카카오는 null일 수 있음
-                                            i.putExtra("birth", birth);
-                                            i.putExtra("bloodType", bloodType);
-                                            startActivity(i);
-                                            finish();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(this, "프로필 조회 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                                            Log.e("Firestore", "get user profile failed", e);
-                                        });
-                            })
-                            .addOnFailureListener(e -> {
-                                Log.e("FirebaseAuth", "signInWithCustomToken 실패", e);
-                                Toast.makeText(this, "Firebase 로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                            });
-                })
-                .addOnFailureListener(e -> {
-                    Log.e("Functions", "kakaoLogin 호출 실패", e);
-                    Toast.makeText(this, "Function 호출 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+    private void goMainWithUid(@NonNull String uid,
+                               @NonNull String nickname,
+                               @NonNull String email) {
+        Intent i = new Intent(LoginActivity.this, MainActivity.class);
+        i.putExtra("uid", uid);
+        i.putExtra("kakao_nickname", nickname);
+        i.putExtra("email", email);
+        startActivity(i);
+        finish();
     }
 
-    // ───────────────── 유틸 ─────────────────
     private String safe(TextInputEditText e) {
         return e.getText() == null ? "" : e.getText().toString().trim();
     }

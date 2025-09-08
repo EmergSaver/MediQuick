@@ -44,15 +44,21 @@ public class CheckEmail extends AppCompatActivity {
         findViewById(R.id.btnVerifyDone).setOnClickListener(v -> {
             FirebaseUser u = auth.getCurrentUser();
             if (u == null) {
-                Toast.makeText(this, "세션이 만료되었습니다. 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show();
+                // InsertActivity에서 이제는 signOut하지 않지만, 앱 재시작 등으로 세션이 사라졌을 수 있음
+                Toast.makeText(this, "세션이 만료되었거나 앱이 재시작되었습니다. 로그인해 주세요.", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return;
             }
 
             u.reload().addOnCompleteListener(t -> {
                 if (u.isEmailVerified()) {
-                    Toast.makeText(this, "인증이 완료되었습니다. 로그인해 주세요.", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(this, LoginActivity.class));
+                    Toast.makeText(this, "가입완료! 로그인 해주세요", Toast.LENGTH_LONG).show();
+                    // 로그인 화면으로 보내기 전에 세션 정리
+                    auth.signOut();
+                    Intent i = new Intent(this, LoginActivity.class);
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(i);
                     finish();
                 } else {
                     Toast.makeText(this, "아직 인증되지 않았습니다. 메일의 링크를 눌러주세요.", Toast.LENGTH_SHORT).show();
@@ -65,6 +71,7 @@ public class CheckEmail extends AppCompatActivity {
             FirebaseUser u = auth.getCurrentUser();
             if (u == null) {
                 Toast.makeText(this, "세션이 만료되었습니다. 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(this, LoginActivity.class));
                 finish();
                 return;
             }

@@ -1,5 +1,7 @@
 package com.emergsaver.mediquick;
 
+import android.util.Log;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -17,8 +19,10 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.Blob;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -28,6 +32,8 @@ import java.util.List;
 import java.util.Map;
 
 public class ProfileFragment extends Fragment {
+
+    private static final String TAG = "ProfileFragment";
 
     private Button btnAllergy;
     private Button btnProfile;
@@ -47,6 +53,15 @@ public class ProfileFragment extends Fragment {
 
     private FirebaseFirestore db;
     private String userUid;
+
+    // Kakao/Firebase 캐시 키
+    private static final String PREF_KAKAO = "kakao_user";
+    private static final String KEY_K_NICK = "nickname";
+    private static final String KEY_K_IMG  = "profileImg";
+    private static final String KEY_K_MAIL = "email";
+
+    private static final String PREF_AUTH = "auth_cache";
+    private static final String KEY_FB_UID = "firebase_uid";
 
     private static final Map<String, String> FOOD_ALLERGY_MAP = new HashMap<>();
     static {
@@ -76,11 +91,25 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        db = FirebaseFirestore.getInstance();
 
+        // 1) Fragment arguments 우선
         if (getArguments() != null) {
             userUid = getArguments().getString("userUid");
         }
-        db = FirebaseFirestore.getInstance();
+
+        // 2) MainActivity Intent 보조
+        if (userUid == null && getActivity() != null && getActivity().getIntent() != null) {
+            userUid = getActivity().getIntent().getStringExtra("uid");
+        }
+
+        // 3) ★ Functions 성공 시 넣어둔 캐시 UID 최종 보강
+        if (userUid == null && getContext() != null) {
+            userUid = getContext()
+                    .getSharedPreferences(PREF_AUTH, AppCompatActivity.MODE_PRIVATE)
+                    .getString(KEY_FB_UID, null);
+        }
+        Log.d(TAG, "onCreate() userUid=" + userUid);
 
         // 개인정보/알러지 편집 다이얼로그 결과 수신
         getParentFragmentManager().setFragmentResultListener("requestKey", this, (requestKey, result) -> {
@@ -90,10 +119,10 @@ public class ProfileFragment extends Fragment {
                 String emergencyContact = result.getString("emergencyContact");
                 String gender = result.getString("gender");
 
-                if (tvDob != null) tvDob.setText(birthdate);
-                if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
-                if (tvBloodType != null) tvBloodType.setText(bloodType);
-                if (tvGender != null) tvGender.setText(gender);
+                if (tvDob != null && birthdate != null) tvDob.setText(birthdate);
+                if (tvEmergencyContact != null && emergencyContact != null) tvEmergencyContact.setText(emergencyContact);
+                if (tvBloodType != null && bloodType != null) tvBloodType.setText(bloodType);
+                if (tvGender != null && gender != null) tvGender.setText(gender);
             }
         });
 
@@ -108,12 +137,8 @@ public class ProfileFragment extends Fragment {
             String updatedName = result.getString("updatedName");
             boolean photoUpdated = result.getBoolean("photoUpdated", false);
 
-            if (updatedName != null && tvName != null) {
-                tvName.setText(updatedName);
-            }
-            if (photoUpdated) {
-                loadUserProfileData();
-            }
+            if (updatedName != null && tvName != null) tvName.setText(updatedName);
+            if (photoUpdated && userUid != null) loadUserProfileData();
         });
     }
 
@@ -122,13 +147,52 @@ public class ProfileFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         bindViews(view);
+
+        // 프로필 이미지 뷰 모양 고정(Glide/Bitmap 어느 경우든)
+        ivProfileImage.setBackgroundResource(R.drawable.circular_background);
+        ivProfileImage.setClipToOutline(true);
+
+        // Kakao 로그인 캐시가 있으면 우선 표시
+        SharedPreferences pref = requireContext().getSharedPreferences(PREF_KAKAO, AppCompatActivity.MODE_PRIVATE);
+        String nickname  = pref.getString(KEY_K_NICK, null);
+        String profileImg= pref.getString(KEY_K_IMG,  null);
+        String email     = pref.getString(KEY_K_MAIL, null);
+
+        if (nickname != null) tvName.setText(nickname);
+        if (email != null)    tvEmergencyContact.setText(email);
+        if (profileImg != null && !profileImg.isEmpty()) {
+            Glide.with(this).load(profileImg).circleCrop().into(ivProfileImage);
+        }
+
         return view;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        loadUserProfileData();
+
+        // 늦게 저장된 UID가 있으면 재보강
+        if (userUid == null && getContext() != null) {
+            userUid = getContext()
+                    .getSharedPreferences(PREF_AUTH, AppCompatActivity.MODE_PRIVATE)
+                    .getString(KEY_FB_UID, null);
+            Log.d(TAG, "onResume() re-check cached uid: " + userUid);
+        }
+
+        if (userUid != null) {
+            Log.d(TAG, "onResume() -> loadUserProfileData()");
+            loadUserProfileData();
+        } else {
+            // Kakao 전용 표기: 부족한 필드 기본값
+            if (isEmpty(tvDob.getText()))       tvDob.setText("정보 없음");
+            if (isEmpty(tvBloodType.getText())) tvBloodType.setText("정보 없음");
+            if (isEmpty(tvGender.getText()))    tvGender.setText("정보 없음");
+            updateAllergiesUI(null, null);
+        }
+    }
+
+    private boolean isEmpty(CharSequence cs) {
+        return cs == null || cs.toString().trim().isEmpty();
     }
 
     private void bindViews(View view) {
@@ -155,6 +219,8 @@ public class ProfileFragment extends Fragment {
                 AllergyDialog dialog = new AllergyDialog();
                 dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "allergyDialog");
+            } else {
+                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -165,6 +231,8 @@ public class ProfileFragment extends Fragment {
                 EditProfileDialog dialog = new EditProfileDialog();
                 dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "editProfileDialog");
+            } else {
+                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -175,6 +243,8 @@ public class ProfileFragment extends Fragment {
                 EditProfilePhotoDialog dialog = new EditProfilePhotoDialog();
                 dialog.setArguments(args);
                 dialog.show(getParentFragmentManager(), "editProfilePhotoDialog");
+            } else {
+                Toast.makeText(getContext(), "이 기능은 회원 프로필 등록 후 사용 가능합니다.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -187,7 +257,7 @@ public class ProfileFragment extends Fragment {
     /** Firestore에서 사용자 프로필 데이터를 불러와 UI 업데이트 */
     private void loadUserProfileData() {
         if (userUid == null) {
-            Toast.makeText(getContext(), "사용자 정보를 불러올 수 없습니다.", Toast.LENGTH_SHORT).show();
+            Log.d(TAG, "loadUserProfileData(): userUid is null, skip Firestore");
             return;
         }
 
@@ -201,13 +271,13 @@ public class ProfileFragment extends Fragment {
                         String gender = documentSnapshot.getString("gender");
                         Blob profileImageBlob = documentSnapshot.getBlob("profileImage");
 
-                        if (tvName != null) tvName.setText(name);
-                        if (tvDob != null) tvDob.setText(birth);
-                        if (tvBloodType != null) tvBloodType.setText(bloodType);
-                        if (tvEmergencyContact != null) tvEmergencyContact.setText(emergencyContact);
-                        if (tvGender != null && gender != null) tvGender.setText(gender);
+                        if (name != null) tvName.setText(name);
+                        tvDob.setText(birth != null ? birth : "정보 없음");
+                        tvBloodType.setText(bloodType != null ? bloodType : "정보 없음");
+                        tvEmergencyContact.setText(emergencyContact != null ? emergencyContact : "정보 없음");
+                        tvGender.setText(gender != null ? gender : "정보 없음");
 
-                        if (profileImageBlob != null && ivProfileImage != null) {
+                        if (profileImageBlob != null) {
                             try {
                                 byte[] imageData = profileImageBlob.toBytes();
                                 Bitmap bitmap = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
@@ -216,24 +286,28 @@ public class ProfileFragment extends Fragment {
                                 ivProfileImage.setImageResource(R.drawable.ic_user);
                                 Toast.makeText(getContext(), "프로필 사진 불러오기 실패", Toast.LENGTH_SHORT).show();
                             }
-                        } else {
+                        } else if (ivProfileImage.getDrawable() == null) {
                             ivProfileImage.setImageResource(R.drawable.ic_user);
                         }
+
                         ivProfileImage.setBackgroundResource(R.drawable.circular_background);
                         ivProfileImage.setClipToOutline(true);
 
+                        @SuppressWarnings("unchecked")
                         Map<String, Object> allergies = (Map<String, Object>) documentSnapshot.get("allergies");
                         if (allergies != null) {
                             List<String> foodAllergies = new ArrayList<>();
+                            @SuppressWarnings("unchecked")
                             Map<String, Boolean> foodMap = (Map<String, Boolean>) allergies.get("foodAllergies");
                             if (foodMap != null) {
                                 for (Map.Entry<String, Boolean> entry : foodMap.entrySet()) {
-                                    if (entry.getValue()) {
+                                    if (entry.getValue() != null && entry.getValue()) {
                                         String allergyName = FOOD_ALLERGY_MAP.get(entry.getKey());
                                         if (allergyName != null) foodAllergies.add(allergyName);
                                     }
                                 }
                             }
+                            @SuppressWarnings("unchecked")
                             List<String> drugAllergies = (List<String>) allergies.get("drugAllergies");
                             if (drugAllergies == null) drugAllergies = new ArrayList<>();
                             updateAllergiesUI(new ArrayList<>(foodAllergies), new ArrayList<>(drugAllergies));
@@ -241,53 +315,44 @@ public class ProfileFragment extends Fragment {
                             updateAllergiesUI(null, null);
                         }
                     } else {
-                        if (getContext() != null) {
-                            Toast.makeText(getContext(), "프로필 정보가 없습니다. 새로 등록해주세요.", Toast.LENGTH_SHORT).show();
-                            tvName.setText("새로운 사용자");
+                        // 문서 없음 → 기본값 유지
+                        if (isEmpty(tvDob.getText()))       tvDob.setText("정보 없음");
+                        if (isEmpty(tvBloodType.getText())) tvBloodType.setText("정보 없음");
+                        if (isEmpty(tvEmergencyContact.getText())) tvEmergencyContact.setText("정보 없음");
+                        if (isEmpty(tvGender.getText()))    tvGender.setText("정보 없음");
+                        if (ivProfileImage.getDrawable() == null) {
                             ivProfileImage.setImageResource(R.drawable.ic_user);
-                            tvDob.setText("정보 없음");
-                            tvBloodType.setText("정보 없음");
-                            tvEmergencyContact.setText("정보 없음");
-                            tvGender.setText("정보 없음");
-                            updateAllergiesUI(null, null);
                         }
+                        updateAllergiesUI(null, null);
                     }
                 })
                 .addOnFailureListener(e -> {
-                    if (getContext() != null) {
-                        Toast.makeText(getContext(), "프로필 정보를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
-                        tvName.setText("새로운 사용자");
-                        ivProfileImage.setImageResource(R.drawable.ic_user);
-                        tvDob.setText("정보 없음");
-                        tvBloodType.setText("정보 없음");
-                        tvEmergencyContact.setText("정보 없음");
-                        tvGender.setText("정보 없음");
-                        updateAllergiesUI(null, null);
-                    }
+                    Log.e(TAG, "Firestore get user failed", e);
+                    Toast.makeText(getContext(), "프로필 불러오기 실패", Toast.LENGTH_SHORT).show();
                 });
     }
 
-    private void updateAllergiesUI(ArrayList<String> foodAllergies, ArrayList<String> drugAllergies) {
+    private void updateAllergiesUI(@Nullable ArrayList<String> foodAllergies, @Nullable ArrayList<String> drugAllergies) {
         if (llFoodAllergies != null) {
             llFoodAllergies.removeAllViews();
             if (foodAllergies != null && !foodAllergies.isEmpty()) {
-                for (String allergy : foodAllergies) llFoodAllergies.addView(createAllergyTextView(allergy));
+                for (String allergy : foodAllergies) llFoodAllergies.addView(createAllergyChip(allergy));
             } else {
-                llFoodAllergies.addView(createAllergyTextView("정보 없음"));
+                llFoodAllergies.addView(createAllergyChip("정보 없음"));
             }
         }
 
         if (llDrugAllergies != null) {
             llDrugAllergies.removeAllViews();
             if (drugAllergies != null && !drugAllergies.isEmpty()) {
-                for (String allergy : drugAllergies) llDrugAllergies.addView(createAllergyTextView(allergy));
+                for (String allergy : drugAllergies) llDrugAllergies.addView(createAllergyChip(allergy));
             } else {
-                llDrugAllergies.addView(createAllergyTextView("정보 없음"));
+                llDrugAllergies.addView(createAllergyChip("정보 없음"));
             }
         }
     }
 
-    private TextView createAllergyTextView(String text) {
+    private TextView createAllergyChip(String text) {
         TextView tv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,

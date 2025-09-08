@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.AdapterView;
@@ -45,6 +46,11 @@ public class InsertActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
+    // 카카오 프리필
+    private String kakaoIdFromLogin;
+    private String prefillName;
+    private String prefillEmail;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +63,12 @@ public class InsertActivity extends AppCompatActivity {
         bindViews();
         setupBirthSpinners();
         setupBloodSpinner();
+
+        kakaoIdFromLogin = getIntent().getStringExtra("kakao_id");
+        prefillName      = getIntent().getStringExtra("prefill_name");
+        prefillEmail     = getIntent().getStringExtra("prefill_email");
+        if (!TextUtils.isEmpty(prefillName))  etName.setText(prefillName);
+        if (!TextUtils.isEmpty(prefillEmail)) etEmail.setText(prefillEmail);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_InPro), (v, insets) -> {
             Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -142,8 +154,21 @@ public class InsertActivity extends AppCompatActivity {
                                     db.collection("users").document(uid)
                                             .set(profile)
                                             .addOnSuccessListener(x -> {
+                                                if (!TextUtils.isEmpty(kakaoIdFromLogin)) {
+                                                    Map<String, Object> link = new HashMap<>();
+                                                    link.put("uid", uid);
+                                                    FirebaseFirestore.getInstance()
+                                                            .collection("user_by_kakao")
+                                                            .document(kakaoIdFromLogin)
+                                                            .set(link)
+                                                            .addOnFailureListener(e2 ->
+                                                                    Log.w("InsertActivity", "user_by_kakao set failed", e2)
+                                                            );
+                                                }
+
                                                 dialog.dismiss();
-                                                Toast.makeText(this, "가입 완료! 인증 메일을 확인하세요.", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(this, "인증 메일을 보냈습니다. 메일의 링크로 인증을 완료해 주세요.", Toast.LENGTH_LONG).show();
+
                                                 Intent intent = new Intent(InsertActivity.this, CheckEmail.class);
                                                 intent.putExtra("email", user.getEmail());
                                                 startActivity(intent);
@@ -325,26 +350,35 @@ public class InsertActivity extends AppCompatActivity {
         String pw2   = textOf(etPw2);
 
         String rawPhone = textOf(etPhone).trim().replaceAll("[^0-9]", "");
+        String phone = (rawPhone.length() == 9)
+                ? rawPhone.substring(0,3) + "-" + rawPhone.substring(3,7) + "-" + rawPhone.substring(7)
+                : textOf(etPhone).trim();
         int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
         boolean ok = true;
 
         if (!name.matches("^[A-Za-z가-힣]{2,16}$")) {
-            if (tilName != null) tilName.setError("이름은 2~16자여야 합니다."); ok = false;
+            if (tilName != null) tilName.setError("이름은 2~16자여야 합니다.");
+            ok = false;
         }
         if (!( !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches() )) {
-            if (tilEmail != null) tilEmail.setError("이메일 형식을 확인해 주세요."); ok = false;
+            if (tilEmail != null) tilEmail.setError("이메일 형식을 확인해 주세요.");
+            ok = false;
         }
         if (!isPasswordValid(pw)) {
-            if (tilPw != null) tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다."); ok = false;
+            if (tilPw != null) tilPw.setError("8~16자, 영문+숫자 조합이어야 합니다.");
+            ok = false;
         }
         if (!pw.equals(pw2)) {
-            if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다."); ok = false;
+            if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
+            ok = false;
         }
-        if (rawPhone.length() != 11) {
-            if (tilPhone != null) tilPhone.setError("전화번호 11자리를 입력하세요."); ok = false;
+        if (phone.length() != 11) { // 필요 시 rawPhone.length() == 11로 변경 권장
+            if (tilPhone != null) tilPhone.setError("전화번호 11자리를 입력하세요.");
+            ok = false;
         }
         if (!isValidDate(y, m, d)) {
-            Toast.makeText(this, "생년월일을 확인해 주세요.", Toast.LENGTH_SHORT).show(); ok = false;
+            Toast.makeText(this, "생년월일을 확인해 주세요.", Toast.LENGTH_SHORT).show();
+            ok = false;
         }
         return ok;
     }
