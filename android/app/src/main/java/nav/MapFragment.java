@@ -389,11 +389,13 @@ public class MapFragment extends Fragment {
         // 사용자 위치 업데이트 (10초마다)
         if(ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationRequest locationRequest = new LocationRequest.Builder(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10000
-            ). build();
 
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+            LocationRequest locationRequest = new LocationRequest.Builder(
+                    Priority.PRIORITY_HIGH_ACCURACY, 0 // 1초 간격
+            ).setMinUpdateDistanceMeters(0f)
+                    .build();
+
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
         }
 
         // 검생창 초기화
