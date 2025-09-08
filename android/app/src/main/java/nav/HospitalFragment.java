@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.emergsaver.mediquick.R;
-import com.emergsaver.mediquick.search.SearchActivity;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -79,7 +78,8 @@ public class HospitalFragment extends Fragment {
 
         search.setOnClickListener(v -> {
             // 다이얼로그 UI 불러오기
-            View dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_searchpopup, null);
+            View dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_searchpopup, null);
 
             AlertDialog dialog = new AlertDialog.Builder(requireContext())
                     .setView(dialogView)
@@ -93,12 +93,15 @@ public class HospitalFragment extends Fragment {
 
             btnOk.setOnClickListener(btn -> {
                 dialog.dismiss();
-                // SearchActivity로 이동
-                Intent intent = new Intent(requireContext(), SearchActivity.class);
-                startActivity(intent);
+                // ✅ CategoryFragment로 화면 전환
+                requireActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.fragment_container, new CategoryFragment())
+                        .addToBackStack(null)
+                        .commit();
             });
 
             dialog.show();
         });
     }
+
 }
