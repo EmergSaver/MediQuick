@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.AdapterView;
@@ -34,6 +35,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// ▼ 이미 있는 이메일 대응용 다이얼로그/예외
+import com.google.android.material.dialog.MaterialAlertDialogBuilder; // ★ 추가: 이미 존재 이메일 대응 다이얼로그
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;   // ★ 추가: 이미 존재 이메일 예외
+
 public class InsertActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPw, etPw2, etPhone;
@@ -44,6 +49,11 @@ public class InsertActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
+
+    // 카카오 프리필
+    private String kakaoIdFromLogin;
+    private String prefillName;
+    private String prefillEmail;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +67,12 @@ public class InsertActivity extends AppCompatActivity {
         bindViews();
         setupBirthSpinners();
         setupBloodSpinner();
+
+        kakaoIdFromLogin = getIntent().getStringExtra("kakao_id");
+        prefillName      = getIntent().getStringExtra("prefill_name");
+        prefillEmail     = getIntent().getStringExtra("prefill_email");
+        if (!TextUtils.isEmpty(prefillName))  etName.setText(prefillName);
+        if (!TextUtils.isEmpty(prefillEmail)) etEmail.setText(prefillEmail);
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_InPro), (v, insets) -> {
             Insets sb = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -142,8 +158,21 @@ public class InsertActivity extends AppCompatActivity {
                                     db.collection("users").document(uid)
                                             .set(profile)
                                             .addOnSuccessListener(x -> {
+                                                if (!TextUtils.isEmpty(kakaoIdFromLogin)) {
+                                                    Map<String, Object> link = new HashMap<>();
+                                                    link.put("uid", uid);
+                                                    FirebaseFirestore.getInstance()
+                                                            .collection("user_by_kakao")
+                                                            .document(kakaoIdFromLogin)
+                                                            .set(link)
+                                                            .addOnFailureListener(e2 ->
+                                                                    Log.w("InsertActivity", "user_by_kakao set failed", e2)
+                                                            );
+                                                }
+
                                                 dialog.dismiss();
-                                                Toast.makeText(this, "가입 완료! 인증 메일을 확인하세요.", Toast.LENGTH_LONG).show();
+                                                Toast.makeText(this, "인증 메일을 보냈습니다. 메일의 링크로 인증을 완료해 주세요.", Toast.LENGTH_LONG).show();
+
                                                 Intent intent = new Intent(InsertActivity.this, CheckEmail.class);
                                                 intent.putExtra("email", user.getEmail());
                                                 startActivity(intent);
@@ -161,6 +190,14 @@ public class InsertActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         btnOk.setEnabled(true);
+                        // ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼
+                        // ★ 변경: '이미 존재하는 이메일'일 때 전용 다이얼로그 제공
+                        if (e instanceof FirebaseAuthUserCollisionException) {
+                            showEmailAlreadyInUseDialog(email, pw); // ★ 추가 호출
+                            return;
+                        }
+                        // ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲
+
                         Toast.makeText(this, "가입 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
         });
@@ -347,7 +384,7 @@ public class InsertActivity extends AppCompatActivity {
             if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
             ok = false;
         }
-        if (phone.length() != 11) {
+        if (phone.length() != 11) { // 필요 시 rawPhone.length() == 11로 변경 권장
             if (tilPhone != null) tilPhone.setError("전화번호 11자리를 입력하세요.");
             ok = false;
         }
@@ -398,5 +435,59 @@ public class InsertActivity extends AppCompatActivity {
         if (id == R.id.rbMale) return "남성";
         if (id == R.id.rbFemale) return "여성";
         return "";
+    }
+
+    // ===========================================================
+    // ★ 추가: '이미 가입된 이메일'일 때 선택지 제공 다이얼로그
+    //   - 로그인 화면 이동(이메일 프리필 + 힌트)
+    //   - 비밀번호 재설정 메일 전송
+    //   - (가능 시) 인증메일 다시 보내기
+    // ===========================================================
+    private void showEmailAlreadyInUseDialog(String email, String pw) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("이미 가입된 이메일")
+                .setMessage("해당 이메일로 이미 계정이 존재합니다.\n로그인하여 인증을 완료하거나, 비밀번호를 재설정할 수 있습니다.")
+                // ➊ 로그인 화면으로 이동 (이메일 미리 채워주기)
+                .setPositiveButton("로그인 화면으로", (d, w) -> {
+                    Intent i = new Intent(InsertActivity.this, LoginActivity.class);
+                    i.putExtra("prefill_email", email);   // ★ 추가: Login 화면 이메일 프리필
+                    i.putExtra("showVerifyHint", true);    // ★ 추가: 안내 토스트 표시 플래그
+                    startActivity(i);
+                    finish();
+                })
+                // ➋ 비밀번호 재설정
+                .setNegativeButton("비밀번호 재설정", (d, w) -> {
+                    FirebaseAuth.getInstance().sendPasswordResetEmail(email)
+                            .addOnSuccessListener(v -> Toast.makeText(this, "비밀번호 재설정 메일을 보냈습니다.", Toast.LENGTH_LONG).show())
+                            .addOnFailureListener(err -> Toast.makeText(this, "재설정 메일 전송 실패: " + err.getMessage(), Toast.LENGTH_LONG).show());
+                })
+                // ➌ (선택) 지금 입력한 비번이 맞다면 임시 로그인 후 인증메일 재발송
+                .setNeutralButton("인증메일 다시 보내기", (d, w) -> {
+                    FirebaseAuth.getInstance().signInWithEmailAndPassword(email, pw)
+                            .addOnSuccessListener(res -> {
+                                FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+                                if (u != null && !u.isEmailVerified()) {
+                                    u.sendEmailVerification()
+                                            .addOnSuccessListener(v2 -> {
+                                                Toast.makeText(this, "인증 메일을 다시 보냈습니다.", Toast.LENGTH_LONG).show();
+                                                Intent i = new Intent(InsertActivity.this, CheckEmail.class);
+                                                i.putExtra("email", email);
+                                                startActivity(i);
+                                                finish();
+                                            })
+                                            .addOnFailureListener(err -> Toast.makeText(this, "재발송 실패: " + err.getMessage(), Toast.LENGTH_LONG).show());
+                                } else {
+                                    Toast.makeText(this, "이미 인증된 계정입니다. 로그인해 주세요.", Toast.LENGTH_LONG).show();
+                                    Intent i = new Intent(InsertActivity.this, LoginActivity.class);
+                                    i.putExtra("prefill_email", email);
+                                    startActivity(i);
+                                    finish();
+                                }
+                            })
+                            .addOnFailureListener(err -> {
+                                Toast.makeText(this, "비밀번호가 일치하지 않습니다. 로그인 화면에서 비밀번호 재설정을 진행해 주세요.", Toast.LENGTH_LONG).show();
+                            });
+                })
+                .show();
     }
 }

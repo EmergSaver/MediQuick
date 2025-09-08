@@ -57,7 +57,9 @@
                 android:id="@+id/etName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="이름 입력" />
+                android:hint="이름 입력"
+                android:inputType="textPersonName"
+                android:imeOptions="actionNext" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
