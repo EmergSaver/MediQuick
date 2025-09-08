@@ -9,7 +9,7 @@ if (localPropertiesFile.exists()) {
     localPropertiesFile.withInputStream { stream -> localProperties.load(stream) }
 }
 
-def kakaoMapKey   = localProperties.getProperty("kakao_map_key", "")
+def kakaoMapKey   = localProperties.getProperty("kakao_native_key", "")
 def kakaoLoginKey = localProperties.getProperty("kakao_login_key", "")
 def useFunctionsEmu = localProperties.getProperty("functions_emulator", "false")
 def functionsEmuPort = localProperties.getProperty("functions_emulator_port", "5001")
