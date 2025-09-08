@@ -50,7 +50,6 @@ public class NavigationManager {
 
         Intent chooser = Intent.createChooser(intentList.remove(0), "네비게이션 앱 선택");
         chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, intentList.toArray(new Parcelable[0]));
-
         context.startActivity(chooser);
     }
 }
