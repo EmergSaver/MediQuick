@@ -1,6 +1,5 @@
 package com.emergsaver.mediquick;
 
-import android.content.Intent;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -11,20 +10,24 @@ import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationBarView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import nav.CategoryFragment;
 import nav.MapFragment;
-import util.HospitalGeoUpdater;
 
 public class MainActivity extends AppCompatActivity {
 
     //사용자 UID를 저장할 변수
     private String userUid;
+
+    // 재사용 프래그먼트
+    private Fragment mapFrag;
+    private Fragment userFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,31 +35,35 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
-        // LoginActivity에서 전달된 UID를 Intent에서 가져오기
+        // LoginActivity에서 전달된 UID 우선 획득
         Intent intent = getIntent();
         if (intent != null) {
             userUid = intent.getStringExtra("uid");
         }
 
+        // 보조: 현재 FirebaseAuth 세션에서 uid (A안의 익명로그인/이메일로그인 모두 지원)
+        if (userUid == null) {
+            FirebaseUser cur = FirebaseAuth.getInstance().getCurrentUser();
+            if (cur != null) userUid = cur.getUid();
+        }
+
         BottomNavigationView bottomNav = findViewById(R.id.bottom_navigation);
 
         // Fragment 초기화
-        Fragment mapFrag = new MapFragment();
-        Fragment userFrag = new ProfileFragment();
+        mapFrag = new MapFragment();
+        userFrag = new ProfileFragment();
 
-        // ProfileFragment를 생성할 때 Bundle을 사용하여 UID 전달
+        // ProfileFragment에 uid 전달 (존재할 때만)
         if (userUid != null) {
             Bundle bundle = new Bundle();
             bundle.putString("userUid", userUid);
             userFrag.setArguments(bundle);
         }
 
-        // 첫 번째 화면일 경우 (지도 보기)
-        if(savedInstanceState == null) {
+        // 첫 화면: 지도
+        if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .replace(R.id.fragment_container, mapFrag).commit();
-
-            // 지도 탭을 선택 상태로 변경
             bottomNav.setSelectedItemId(R.id.nav_map);
         }
 
@@ -81,9 +88,9 @@ public class MainActivity extends AppCompatActivity {
 
                     btnOk.setOnClickListener(v -> {
                         dialog.dismiss();
-                        // SearchActivity로 이동
+                        // 카테고리 화면으로 이동
                         getSupportFragmentManager().beginTransaction()
-                                .replace(R.id.fragment_container, new CategoryFragment())
+                                .replace(R.id.fragment_container, new nav.CategoryFragment())
                                 .commit();
                     });
 
@@ -97,14 +104,31 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 }
                 else if (id == R.id.nav_user) {
+                    // 런타임에 uid가 생겼다면 최신 uid 다시 전달
+                    ensureUserUidOnProfile();
                     getSupportFragmentManager().beginTransaction()
                             .replace(R.id.fragment_container, userFrag)
                             .commit();
                     return true;
                 }
-
                 return false;
             }
         });
+    }
+
+    private void ensureUserUidOnProfile() {
+        if (userFrag == null) return;
+
+        if (userUid == null) {
+            FirebaseUser cur = FirebaseAuth.getInstance().getCurrentUser();
+            if (cur != null) userUid = cur.getUid();
+        }
+
+        if (userUid != null) {
+            Bundle args = userFrag.getArguments();
+            if (args == null) args = new Bundle();
+            args.putString("userUid", userUid);
+            userFrag.setArguments(args);
+        }
     }
 }
