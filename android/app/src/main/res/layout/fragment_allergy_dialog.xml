@@ -26,7 +26,10 @@
         android:text="음식 알레르기"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
         android:textColor="@android:color/black"
+        android:background="@drawable/allergy_rounded_background"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/tv_title"
         app:layout_constraintStart_toStartOf="parent" />
@@ -69,7 +72,10 @@
         android:text="약물 부작용"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="8dp"
         android:textColor="@android:color/black"
+        android:background="@drawable/allergy_rounded_background"
         android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/grid_food_allergies"
         app:layout_constraintStart_toStartOf="parent" />
