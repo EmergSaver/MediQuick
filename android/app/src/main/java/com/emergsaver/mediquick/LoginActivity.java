@@ -105,7 +105,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         if (!user.isEmailVerified()) {
                             btLogin.setEnabled(true);
-                            auth.signOut();
+                            //auth.signOut();
                             Intent i = new Intent(LoginActivity.this, CheckEmail.class);
                             i.putExtra("email", email);
                             startActivity(i);
