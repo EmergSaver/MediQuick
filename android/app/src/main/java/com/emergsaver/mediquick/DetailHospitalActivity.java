@@ -1,15 +1,22 @@
 package com.emergsaver.mediquick;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
@@ -19,6 +26,7 @@ import model.Hospital;
 import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
+import util.NavigationManager;
 
 public class DetailHospitalActivity extends AppCompatActivity {
     private MapView miniMap;
@@ -28,6 +36,8 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private Hospital hospital;
     private CongestionManager congestionManager;
     private TableLayout tableLayout;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private Button findBtn;
 
 
     @Override
@@ -35,6 +45,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_hospital);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Intent로 전달된 병원 정보 받기
         hospital = (Hospital) getIntent().getSerializableExtra("hospital");
@@ -50,6 +61,10 @@ public class DetailHospitalActivity extends AppCompatActivity {
         initMiniMap();
         initCongestion();
         addTable();
+
+        findBtn.setOnClickListener(v -> {
+            findRoad();
+        });
     }
 
     private void initView() {
@@ -58,6 +73,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         hospitalPhone = findViewById(R.id.tvPhone);
         congestion = findViewById(R.id.tvCongestion);
         miniMap = findViewById(R.id.miniMap);
+        findBtn = findViewById(R.id.btnStartNavi);
 
         // 병원 정보 세팅
         hospitalName.setText(hospital.getHospital_name());
@@ -91,6 +107,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
     }
 
     private void initCongestion() {
+        // 혼잡도 초기화
         congestionManager = new CongestionManager();
         congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
@@ -106,6 +123,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         });
     }
 
+    // 진료과 & 진료인 수 테이블 생성
     private void addTable() {
         tableLayout = findViewById(R.id.tableDepts);
         tableLayout.removeAllViews();
@@ -129,6 +147,55 @@ public class DetailHospitalActivity extends AppCompatActivity {
             row.addView(doctorCount);
 
             tableLayout.addView(row);
+        }
+    }
+
+    // 길찾기 버튼 클릭 시
+    private void findRoad() {
+        // 권한 체크
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    1001);
+            return;
+        }
+
+        // 권한이 있는 경우에만 위치 가져오기
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    if(location != null) {
+                        double startLat = location.getLatitude();
+                        double startLng = location.getLongitude();
+
+                        // 병원 좌표 + 이름
+                        double destLat = hospital.getLatitude();
+                        double destLng = hospital.getLongitude();
+                        String destName = hospital.getHospital_name();
+
+                        // 네비게이션 호출
+                        NavigationManager.startNavigation(
+                                DetailHospitalActivity.this,
+                                startLat,
+                                startLng,
+                                destLat,
+                                destLng,
+                                destName
+                        );
+                    } else {
+                        Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 1001) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                findRoad(); // 권한 허용 시 길찾기 재실행
+            } else {
+                Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
