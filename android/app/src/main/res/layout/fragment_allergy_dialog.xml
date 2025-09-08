@@ -112,7 +112,9 @@
             android:text="등록"
             android:textSize="12sp"
             android:layout_marginEnd="8dp"
-            app:cornerRadius="8dp" />
+            app:cornerRadius="8dp"
+            android:backgroundTint="#4285F4"
+            android:textColor="@android:color/white"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_delete_drug_side_effect"
@@ -123,7 +125,9 @@
             android:textSize="12sp"
             android:layout_marginStart="8dp"
             app:cornerRadius="8dp"
-            style="?attr/materialButtonOutlinedStyle" />
+            style="?attr/materialButtonOutlinedStyle"
+            app:strokeColor="#F44336"
+            android:textColor="#F44336"/>
     </LinearLayout>
 
     <TextView
@@ -140,7 +144,7 @@
 
     <Button
         android:id="@+id/btn_confirm_allergy"
-        android:layout_width="0dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
         android:backgroundTint="#4285F4"
@@ -148,5 +152,7 @@
         android:textColor="@android:color/white"
         app:layout_constraintTop_toBottomOf="@id/tv_registered_allergies"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"
+        app:cornerRadius="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

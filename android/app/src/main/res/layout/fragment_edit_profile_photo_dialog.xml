@@ -48,6 +48,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:text="사진 업로드"
+        android:textColor="#333333"
         app:layout_constraintTop_toBottomOf="@id/card_profile_image"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -80,17 +81,19 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btn_save"
-        android:layout_width="0dp"
+        android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="32dp"
         android:text="저장"
         android:textSize="18sp"
         android:textColor="@android:color/white"
+        android:backgroundTint="#4285F4"
         android:paddingVertical="12dp"
         app:cornerRadius="12dp"
         app:backgroundTint="?attr/colorPrimary"
         app:layout_constraintTop_toBottomOf="@id/et_name_dialog"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.5"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
