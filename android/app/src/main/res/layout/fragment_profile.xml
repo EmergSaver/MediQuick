@@ -58,8 +58,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_marginTop="-40dp"
-                android:layout_marginStart="40dp"
+                android:layout_marginTop="-45dp"
+                android:layout_marginStart="80dp"
                 app:icon="@drawable/ic_edit_pencil"
                 app:iconTint="#000000"
                 app:backgroundTint="#FFFFFF"
@@ -122,14 +122,16 @@
                     android:layout_height="wrap_content"
                     android:text="생년월일"
                     android:textSize="14sp"
-                    android:textColor="#888888"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
                     android:text="비상 연락처"
                     android:textSize="14sp"
-                    android:textColor="#888888"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
 
                 <TextView
                     android:id="@+id/tv_dob"
@@ -137,8 +139,7 @@
                     android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:textStyle="bold"
-                    android:textColor="@color/black"
+                    android:textColor="#888888"
                     tools:text="2000.03.04"/>
                 <TextView
                     android:id="@+id/tv_emergency_contact"
@@ -157,7 +158,8 @@
                     android:layout_marginTop="16dp"
                     android:text="혈액형"
                     android:textSize="14sp"
-                    android:textColor="#888888"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_columnWeight="1"
@@ -165,7 +167,8 @@
                     android:layout_marginTop="16dp"
                     android:text="성별"
                     android:textSize="14sp"
-                    android:textColor="#888888"/>
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
 
                 <TextView
                     android:id="@+id/tv_blood_type"
