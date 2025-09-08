@@ -4,13 +4,16 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.emergsaver.mediquick.R;
+import com.google.android.gms.location.DeviceOrientationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
@@ -94,9 +97,22 @@ public class MapManager {
 
                             // 최초 위치이므로 카메라 이동
                             if(isFirstLocationUpdate) {
-                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos, 16));
+                                moveCameraToCurrent(context);
                                 isFirstLocationUpdate = false;
                             }
+
+                            DeviceOrientationRequest request = new DeviceOrientationRequest
+                                    .Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
+                            FusedLocationProviderClient orientationProviderClient = LocationServices.getFusedLocationProviderClient((Activity) context);
+                            orientationProviderClient.requestDeviceOrientationUpdates(
+                                    request,
+                                    deviceOrientation -> {
+                                        if (headingLabel != null) {
+                                            headingLabel.rotateTo((float) Math.toRadians(deviceOrientation.getHeadingDegrees())); // 수정/추가: 방향 label 회전
+                                        }
+                                    },
+                                    Looper.getMainLooper()
+                            );
                         }
                     });
         } else {
