@@ -28,6 +28,7 @@ import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
 import util.NavigationManager;
+import util.NavigationUtil;
 
 public class DetailHospitalActivity extends AppCompatActivity {
     private MapView miniMap;
@@ -63,7 +64,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         addTable();
 
         findBtn.setOnClickListener(v -> {
-            findRoad();
+            NavigationUtil.findRoad(fusedLocationProviderClient, this, hospital, 1001);
         });
     }
 
@@ -172,55 +173,6 @@ public class DetailHospitalActivity extends AppCompatActivity {
             row.addView(doctorCount);
 
             tableLayout.addView(row);
-        }
-    }
-
-    // 길찾기 버튼 클릭 시
-    private void findRoad() {
-        // 권한 체크
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    1001);
-            return;
-        }
-
-        // 권한이 있는 경우에만 위치 가져오기
-        fusedLocationProviderClient.getLastLocation()
-                .addOnSuccessListener(location -> {
-                    if(location != null) {
-                        double startLat = location.getLatitude();
-                        double startLng = location.getLongitude();
-
-                        // 병원 좌표 + 이름
-                        double destLat = hospital.getLatitude();
-                        double destLng = hospital.getLongitude();
-                        String destName = hospital.getHospital_name();
-
-                        // 네비게이션 호출
-                        NavigationManager.startNavigation(
-                                DetailHospitalActivity.this,
-                                startLat,
-                                startLng,
-                                destLat,
-                                destLng,
-                                destName
-                        );
-                    } else {
-                        Toast.makeText(this, "현재 위치를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == 1001) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                findRoad(); // 권한 허용 시 길찾기 재실행
-            } else {
-                Toast.makeText(this, "위치 권한이 필요합니다.", Toast.LENGTH_SHORT).show();
-            }
         }
     }
 
