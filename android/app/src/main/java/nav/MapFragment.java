@@ -1,6 +1,7 @@
 package nav;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -220,7 +221,10 @@ public class MapFragment extends Fragment {
 
         Button navBtn = view.findViewById(R.id.navBtn);
         navBtn.setOnClickListener(v -> {
-            NavigationUtil.findRoad(fusedLocationProviderClient, getActivity(), hospitalModel, 1001);
+            Activity activity = getActivity();
+            if(activity != null) {
+                NavigationUtil.findRoad(fusedLocationProviderClient, getActivity(), hospitalModel, 1001);
+            }
         });
     }
 
