@@ -235,10 +235,10 @@ public class MapManager {
     }
 
     public void moveCameraToCurrent(Context context) {
-        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(location -> {
-                        if(location != null && kakaoMap != null) {
+                        if (location != null && kakaoMap != null) {
                             LatLng currentPos = LatLng.from(location.getLatitude(), location.getLongitude());
                             kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentPos, 16));
                         }

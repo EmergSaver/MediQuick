@@ -60,6 +60,7 @@ import model.Hospital;
 import repository.HospitalRepository;
 import util.HospitalUtils;
 import util.MapManager;
+import util.NavigationUtil;
 
 
 public class MapFragment extends Fragment {
@@ -217,10 +218,10 @@ public class MapFragment extends Fragment {
             }
         });
 
-
-
         Button navBtn = view.findViewById(R.id.navBtn);
-//        navBtn.setOnClickListener(v -> );
+        navBtn.setOnClickListener(v -> {
+            NavigationUtil.findRoad(fusedLocationProviderClient, getActivity(), hospitalModel, 1001);
+        });
     }
 
     private void initRecyclerView(View view) {
