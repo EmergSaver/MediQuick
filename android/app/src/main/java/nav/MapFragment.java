@@ -372,6 +372,11 @@ public class MapFragment extends Fragment {
         super.onResume();
         mapView.resume();
 
+        // MapManager가 초기화된 상태라면 현재 위치 바로 요청
+        if (mapManager != null) {
+            mapManager.initCurrentLocation(requireContext());
+        }
+
         // 저장된 카메라 위치가 있으면 복원
         if (savedCameraPos != null && kakaoMap != null) {
             kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
