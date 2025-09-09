@@ -198,12 +198,15 @@ public class MapFragment extends Fragment {
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        bottomSheetBehavior.setHideable(true);
         bottomSheetBehavior.setPeekHeight(0);
+        bottomSheetBehavior.setHideable(true);
 
         bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View view, int i) {
+                if(i == bottomSheetBehavior.STATE_COLLAPSED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
                 if(i == BottomSheetBehavior.STATE_HIDDEN) {
                     bottomSheet.setVisibility(View.GONE);
                 }
@@ -214,7 +217,6 @@ public class MapFragment extends Fragment {
             }
         });
 
-        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
 
 
         Button navBtn = view.findViewById(R.id.navBtn);
