@@ -61,15 +61,6 @@ public class MapManager {
         this.fusedLocationProviderClient = client;
     }
 
-    // getter 추가
-    public KakaoMap getKakaoMap() {
-        return kakaoMap;
-    }
-
-    public void onLocationPermissionGranted(Context context) {
-        initCurrentLocation(context);
-    }
-
     public void initCurrentLocation(Context context) {
         if(kakaoMap == null) {
             return;
@@ -255,12 +246,5 @@ public class MapManager {
         } else {
             ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
         }
-    }
-
-    // 카메라 이동
-    public void moveCameraToHospital(Hospital hospital) {
-        LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
-        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
-        Log.d("MAP_DEBUG", "카메라 이동 완료");
     }
 }
