@@ -198,8 +198,27 @@ public class MapFragment extends Fragment {
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        Button closeBtn = view.findViewById(R.id.closeBtn);
-        closeBtn.setOnClickListener(v -> bottomSheet.setVisibility(View.GONE));
+        bottomSheetBehavior.setHideable(true);
+        bottomSheetBehavior.setPeekHeight(0);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                if(i == BottomSheetBehavior.STATE_HIDDEN) {
+                    bottomSheet.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+            }
+        });
+
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+
+        Button navBtn = view.findViewById(R.id.navBtn);
+//        navBtn.setOnClickListener(v -> );
     }
 
     private void initRecyclerView(View view) {
@@ -355,6 +374,7 @@ public class MapFragment extends Fragment {
 
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
 
