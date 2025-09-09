@@ -48,9 +48,9 @@ public class DetailHospitalActivity extends AppCompatActivity {
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Intent로 전달된 병원 정보 받기
-        hospital = (Hospital) getIntent().getSerializableExtra("hospital");
+        hospital = getIntent().getParcelableExtra("hospital");
 
-        Log.d("DETAIL_HOSPITAL", "lat=" + hospital.getLatitude() + " lng=" + hospital.getLongitude());
+//        Log.d("DETAIL_HOSPITAL", "lat=" + hospital.getLatitude() + " lng=" + hospital.getLongitude());
 
         if(hospital == null) {
             finish();
