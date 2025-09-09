@@ -60,6 +60,7 @@ public class MapManager {
         this.fusedLocationProviderClient = client;
     }
 
+    // getter 추가
     public KakaoMap getKakaoMap() {
         return kakaoMap;
     }
