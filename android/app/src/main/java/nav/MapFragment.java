@@ -453,4 +453,9 @@ public class MapFragment extends Fragment {
         // 사용자 위치 업데이트 중단
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
 }

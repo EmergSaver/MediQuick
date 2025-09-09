@@ -142,19 +142,6 @@ public class MapManager {
             moveCameraToCurrent(context);
             isFirstLocationUpdate = false;
         }
-
-        DeviceOrientationRequest request = new DeviceOrientationRequest
-                .Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
-        FusedLocationProviderClient orientationProviderClient = LocationServices.getFusedLocationProviderClient((Activity) context);
-        orientationProviderClient.requestDeviceOrientationUpdates(
-                request,
-                deviceOrientation -> {
-                    if (headingLabel != null) {
-                        headingLabel.rotateTo((float) Math.toRadians(deviceOrientation.getHeadingDegrees())); // 수정/추가: 방향 label 회전
-                    }
-                },
-                Looper.getMainLooper()
-        );
     }
 
     public void initMapView(MapView mapView, LatLng initialPosition, onMapReadyCallback callback) {
@@ -201,6 +188,18 @@ public class MapManager {
                 if(callback != null) {
                     callback.onMapReady(kakaoMap);
                 }
+
+                DeviceOrientationRequest request = new DeviceOrientationRequest
+                        .Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
+                fusedLocationProviderClient.requestDeviceOrientationUpdates(
+                        request,
+                        deviceOrientation -> {
+                            if (headingLabel != null) {
+                                headingLabel.rotateTo((float) Math.toRadians(deviceOrientation.getHeadingDegrees()));
+                            }
+                        },
+                        Looper.getMainLooper()
+                );
             }
         });
     }
