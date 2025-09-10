@@ -12,22 +12,22 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="vertical">
 
-        <!-- 상단: 프로필 사진(가운데) + 설정 버튼(우측 상단) -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingVertical="16dp">
+            android:paddingHorizontal="16dp"
+            android:paddingTop="32dp"
+            android:paddingBottom="16dp">
 
-            <!-- 프로필 사진: 정중앙 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/card_profile_image"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 app:cardCornerRadius="60dp"
-                app:cardElevation="8dp"
-                android:layout_centerInParent="true">
+                app:cardElevation="0dp"
+                android:layout_centerHorizontal="true">
 
                 <ImageView
                     android:id="@+id/profile_image"
@@ -35,257 +35,241 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/ic_user"
                     android:scaleType="centerCrop"
-                    android:background="#FFFFFF"
+                    android:background="@android:color/transparent"
                     tools:src="@drawable/ic_user"/>
             </androidx.cardview.widget.CardView>
 
-            <!-- 설정 버튼: 오른쪽 상단 -->
-            <ImageButton
-                android:id="@+id/btn_settings"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:layout_margin="8dp"
-                android:background="@android:color/transparent"
-                android:contentDescription="설정"
-                android:src="@drawable/ic_settings" />
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_edit_profile_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_below="@id/card_profile_image"
+                android:layout_alignEnd="@id/card_profile_image"
+                android:layout_marginTop="-45dp"
+                app:icon="@drawable/ic_edit_pencil"
+                app:iconTint="#000000"
+                app:backgroundTint="#FFFFFF"
+                app:cornerRadius="20dp"
+                app:iconSize="20dp"
+                android:elevation="4dp"
+                android:padding="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/card_profile_image"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="16dp"
+                android:text="이름"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                tools:text="사용자 이름"/>
         </RelativeLayout>
 
-        <Button
-            android:id="@+id/btn_upload_photo"
-            style="@style/Widget.AppCompat.Button.Borderless"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="프로필 수정"
-            android:textColor="?attr/colorPrimary" />
-
-        <TextView
-            android:id="@+id/tv_name"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_modify_info"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginHorizontal="100dp"
             android:layout_marginTop="16dp"
-            android:text="이름"
-            android:textSize="20sp"
+            android:text="사용자 정보 수정하기"
+            android:textColor="@color/black"
             android:textStyle="bold"
-            android:textColor="@android:color/black"
-            android:gravity="center"
-            tools:text="홍길동"/>
+            android:backgroundTint="#FFFFFF"
+            app:strokeColor="#4285F4"
+            app:strokeWidth="1dp"
+            app:cornerRadius="8dp"
+            app:elevation="0dp"/>
 
-        <!-- 섹션: 개인 정보 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="24dp">
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp">
+
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="개인 정보"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"/>
-            <Button
-                android:id="@+id/btn_profile"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="수정"
-                android:textColor="?attr/colorPrimary" />
-        </LinearLayout>
 
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginTop="8dp">
-
-            <LinearLayout
+            <GridLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:padding="16dp">
+                android:layout_marginTop="16dp"
+                android:columnCount="2"
+                android:rowCount="2">
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="생년월일"
-                        android:textSize="14sp"
-                        android:textColor="#757575"/>
-                    <TextView
-                        android:id="@+id/tv_dob"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:hint="정보 없음"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="2000.03.04"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                    android:text="생년월일"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="비상연락처"
-                        android:textSize="14sp"
-                        android:textColor="#757575"/>
-                    <TextView
-                        android:id="@+id/tv_emergency_contact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:hint="정보 없음"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="010-1234-5678"/>
-                </LinearLayout>
+                    android:text="비상 연락처"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
+                <TextView
+                    android:id="@+id/tv_dob"
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="혈액형"
-                        android:textSize="14sp"
-                        android:textColor="#757575"/>
-                    <TextView
-                        android:id="@+id/tv_blood_type"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:hint="정보 없음"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="A형"/>
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_marginTop="4dp"
+                    android:textColor="#888888"
+                    tools:text="2000.03.04"/>
+                <TextView
+                    android:id="@+id/tv_emergency_contact"
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:layout_marginTop="12dp">
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="성별"
-                        android:textSize="14sp"
-                        android:textColor="#757575"/>
-                    <TextView
-                        android:id="@+id/tv_gender"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:hint="정보 없음"
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        android:textStyle="bold"
-                        tools:text="남성"/>
-                </LinearLayout>
-            </LinearLayout>
-        </androidx.cardview.widget.CardView>
+                    android:layout_marginTop="4dp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    tools:text="연락처를 등록해주세요"/>
 
-        <!-- 섹션: 알러지 정보 -->
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="혈액형"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="성별"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/black"/>
+
+                <TextView
+                    android:id="@+id/tv_blood_type"
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    tools:text="혈액형을 등록해주세요"/>
+                <TextView
+                    android:id="@+id/tv_gender"
+                    android:layout_width="0dp"
+                    android:layout_columnWeight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:textStyle="bold"
+                    android:textColor="#888888"
+                    tools:text="여성"/>
+            </GridLayout>
+        </LinearLayout>
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="24dp">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="알러지 정보"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="@android:color/black"/>
-            <Button
-                android:id="@+id/btn_allergy"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="수정"
-                android:textColor="?attr/colorPrimary" />
-        </LinearLayout>
-
-        <androidx.cardview.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="12dp"
-            app:cardElevation="4dp"
-            android:layout_marginTop="8dp">
+            android:orientation="vertical"
+            android:layout_marginTop="24dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:padding="16dp">
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="알러지 정보"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:textColor="@android:color/black"/>
+
+                <ImageButton
+                    android:id="@+id/btn_allergy"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_edit_boxpencil"
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:scaleType="fitCenter"
+                    app:tint="#000000"
+                    android:contentDescription="알러지 정보 수정" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/allergy_table_background"
+                android:padding="1dp">
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:orientation="vertical">
+                    android:orientation="vertical"
+                    android:background="#FFFFFF">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="음식 알러지"
-                        android:background="#E0E0E0"
+                        android:background="#E7F0FE"
                         android:padding="8dp"
                         android:gravity="center"
                         android:textStyle="bold"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@color/black" />
                     <LinearLayout
                         android:id="@+id/ll_food_allergies"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingTop="8dp" />
+                        android:padding="8dp" />
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginStart="8dp"
-                    android:orientation="vertical">
+                    android:layout_marginStart="1dp"
+                    android:orientation="vertical"
+                    android:background="#FFFFFF">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="약물 알러지"
-                        android:background="#E0E0E0"
+                        android:background="#E7F0FE"
                         android:padding="8dp"
                         android:gravity="center"
                         android:textStyle="bold"
-                        android:textColor="@android:color/black" />
+                        android:textColor="@color/black" />
                     <LinearLayout
                         android:id="@+id/ll_drug_allergies"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
-                        android:paddingTop="8dp" />
+                        android:padding="8dp" />
                 </LinearLayout>
             </LinearLayout>
-        </androidx.cardview.widget.CardView>
-
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>
