@@ -14,23 +14,20 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 상단: 프로필 사진(가운데) + 설정 버튼(우측 상단) -->
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center_horizontal"
             android:paddingHorizontal="16dp"
             android:paddingTop="32dp"
             android:paddingBottom="16dp">
 
-            <!-- 프로필 사진: 정중앙 -->
             <androidx.cardview.widget.CardView
+                android:id="@+id/card_profile_image"
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 app:cardCornerRadius="60dp"
                 app:cardElevation="0dp"
-                android:layout_gravity="center">
+                android:layout_centerHorizontal="true">
 
                 <ImageView
                     android:id="@+id/profile_image"
@@ -42,24 +39,14 @@
                     tools:src="@drawable/ic_user"/>
             </androidx.cardview.widget.CardView>
 
-            <Button
-                android:id="@+id/btn_upload_photo"
-                style="@style/Widget.AppCompat.Button.Borderless"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="프로필 수정"
-                android:textColor="?attr/colorPrimary"
-                android:visibility="gone"
-                />
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit_profile_icon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_below="@id/card_profile_image"
+                android:layout_alignEnd="@id/card_profile_image"
                 android:layout_marginTop="-45dp"
-                android:layout_marginStart="80dp"
                 app:icon="@drawable/ic_edit_pencil"
                 app:iconTint="#000000"
                 app:backgroundTint="#FFFFFF"
@@ -72,13 +59,15 @@
                 android:id="@+id/tv_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/card_profile_image"
+                android:layout_centerHorizontal="true"
                 android:layout_marginTop="16dp"
                 android:text="이름"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 tools:text="사용자 이름"/>
-        </LinearLayout>
+        </RelativeLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_modify_info"
