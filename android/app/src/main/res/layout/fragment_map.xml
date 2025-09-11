@@ -240,11 +240,12 @@ tools:context="nav.MapFragment">
                         android:text="혼잡도"
                         android:textSize="12sp" />
 
-                    <ImageView
-                        android:layout_width="6dp"
-                        android:layout_height="6dp"
+                    <View
+                        android:id="@+id/viewCongestion"
                         android:layout_marginStart="12dp"
-                        android:src="@drawable/green_marker" />
+                        android:layout_width="8dp"
+                        android:layout_height="8dp"
+                        android:background="@color/red"/>
 
                     <TextView
                         android:id="@+id/congestionText"

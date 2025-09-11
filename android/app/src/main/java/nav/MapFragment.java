@@ -397,6 +397,7 @@ public class MapFragment extends Fragment {
         TextView doctorText = view.findViewById(R.id.doctorText);
         TextView congestionText = view.findViewById(R.id.congestionText);
         ImageView congestionIcon = view.findViewById(R.id.congestionIcon);
+        View congestionDot = view.findViewById(R.id.viewCongestion);
 
         hospitalNameText.setText(hospital.getHospital_name());
         callText.setText(hospital.getPhone());
@@ -433,7 +434,7 @@ public class MapFragment extends Fragment {
                     color = getResources().getColor(R.color.red);
                 }
 
-                congestionIcon.setColorFilter(color);
+                congestionDot.setBackgroundColor(color);
                 congestionText.setText("" + congestionStatus + "\t (" + peopleCount.toString() + " 명)");
             }
 
