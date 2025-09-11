@@ -19,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -239,12 +241,11 @@ public class MapFragment extends Fragment {
     }
 
     private void initRecyclerView(View view) {
-        RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
+        searchResultList = view.findViewById(R.id.search_result_list);
         searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // 리스트 클릭 시
         searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
-//            mapManager.moveCameraToHospital(hospital);
             if(kakaoMap != null) {
                 savedCameraPos = kakaoMap.getCameraPosition();
             }
@@ -339,9 +340,14 @@ public class MapFragment extends Fragment {
 
         // 키보드 엔터키 처리
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            String query = searchEditText.getText().toString().trim();
-            performSearch(query);
-            return true;
+            if(actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String query = searchEditText.getText().toString().trim();
+                performSearch(query);
+                return true;
+            }
+            return false;
         });
     }
 
@@ -355,9 +361,19 @@ public class MapFragment extends Fragment {
         repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
             @Override
             public void onLoaded(List<Hospital> hospitals) {
-                searchAdapter.setItems(hospitals);
+                List<Hospital> distinctList = new ArrayList<>();
+                for(Hospital h : hospitals) {
+                    boolean exists = false;
+                    for(Hospital d : distinctList) {
+                        if(d.getHospital_name().equals(h.getHospital_name())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if(!exists) distinctList.add(h);
+                }
 
-                searchResultList = getView().findViewById(R.id.search_result_list);
+                searchAdapter.updateList(distinctList);
                 searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
             }
 
