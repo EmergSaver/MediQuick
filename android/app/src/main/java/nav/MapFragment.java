@@ -385,10 +385,26 @@ public class MapFragment extends Fragment {
         if(congestionManager == null) {
             congestionManager = new CongestionManager();
         }
+
         congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
             public void onUpdate(Object peopleCount) {
-                congestionText.setText(peopleCount.toString());
+                String congestionStatus;
+                int people = 0;
+
+                if(peopleCount instanceof Number) {
+                    people = ((Number) peopleCount).intValue();
+                }
+
+                if(people <= 20) {
+                    congestionStatus = "원활";
+                } else if(people <= 40) {
+                    congestionStatus = "보통";
+                } else {
+                    congestionStatus = "혼잡";
+                }
+
+                congestionText.setText("" + congestionStatus + "\t (" + peopleCount.toString() + " 명)");
             }
 
             @Override
