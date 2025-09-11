@@ -3,6 +3,7 @@ package util;
 import android.os.Handler;
 import android.util.Log;
 
+import model.Hospital;
 import repository.CongestionRepository;
 
 public class CongestionManager {
@@ -26,7 +27,7 @@ public class CongestionManager {
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                fetchCongestion();
+                fetchCongestion(new Hospital());
                 handler.postDelayed(this, REFRESH_INTERVAL_MS);
             }
         }, 0); // 첫 실행 바로
@@ -38,10 +39,20 @@ public class CongestionManager {
     }
 
     // 혼잡도 가져오기
-    private void fetchCongestion() {
+    private void fetchCongestion(Hospital hospital) {
         congestionRepository.fetchLatestAnalysis(new CongestionRepository.OnAnalysisLoaded() {
             @Override
             public void onLoaded(Object peopleCount) {
+                int people = 0;
+                if(peopleCount instanceof Number) {
+                    people = ((Number) peopleCount).intValue();
+                }
+
+                // 병원 객체에 혼잡도 저장
+                if(hospital != null) {
+                    hospital.setCurrentPeople(people);
+                }
+
                 if(listener != null) {
                     listener.onUpdate(peopleCount);
                 }

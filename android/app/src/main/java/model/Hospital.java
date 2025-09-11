@@ -12,6 +12,7 @@ public class Hospital implements Serializable{
     private double longitude;
     // 추가적으로 상세정보도 추후 추가
     private int doctor_count;
+    private int currentPeople;
 
     // 기본 생성자
     public Hospital() {
@@ -92,5 +93,13 @@ public class Hospital implements Serializable{
 
     public void setDoctor_count(int doctor_count) {
         this.doctor_count = doctor_count;
+    }
+
+    public int getCurrentPeople() {
+        return currentPeople;
+    }
+
+    public void setCurrentPeople(int currentPeople) {
+        this.currentPeople = currentPeople;
     }
 }
