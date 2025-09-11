@@ -1,6 +1,7 @@
 package nav;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -18,9 +19,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
@@ -58,8 +61,10 @@ import java.util.concurrent.Executors;
 
 import model.Hospital;
 import repository.HospitalRepository;
+import util.CongestionManager;
 import util.HospitalUtils;
 import util.MapManager;
+import util.NavigationUtil;
 
 
 public class MapFragment extends Fragment {
@@ -100,6 +105,7 @@ public class MapFragment extends Fragment {
     private EditText searchEditText;
 
     private RecyclerView searchResultList;
+    private CongestionManager congestionManager;
 
 
     public static MapFragment newInstance(String param1, String param2) {
@@ -189,6 +195,14 @@ public class MapFragment extends Fragment {
             public void onMarkerClick(Hospital hospital) {
                 // 마커 클릭 시 UI 업데이트
                 hospitalModel = hospital;
+
+                // 마커 클릭 시 카메라 이동 + 줌
+                if(mapManager.getKakaoMap() != null) {
+                    LatLng pos = LatLng.from(hospital.getLatitude() - 0.0005, hospital.getLongitude());
+                    mapManager.getKakaoMap().moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
+                }
+
+                // Bottom Sheet 열기
                 showHospitalInfo(view, hospital);
             }
         });
@@ -198,17 +212,40 @@ public class MapFragment extends Fragment {
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
 
-        Button closeBtn = view.findViewById(R.id.closeBtn);
-        closeBtn.setOnClickListener(v -> bottomSheet.setVisibility(View.GONE));
+        bottomSheetBehavior.setPeekHeight(0);
+        bottomSheetBehavior.setHideable(true);
+
+        bottomSheetBehavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View view, int i) {
+                if(i == bottomSheetBehavior.STATE_COLLAPSED) {
+                    bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+                }
+                if(i == BottomSheetBehavior.STATE_HIDDEN) {
+                    bottomSheet.setVisibility(View.GONE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View view, float v) {
+            }
+        });
+
+        Button navBtn = view.findViewById(R.id.navBtn);
+        navBtn.setOnClickListener(v -> {
+            Activity activity = getActivity();
+            if(activity != null) {
+                NavigationUtil.findRoad(fusedLocationProviderClient, getActivity(), hospitalModel, 1001);
+            }
+        });
     }
 
     private void initRecyclerView(View view) {
-        RecyclerView searchResultList = view.findViewById(R.id.search_result_list);
+        searchResultList = view.findViewById(R.id.search_result_list);
         searchResultList.setLayoutManager(new LinearLayoutManager(requireContext()));
 
         // 리스트 클릭 시
         searchAdapter = new MapSearchAdapter(new ArrayList<>(), hospital -> {
-//            mapManager.moveCameraToHospital(hospital);
             if(kakaoMap != null) {
                 savedCameraPos = kakaoMap.getCameraPosition();
             }
@@ -303,9 +340,14 @@ public class MapFragment extends Fragment {
 
         // 키보드 엔터키 처리
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
-            String query = searchEditText.getText().toString().trim();
-            performSearch(query);
-            return true;
+            if(actionId == EditorInfo.IME_ACTION_SEARCH ||
+                    (event != null && event.getKeyCode() == KeyEvent.KEYCODE_ENTER
+                    && event.getAction() == KeyEvent.ACTION_DOWN)) {
+                String query = searchEditText.getText().toString().trim();
+                performSearch(query);
+                return true;
+            }
+            return false;
         });
     }
 
@@ -319,9 +361,19 @@ public class MapFragment extends Fragment {
         repository.searchHospitalByName(query, new HospitalRepository.OnHospitalsLoaded() {
             @Override
             public void onLoaded(List<Hospital> hospitals) {
-                searchAdapter.setItems(hospitals);
+                List<Hospital> distinctList = new ArrayList<>();
+                for(Hospital h : hospitals) {
+                    boolean exists = false;
+                    for(Hospital d : distinctList) {
+                        if(d.getHospital_name().equals(h.getHospital_name())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if(!exists) distinctList.add(h);
+                }
 
-                searchResultList = getView().findViewById(R.id.search_result_list);
+                searchAdapter.updateList(distinctList);
                 searchResultList.setVisibility(hospitals.isEmpty() ? View.GONE : View.VISIBLE);
             }
 
@@ -343,6 +395,9 @@ public class MapFragment extends Fragment {
         TextView callText = view.findViewById(R.id.callText);
         TextView addressText = view.findViewById(R.id.addressText);
         TextView doctorText = view.findViewById(R.id.doctorText);
+        TextView congestionText = view.findViewById(R.id.congestionText);
+        ImageView congestionIcon = view.findViewById(R.id.congestionIcon);
+        View congestionDot = view.findViewById(R.id.viewCongestion);
 
         hospitalNameText.setText(hospital.getHospital_name());
         callText.setText(hospital.getPhone());
@@ -353,8 +408,45 @@ public class MapFragment extends Fragment {
             doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
         }
 
+        if(congestionManager == null) {
+            congestionManager = new CongestionManager();
+        }
+
+        congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
+            @Override
+            public void onUpdate(Object peopleCount) {
+                String congestionStatus;
+                int people = 0;
+                int color;
+
+                if(peopleCount instanceof Number) {
+                    people = ((Number) peopleCount).intValue();
+                }
+
+                if(people <= 20) {
+                    congestionStatus = "원활";
+                    color = getResources().getColor(R.color.lime_green);
+                } else if(people <= 40) {
+                    congestionStatus = "보통";
+                    color = getResources().getColor(R.color.orange);
+                } else {
+                    congestionStatus = "혼잡";
+                    color = getResources().getColor(R.color.red);
+                }
+
+                congestionDot.setBackgroundColor(color);
+                congestionText.setText("" + congestionStatus + "\t (" + peopleCount.toString() + " 명)");
+            }
+
+            @Override
+            public void onError(Exception e) {
+                congestionText.setText("오류 발생");
+            }
+        });
+
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
+        bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
     }
 
 
@@ -371,6 +463,11 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mapView.resume();
+
+        // MapManager가 초기화된 상태라면 현재 위치 바로 요청
+        if (mapManager != null) {
+            mapManager.initCurrentLocation(requireContext());
+        }
 
         // 저장된 카메라 위치가 있으면 복원
         if (savedCameraPos != null && kakaoMap != null) {
@@ -389,11 +486,13 @@ public class MapFragment extends Fragment {
         // 사용자 위치 업데이트 (10초마다)
         if(ActivityCompat.checkSelfPermission(requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            LocationRequest locationRequest = new LocationRequest.Builder(
-                    Priority.PRIORITY_BALANCED_POWER_ACCURACY, 10000
-            ). build();
 
-            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, null);
+            LocationRequest locationRequest = new LocationRequest.Builder(
+                    Priority.PRIORITY_HIGH_ACCURACY, 0 // 1초 간격
+            ).setMinUpdateDistanceMeters(0f)
+                    .build();
+
+            fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
         }
 
         // 검생창 초기화
@@ -418,5 +517,13 @@ public class MapFragment extends Fragment {
 
         // 사용자 위치 업데이트 중단
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if(congestionManager != null) {
+            congestionManager.stopUpdates();
+        }
     }
 }

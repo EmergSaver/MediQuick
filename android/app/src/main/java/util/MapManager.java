@@ -4,13 +4,19 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import com.emergsaver.mediquick.R;
+import com.google.android.gms.location.DeviceOrientationRequest;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
@@ -54,54 +60,90 @@ public class MapManager {
         this.fusedLocationProviderClient = client;
     }
 
-    // getter 추가
     public KakaoMap getKakaoMap() {
         return kakaoMap;
     }
 
     public void initCurrentLocation(Context context) {
-        // TrackingManager 초기화
-        trackingManager = kakaoMap.getTrackingManager();
+        if(kakaoMap == null) {
+            return;
+        }
 
         // 권한 체크 후 마지막 위치 가져오기 (초기 지도 위치 설정)
-        if(ActivityCompat.checkSelfPermission(context,
-                Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(location -> {
-                        LatLng startPos;
-                        if(location != null) {
-                            startPos = LatLng.from(location.getLatitude(), location.getLongitude());
-
-                            // Label 추가
-                            LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
-
-                            // 현재 위치 label
-                            locationLabel = labelLayer.addLabel(LabelOptions.from(startPos)
-                                    .setRank(10)
-                                    .setStyles(LabelStyles.from(
-                                            LabelStyle.from(R.drawable.current_location)
-                                                    .setAnchorPoint(0.5f, 0.5f))));
-
-                            // 방향 Label
-                            headingLabel = labelLayer.addLabel(LabelOptions.from(startPos)
-                                    .setRank(9)
-                                    .setStyles(LabelStyles.from(
-                                            LabelStyle.from(R.drawable.direction_area)
-                                                    .setAnchorPoint(0.5f, 1.0f))));
-
-                            // headingLabel이 locationLabel과 함께 이동
-                            locationLabel.addSharePosition(headingLabel);
-
-                            // 최초 위치이므로 카메라 이동
-                            if(isFirstLocationUpdate) {
-                                kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(startPos, 16));
-                                isFirstLocationUpdate = false;
-                            }
-                        }
-                    });
-        } else {
+        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+            // 권한이 없으면 요청 후 종료
             ActivityCompat.requestPermissions((Activity) context,
                     new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
+            return;
+        }
+
+        // TrackingManager 초기화
+        trackingManager = kakaoMap.getTrackingManager();
+        // 위치 기록 없을 경우 실시간 위치 요청
+        LocationRequest locationRequest = new LocationRequest.Builder(
+                LocationRequest.PRIORITY_HIGH_ACCURACY, 1000)
+                .setMinUpdateDistanceMeters(0f)
+                .build();
+
+
+        fusedLocationProviderClient.getLastLocation()
+                .addOnSuccessListener(location -> {
+                    LatLng startPos;
+                    if(location != null) {
+                        // 위치 기록 있으면 지도 및 라벨 초기화
+                        updateMapWithLocation(location, context);
+
+                    } else {
+                        fusedLocationProviderClient.requestLocationUpdates(locationRequest, new LocationCallback() {
+                            @Override
+                            public void onLocationResult(@NonNull LocationResult result) {
+                                if(result.getLastLocation() != null) {
+                                    updateMapWithLocation(result.getLastLocation(), context);
+                                    fusedLocationProviderClient.removeLocationUpdates(this); // 한 번만 사용
+                                }
+                            }
+                        }, Looper.getMainLooper());
+                    }
+                });
+    }
+
+    private void updateMapWithLocation(Location location, Context context) {
+        LatLng startPos = LatLng.from(location.getLatitude(), location.getLongitude());
+
+        // Label 추가
+        LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
+
+        // 현재 위치 label
+        if(locationLabel == null) {
+            locationLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                    .setRank(10)
+                    .setStyles(LabelStyles.from(
+                            LabelStyle.from(R.drawable.current_location)
+                                    .setAnchorPoint(0.5f, 0.5f))));
+
+        } else {
+            locationLabel.moveTo(startPos);
+        }
+        if(headingLabel == null) {
+            // 방향 Label
+            headingLabel = labelLayer.addLabel(LabelOptions.from(startPos)
+                    .setRank(9)
+                    .setStyles(LabelStyles.from(
+                            LabelStyle.from(R.drawable.direction_area)
+                                    .setAnchorPoint(0.5f, 1.0f))));
+
+        } else {
+            headingLabel.moveTo(startPos);
+        }
+
+        // headingLabel이 locationLabel과 함께 이동
+        locationLabel.addSharePosition(headingLabel);
+
+        // 최초 위치이므로 카메라 이동
+        if(isFirstLocationUpdate) {
+            moveCameraToCurrent(context);
+            isFirstLocationUpdate = false;
         }
     }
 
@@ -131,14 +173,6 @@ public class MapManager {
                 // 지도 제어
                 kakaoMap = map;
 
-                // 지도 초기 위치 복원
-//                if (savedCameraPos != null) {
-//                    kakaoMap.moveCamera(CameraUpdateFactory.newCameraPosition(savedCameraPos));
-//                }
-//
-//                // 현재 위치 가져오기
-//                initCurrentLocation(mapView.getContext());
-
                 // 마커 클릭 리스너 등록
                 kakaoMap.setOnLabelClickListener((kakao, layer, label) -> {
                     Hospital hospital = (Hospital) label.getTag();
@@ -157,6 +191,18 @@ public class MapManager {
                 if(callback != null) {
                     callback.onMapReady(kakaoMap);
                 }
+
+                DeviceOrientationRequest request = new DeviceOrientationRequest
+                        .Builder(DeviceOrientationRequest.OUTPUT_PERIOD_DEFAULT).build();
+                fusedLocationProviderClient.requestDeviceOrientationUpdates(
+                        request,
+                        deviceOrientation -> {
+                            if (headingLabel != null) {
+                                headingLabel.rotateTo((float) Math.toRadians(deviceOrientation.getHeadingDegrees()));
+                            }
+                        },
+                        Looper.getMainLooper()
+                );
             }
         });
     }
@@ -170,8 +216,20 @@ public class MapManager {
         LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
         LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
 
+        // 혼잡도 기반 색상 결정
+        int drawableRes;
+        int peopleCount = hospital.getCurrentPeople();
+
+        if(peopleCount <= 20) {
+            drawableRes = R.drawable.green_marker;
+        } else if(peopleCount <= 40) {
+            drawableRes = R.drawable.orange_marker;
+        } else {
+            drawableRes = R.drawable.red_marker;
+        }
+
         // 마커 스타일 설정
-        LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
+        LabelStyle style = LabelStyle.from(drawableRes).setAnchorPoint(1.0f, 1.0f);
         LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
         Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
 
@@ -191,10 +249,10 @@ public class MapManager {
     }
 
     public void moveCameraToCurrent(Context context) {
-        if(ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationProviderClient.getLastLocation()
                     .addOnSuccessListener(location -> {
-                        if(location != null && kakaoMap != null) {
+                        if (location != null && kakaoMap != null) {
                             LatLng currentPos = LatLng.from(location.getLatitude(), location.getLongitude());
                             kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(currentPos, 16));
                         }
@@ -202,12 +260,5 @@ public class MapManager {
         } else {
             ActivityCompat.requestPermissions((Activity) context, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1000);
         }
-    }
-
-    // 카메라 이동
-    public void moveCameraToHospital(Hospital hospital) {
-        LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
-        kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
-        Log.d("MAP_DEBUG", "카메라 이동 완료");
     }
 }

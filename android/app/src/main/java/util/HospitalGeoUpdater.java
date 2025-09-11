@@ -44,6 +44,10 @@ public class HospitalGeoUpdater {
                                         hospital.setLatitude(loc.getLatitude());
                                         hospital.setLongitude(loc.getLongitude());
 
+                                        Log.d("GeoCoder", "변환 성공: " + address +
+                                                " -> 위도: " + loc.getLatitude() +
+                                                ", 경도: " + loc.getLongitude());
+
                                         db.collection("hospitals")
                                                 .document(document.getId())
                                                 .update("latitude", loc.getLatitude(),
@@ -53,7 +57,8 @@ public class HospitalGeoUpdater {
                                                 .addOnFailureListener(e ->
                                                         Log.e("FIREBASE", "좌표 저장 실패", e));
                                     }
-                                } catch (IOException e) {
+                                    Thread.sleep(200);
+                                } catch (IOException | InterruptedException e) {
                                     e.printStackTrace();
                                 }
                             }

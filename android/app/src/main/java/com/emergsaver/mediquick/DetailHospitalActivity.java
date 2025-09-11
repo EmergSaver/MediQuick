@@ -1,15 +1,24 @@
 package com.emergsaver.mediquick;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.LatLng;
 import com.kakao.vectormap.MapView;
@@ -19,15 +28,20 @@ import model.Hospital;
 import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
+import util.NavigationManager;
+import util.NavigationUtil;
 
 public class DetailHospitalActivity extends AppCompatActivity {
     private MapView miniMap;
     private KakaoMap kakaoMap;
 
     private TextView hospitalName, hospitalAddress, hospitalPhone, congestion;
+    private View congestionDot;
     private Hospital hospital;
     private CongestionManager congestionManager;
     private TableLayout tableLayout;
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    private Button findBtn;
 
 
     @Override
@@ -35,11 +49,10 @@ public class DetailHospitalActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_detail_hospital);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
 
         // Intent로 전달된 병원 정보 받기
         hospital = (Hospital) getIntent().getSerializableExtra("hospital");
-
-        Log.d("DETAIL_HOSPITAL", "lat=" + hospital.getLatitude() + " lng=" + hospital.getLongitude());
 
         if(hospital == null) {
             finish();
@@ -50,14 +63,20 @@ public class DetailHospitalActivity extends AppCompatActivity {
         initMiniMap();
         initCongestion();
         addTable();
+
+        findBtn.setOnClickListener(v -> {
+            NavigationUtil.findRoad(fusedLocationProviderClient, this, hospital, 1001);
+        });
     }
 
     private void initView() {
         hospitalName = findViewById(R.id.tvHospitalName);
         hospitalAddress = findViewById(R.id.tvAddress);
         hospitalPhone = findViewById(R.id.tvPhone);
+        congestionDot = findViewById(R.id.viewCongestionDot);
         congestion = findViewById(R.id.tvCongestion);
         miniMap = findViewById(R.id.miniMap);
+        findBtn = findViewById(R.id.btnStartNavi);
 
         // 병원 정보 세팅
         hospitalName.setText(hospital.getHospital_name());
@@ -91,12 +110,37 @@ public class DetailHospitalActivity extends AppCompatActivity {
     }
 
     private void initCongestion() {
+        // 혼잡도 초기화
         congestionManager = new CongestionManager();
         congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
             public void onUpdate(Object peopleCount) {
-                runOnUiThread(() ->
-                        congestion.setText(String.valueOf(peopleCount)));
+                runOnUiThread(() -> {
+                    String congestionStatus;
+                    int people = 0;
+                    int color;
+
+                    if (peopleCount instanceof Number) {
+                        people = ((Number) peopleCount).intValue();
+                    }
+
+                    if (people <= 20) {
+                        congestionStatus = "원활";
+                        color = getResources().getColor(R.color.lime_green);
+                    } else if (people <= 40) {
+                        congestionStatus = "보통";
+                        color = getResources().getColor(R.color.orange);
+                    } else {
+                        congestionStatus = "혼잡";
+                        color = getResources().getColor(R.color.red);
+                    }
+
+                    // 색상과 상태를 TextView에 적용
+                    if(congestionDot != null) {
+                        congestionDot.setBackgroundColor(color);
+                    }
+                    congestion.setText(congestionStatus + "\t(" + people + " 명)");
+                });
             }
 
             @Override
@@ -106,6 +150,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         });
     }
 
+    // 진료과 & 진료인 수 테이블 생성
     private void addTable() {
         tableLayout = findViewById(R.id.tableDepts);
         tableLayout.removeAllViews();
