@@ -21,6 +21,7 @@
             android:paddingTop="32dp"
             android:paddingBottom="16dp">
 
+            <!-- 프로필 이미지 원 -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_profile_image"
                 android:layout_width="120dp"
@@ -39,22 +40,25 @@
                     tools:src="@drawable/ic_user"/>
             </androidx.cardview.widget.CardView>
 
+            <!-- ✅ 수정: 프로필 사진 우하단에 겹쳐서 표시 -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit_profile_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/Widget.AppCompat.Button.Borderless.Colored"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:layout_below="@id/card_profile_image"
                 android:layout_alignEnd="@id/card_profile_image"
-                android:layout_marginTop="-45dp"
-                app:icon="@drawable/ic_edit_pencil"
-                app:iconTint="#000000"
-                app:backgroundTint="#FFFFFF"
+                android:layout_marginTop="-18dp"
+                android:layout_marginEnd="4dp"
+                android:contentDescription="프로필 사진 수정"
+                android:elevation="6dp"
+                app:backgroundTint="@android:color/white"
                 app:cornerRadius="20dp"
+                app:icon="@drawable/ic_edit_pencil"
                 app:iconSize="20dp"
-                android:elevation="4dp"
-                android:padding="8dp"/>
+                app:iconTint="@android:color/black"/>
 
+            <!-- 사용자 이름 -->
             <TextView
                 android:id="@+id/tv_name"
                 android:layout_width="wrap_content"
@@ -67,6 +71,8 @@
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 tools:text="사용자 이름"/>
+
+            <!-- 설정 버튼 -->
             <ImageButton
                 android:id="@+id/btn_settings"
                 android:layout_width="40dp"
@@ -82,6 +88,7 @@
 
         </RelativeLayout>
 
+        <!-- 사용자 정보 수정 버튼 -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_modify_info"
             android:layout_width="match_parent"
@@ -97,6 +104,7 @@
             app:cornerRadius="8dp"
             app:elevation="0dp"/>
 
+        <!-- 개인 정보 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -126,7 +134,7 @@
                     android:text="생년월일"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="@color/black"/>
+                    android:textColor="@android:color/black"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_columnWeight="1"
@@ -134,7 +142,7 @@
                     android:text="비상 연락처"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="@color/black"/>
+                    android:textColor="@android:color/black"/>
 
                 <TextView
                     android:id="@+id/tv_dob"
@@ -162,7 +170,7 @@
                     android:text="혈액형"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="@color/black"/>
+                    android:textColor="@android:color/black"/>
                 <TextView
                     android:layout_width="0dp"
                     android:layout_columnWeight="1"
@@ -171,7 +179,7 @@
                     android:text="성별"
                     android:textSize="14sp"
                     android:textStyle="bold"
-                    android:textColor="@color/black"/>
+                    android:textColor="@android:color/black"/>
 
                 <TextView
                     android:id="@+id/tv_blood_type"
@@ -194,6 +202,7 @@
             </GridLayout>
         </LinearLayout>
 
+        <!-- 알러지 정보 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
