@@ -18,6 +18,8 @@ public class Hospital implements Serializable{
     public Hospital() {
     }
 
+    private List<Specialty> specialties;
+
     public Hospital(String id, String hospital_name, String phone, String address, Double latitude, Double longitude, int doctor_count) {
         this.id = id;
         this.hospital_name = hospital_name;
