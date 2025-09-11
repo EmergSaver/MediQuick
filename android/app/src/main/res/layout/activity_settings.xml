@@ -15,6 +15,7 @@
         android:padding="24dp"
         android:gravity="center">
 
+        <!-- 설정 제목 -->
         <TextView
             android:id="@+id/tvTitle"
             android:text="설정"
