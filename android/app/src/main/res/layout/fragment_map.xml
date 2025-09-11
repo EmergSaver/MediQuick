@@ -250,7 +250,7 @@ tools:context="nav.MapFragment">
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="6dp"
-                        android:text="원활"
+                        android:text="불러오는 중..."
                         android:textSize="12sp" />
                 </LinearLayout>
                 <!-- 전문의 수 -->
