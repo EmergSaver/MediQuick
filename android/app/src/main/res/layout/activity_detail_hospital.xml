@@ -67,14 +67,14 @@
                 android:id="@+id/viewCongestionDot"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
-                android:background="#22A447" />
+                android:background="@color/red" />
 
             <TextView
                 android:id="@+id/tvCongestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="6dp"
-                android:text="보통" />
+                android:text="혼잡" />
         </LinearLayout>
 
         <!-- 진료 정보 (간단 리스트 예시) -->
