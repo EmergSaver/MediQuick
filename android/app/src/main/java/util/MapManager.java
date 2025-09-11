@@ -17,7 +17,6 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.kakao.vectormap.KakaoMap;
 import com.kakao.vectormap.KakaoMapReadyCallback;
 import com.kakao.vectormap.LatLng;
@@ -213,8 +212,20 @@ public class MapManager {
         LatLng pos = LatLng.from(hospital.getLatitude(), hospital.getLongitude());
         LabelLayer labelLayer = kakaoMap.getLabelManager().getLayer();
 
+        // 혼잡도 기반 색상 결정
+        int drawableRes;
+        int peopleCount = hospital.getCurrentPeople();
+
+        if(peopleCount <= 20) {
+            drawableRes = R.drawable.green_marker;
+        } else if(peopleCount <= 40) {
+            drawableRes = R.drawable.orange_marker;
+        } else {
+            drawableRes = R.drawable.red_marker;
+        }
+
         // 마커 스타일 설정
-        LabelStyle style = LabelStyle.from(R.drawable.red_marker).setAnchorPoint(0.5f, 1.0f);
+        LabelStyle style = LabelStyle.from(drawableRes).setAnchorPoint(0.5f, 1.0f);
         LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
         Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
 
