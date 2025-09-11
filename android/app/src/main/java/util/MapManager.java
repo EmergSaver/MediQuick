@@ -60,6 +60,10 @@ public class MapManager {
         this.fusedLocationProviderClient = client;
     }
 
+    public KakaoMap getKakaoMap() {
+        return kakaoMap;
+    }
+
     public void initCurrentLocation(Context context) {
         if(kakaoMap == null) {
             return;
