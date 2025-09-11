@@ -4,7 +4,9 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -34,6 +36,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private KakaoMap kakaoMap;
 
     private TextView hospitalName, hospitalAddress, hospitalPhone, congestion;
+    private View congestionDot;
     private Hospital hospital;
     private CongestionManager congestionManager;
     private TableLayout tableLayout;
@@ -70,6 +73,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         hospitalName = findViewById(R.id.tvHospitalName);
         hospitalAddress = findViewById(R.id.tvAddress);
         hospitalPhone = findViewById(R.id.tvPhone);
+        congestionDot = findViewById(R.id.viewCongestionDot);
         congestion = findViewById(R.id.tvCongestion);
         miniMap = findViewById(R.id.miniMap);
         findBtn = findViewById(R.id.btnStartNavi);
@@ -111,8 +115,32 @@ public class DetailHospitalActivity extends AppCompatActivity {
         congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
             @Override
             public void onUpdate(Object peopleCount) {
-                runOnUiThread(() ->
-                        congestion.setText(String.valueOf(peopleCount)));
+                runOnUiThread(() -> {
+                    String congestionStatus;
+                    int people = 0;
+                    int color;
+
+                    if (peopleCount instanceof Number) {
+                        people = ((Number) peopleCount).intValue();
+                    }
+
+                    if (people <= 20) {
+                        congestionStatus = "원활";
+                        color = getResources().getColor(R.color.lime_green);
+                    } else if (people <= 40) {
+                        congestionStatus = "보통";
+                        color = getResources().getColor(R.color.orange);
+                    } else {
+                        congestionStatus = "혼잡";
+                        color = getResources().getColor(R.color.red);
+                    }
+
+                    // 색상과 상태를 TextView에 적용
+                    if(congestionDot != null) {
+                        congestionDot.setBackgroundColor(color);
+                    }
+                    congestion.setText(congestionStatus + "\t(" + people + " 명)");
+                });
             }
 
             @Override
