@@ -31,7 +31,8 @@ import com.kakao.sdk.user.model.Profile;
  * - 이메일/비번 로그인 (미인증 → CheckEmail 유도)
  * - 자동로그인 복원/저장
  * - 카카오 로그인
- * - ✅ 변경: '가입완료!' 토스트 로직 제거 (여기선 절대 안 뜸)
+
+
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -105,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                         }
                         if (!user.isEmailVerified()) {
                             btLogin.setEnabled(true);
-                            auth.signOut();
+                            //auth.signOut(); //  세션을 끊지 않음 (인증 확인 화면에서 유지)
                             Intent i = new Intent(LoginActivity.this, CheckEmail.class);
                             i.putExtra("email", email);
                             startActivity(i);
@@ -113,13 +114,15 @@ public class LoginActivity extends AppCompatActivity {
                             return;
                         }
 
+                        //  자동로그인 저장/해제
+                        if (cbAuto.isChecked()) saveAutoFill(email, pw, true);
+                        else saveAutoFill("", "", false);
+
+                        // 프로필 조회 후 메인 이동
                         String uid = user.getUid();
                         db.collection("users").document(uid).get()
                                 .addOnSuccessListener(doc -> {
                                     btLogin.setEnabled(true);
-                                    if (cbAuto.isChecked()) saveAutoFill(email, pw, true);
-                                    else saveAutoFill("", "", false);
-
                                     String name = doc.getString("name");
                                     String birth = doc.getString("birth");
                                     String bloodType = doc.getString("bloodType");
@@ -131,7 +134,7 @@ public class LoginActivity extends AppCompatActivity {
                                     i.putExtra("birth", birth);
                                     i.putExtra("bloodType", bloodType);
 
-                                    // ✅ 여기서는 '가입완료!' 토스트를 절대 띄우지 않는다
+
                                     startActivity(i);
                                     finish();
                                 })
@@ -229,6 +232,110 @@ public class LoginActivity extends AppCompatActivity {
         );
     }
 
+    /*
+     * - 흐름:
+     *   (A) 기존 세션 + 이메일 인증 완료 → 바로 MainActivity
+     *   (B) 세션 없음 → 저장 자격증명으로 조용히 signIn → 인증 확인 후 MainActivity
+     */
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        boolean auto = sp.getBoolean(KEY_AUTO, false);
+        if (!auto) return; // 자동로그인 미사용
+
+        String savedEmail = sp.getString(KEY_EMAIL, "");
+        String savedPw    = sp.getString(KEY_PW, "");
+        if (TextUtils.isEmpty(savedEmail) || TextUtils.isEmpty(savedPw)) return; // 저장값 없음
+
+        // 중복 동작 방지용 (자동 로그인 시도 동안 수동 로그인 버튼 비활성화)
+        if (btLogin != null) btLogin.setEnabled(false);
+
+        FirebaseUser current = auth.getCurrentUser();
+
+        // (A) 기존 세션 존재
+        if (current != null) {
+            if (current.isEmailVerified()) {
+                // 프로필 조회 후 메인 이동
+                String uid = current.getUid();
+                db.collection("users").document(uid).get()
+                        .addOnSuccessListener(doc -> {
+                            String name = doc.getString("name");
+                            String birth = doc.getString("birth");
+                            String bloodType = doc.getString("bloodType");
+
+                            Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                            i.putExtra("uid", uid);
+                            i.putExtra("name", name);
+                            i.putExtra("email", savedEmail);
+                            i.putExtra("birth", birth);
+                            i.putExtra("bloodType", bloodType);
+                            startActivity(i);
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            if (btLogin != null) btLogin.setEnabled(true);
+                            Toast.makeText(this, "프로필 조회 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        });
+            } else {
+                // 미인증 세션 → 인증 안내 화면으로
+                if (btLogin != null) btLogin.setEnabled(true);
+                Intent i = new Intent(LoginActivity.this, CheckEmail.class);
+                i.putExtra("email", savedEmail);
+                startActivity(i);
+                Toast.makeText(this, "이메일 인증 후 로그인 가능합니다.", Toast.LENGTH_LONG).show();
+            }
+            return;
+        }
+
+        // (B) 세션 없음 → 저장된 자격증명으로 조용히 로그인
+        auth.signInWithEmailAndPassword(savedEmail, savedPw)
+                .addOnSuccessListener(result -> {
+                    FirebaseUser user = auth.getCurrentUser();
+                    if (user == null) {
+                        if (btLogin != null) btLogin.setEnabled(true);
+                        return;
+                    }
+                    if (!user.isEmailVerified()) {
+                        if (btLogin != null) btLogin.setEnabled(true);
+                        Intent i = new Intent(LoginActivity.this, CheckEmail.class);
+                        i.putExtra("email", savedEmail);
+                        startActivity(i);
+                        Toast.makeText(this, "이메일 인증 후 로그인 가능합니다.", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
+                    String uid = user.getUid();
+                    db.collection("users").document(uid).get()
+                            .addOnSuccessListener(doc -> {
+                                if (btLogin != null) btLogin.setEnabled(true);
+                                String name = doc.getString("name");
+                                String birth = doc.getString("birth");
+                                String bloodType = doc.getString("bloodType");
+
+                                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                                i.putExtra("uid", uid);
+                                i.putExtra("name", name);
+                                i.putExtra("email", savedEmail);
+                                i.putExtra("birth", birth);
+                                i.putExtra("bloodType", bloodType);
+                                startActivity(i);
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                if (btLogin != null) btLogin.setEnabled(true);
+                                Toast.makeText(this, "프로필 조회 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    // 자동로그인 실패 → 플래그 해제 및 저장값 삭제
+                    if (btLogin != null) btLogin.setEnabled(true);
+                    saveAutoFill("", "", false);
+                    Toast.makeText(this, "자동 로그인 실패: 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
     private void clearKakaoCache() {
         getSharedPreferences("kakao_user", MODE_PRIVATE).edit().clear().apply();
     }
@@ -262,6 +369,10 @@ public class LoginActivity extends AppCompatActivity {
         return !TextUtils.isEmpty(s) && Patterns.EMAIL_ADDRESS.matcher(s).matches();
     }
 
+    /**
+     *  현재는 SharedPreferences에 평문 저장 (캡스톤/개발 단계)
+     *   → 운영 시에는 반드시 EncryptedSharedPreferences로 전환 권장
+     */
     private void saveAutoFill(String email, String pw, boolean enable) {
         SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         sp.edit()
