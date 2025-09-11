@@ -48,7 +48,7 @@ public class ProfileFragment extends Fragment {
     private TextView tvEmergencyContact;
     private TextView tvBloodType;
     private TextView tvGender;
-
+    private ImageButton btnSettings;
     private LinearLayout llFoodAllergies;
     private LinearLayout llDrugAllergies;
 
@@ -232,6 +232,16 @@ public class ProfileFragment extends Fragment {
 
         ivProfileImage = view.findViewById(R.id.profile_image);
         tvName = view.findViewById(R.id.tv_name);
+        //
+        btnSettings = view.findViewById(R.id.btn_settings);
+        if (btnSettings != null) {
+            btnSettings.setOnClickListener(v -> {
+                startActivity(new Intent(requireContext(), SettingsActivity.class));
+            });
+            //막힘대비
+            btnSettings.bringToFront();
+            btnSettings.setElevation(12f);
+        }
 
         // ✨ 수정: `btnAllergy`에 대한 null 체크 추가. 안전성을 높입니다.
         if (btnAllergy != null) {
@@ -274,6 +284,7 @@ public class ProfileFragment extends Fragment {
             });
         }
     }
+
 
     private void loadUserProfileData() {
         if (userUid == null) {
