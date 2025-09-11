@@ -372,6 +372,7 @@ public class MapFragment extends Fragment {
         TextView addressText = view.findViewById(R.id.addressText);
         TextView doctorText = view.findViewById(R.id.doctorText);
         TextView congestionText = view.findViewById(R.id.congestionText);
+        ImageView congestionIcon = view.findViewById(R.id.congestionIcon);
 
         hospitalNameText.setText(hospital.getHospital_name());
         callText.setText(hospital.getPhone());
@@ -391,6 +392,7 @@ public class MapFragment extends Fragment {
             public void onUpdate(Object peopleCount) {
                 String congestionStatus;
                 int people = 0;
+                int color;
 
                 if(peopleCount instanceof Number) {
                     people = ((Number) peopleCount).intValue();
@@ -398,12 +400,16 @@ public class MapFragment extends Fragment {
 
                 if(people <= 20) {
                     congestionStatus = "원활";
+                    color = getResources().getColor(R.color.lime_green);
                 } else if(people <= 40) {
                     congestionStatus = "보통";
+                    color = getResources().getColor(R.color.orange);
                 } else {
                     congestionStatus = "혼잡";
+                    color = getResources().getColor(R.color.red);
                 }
 
+                congestionIcon.setColorFilter(color);
                 congestionText.setText("" + congestionStatus + "\t (" + peopleCount.toString() + " 명)");
             }
 
