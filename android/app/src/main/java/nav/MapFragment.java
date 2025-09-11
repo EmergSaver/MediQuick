@@ -59,6 +59,7 @@ import java.util.concurrent.Executors;
 
 import model.Hospital;
 import repository.HospitalRepository;
+import util.CongestionManager;
 import util.HospitalUtils;
 import util.MapManager;
 import util.NavigationUtil;
@@ -102,6 +103,7 @@ public class MapFragment extends Fragment {
     private EditText searchEditText;
 
     private RecyclerView searchResultList;
+    private CongestionManager congestionManager;
 
 
     public static MapFragment newInstance(String param1, String param2) {
@@ -369,6 +371,7 @@ public class MapFragment extends Fragment {
         TextView callText = view.findViewById(R.id.callText);
         TextView addressText = view.findViewById(R.id.addressText);
         TextView doctorText = view.findViewById(R.id.doctorText);
+        TextView congestionText = view.findViewById(R.id.congestionText);
 
         hospitalNameText.setText(hospital.getHospital_name());
         callText.setText(hospital.getPhone());
@@ -378,6 +381,21 @@ public class MapFragment extends Fragment {
         } else {
             doctorText.setText("전문의 " + hospitalModel.getDoctor_count() + " 명");
         }
+
+        if(congestionManager == null) {
+            congestionManager = new CongestionManager();
+        }
+        congestionManager.startCongestionUpdates(new CongestionManager.OnCongestionUpdateListener() {
+            @Override
+            public void onUpdate(Object peopleCount) {
+                congestionText.setText(peopleCount.toString());
+            }
+
+            @Override
+            public void onError(Exception e) {
+                congestionText.setText("오류 발생");
+            }
+        });
 
         ConstraintLayout bottomSheet = view.findViewById(R.id.bottom_sheet);
         bottomSheet.setVisibility(View.VISIBLE);
@@ -457,5 +475,8 @@ public class MapFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        if(congestionManager != null) {
+            congestionManager.stopUpdates();
+        }
     }
 }
