@@ -193,6 +193,14 @@ public class MapFragment extends Fragment {
             public void onMarkerClick(Hospital hospital) {
                 // 마커 클릭 시 UI 업데이트
                 hospitalModel = hospital;
+
+                // 마커 클릭 시 카메라 이동 + 줌
+                if(mapManager.getKakaoMap() != null) {
+                    LatLng pos = LatLng.from(hospital.getLatitude() - 0.0005, hospital.getLongitude());
+                    mapManager.getKakaoMap().moveCamera(CameraUpdateFactory.newCenterPosition(pos, 18));
+                }
+
+                // Bottom Sheet 열기
                 showHospitalInfo(view, hospital);
             }
         });
