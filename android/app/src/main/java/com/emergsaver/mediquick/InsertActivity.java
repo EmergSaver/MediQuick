@@ -16,6 +16,7 @@ import android.widget.Spinner;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -25,19 +26,21 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-// ▼ 이미 있는 이메일 대응용 다이얼로그/예외
-import com.google.android.material.dialog.MaterialAlertDialogBuilder; // ★ 추가: 이미 존재 이메일 대응 다이얼로그
-import com.google.firebase.auth.FirebaseAuthUserCollisionException;   // ★ 추가: 이미 존재 이메일 예외
 
 public class InsertActivity extends AppCompatActivity {
 
@@ -50,7 +53,6 @@ public class InsertActivity extends AppCompatActivity {
     private FirebaseFirestore db;
     private FirebaseAuth auth;
 
-    // 카카오 프리필
     private String kakaoIdFromLogin;
     private String prefillName;
     private String prefillEmail;
@@ -122,6 +124,7 @@ public class InsertActivity extends AppCompatActivity {
         btnCancel.setOnClickListener(v -> finish());
     }
 
+    // ================= 약관 BottomSheet ==================
     private void showTermsBottomSheet(String email, String pw, Map<String, Object> profile) {
         View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
 
@@ -131,10 +134,21 @@ public class InsertActivity extends AppCompatActivity {
         MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
         MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
 
+        // 👇 추가: "보기" 버튼도 연결
+        View btnViewService   = sheetView.findViewById(R.id.btnViewService);
+        View btnViewPrivacy   = sheetView.findViewById(R.id.btnViewPrivacy);
+        View btnViewMarketing = sheetView.findViewById(R.id.btnViewMarketing);
+
         BottomSheetDialog dialog = new BottomSheetDialog(this);
         dialog.setContentView(sheetView);
         dialog.setCanceledOnTouchOutside(false);
 
+        // 보기 버튼 이벤트
+        btnViewService.setOnClickListener(v -> showTermsDialog("이용약관", R.raw.terms_service));
+        btnViewPrivacy.setOnClickListener(v -> showTermsDialog("개인정보 처리방침", R.raw.terms_privacy));
+        btnViewMarketing.setOnClickListener(v -> showTermsDialog("마케팅 정보 수신 동의", R.raw.terms_marketing));
+
+        // 동의 버튼
         sheetBtnAgree.setOnClickListener(v -> {
             if (!cbService.isChecked() || !cbPrivacy.isChecked()) {
                 Toast.makeText(this, "필수 약관에 동의해야 가입할 수 있습니다.", Toast.LENGTH_SHORT).show();
@@ -190,14 +204,10 @@ public class InsertActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         btnOk.setEnabled(true);
-                        // ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼
-                        // ★ 변경: '이미 존재하는 이메일'일 때 전용 다이얼로그 제공
                         if (e instanceof FirebaseAuthUserCollisionException) {
-                            showEmailAlreadyInUseDialog(email, pw); // ★ 추가 호출
+                            showEmailAlreadyInUseDialog(email, pw);
                             return;
                         }
-                        // ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲
-
                         Toast.makeText(this, "가입 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
                     });
         });
@@ -206,6 +216,27 @@ public class InsertActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    // ================= 약관 다이얼로그 ==================
+    private void showTermsDialog(String title, int rawResId) {
+        StringBuilder text = new StringBuilder();
+        try (InputStream inputStream = getResources().openRawResource(rawResId);
+             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                text.append(line).append("\n");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        new AlertDialog.Builder(this)
+                .setTitle(title)
+                .setMessage(text.toString())
+                .setPositiveButton("닫기", null)
+                .show();
+    }
+
+    // ================= 유효성 검사 & UI ==================
     private void setupRealtimeValidation() {
         etName.addTextChangedListener(new TextWatcher() {
             @Override public void afterTextChanged(Editable s) {
@@ -384,7 +415,7 @@ public class InsertActivity extends AppCompatActivity {
             if (tilPw2 != null) tilPw2.setError("비밀번호가 일치하지 않습니다.");
             ok = false;
         }
-        if (phone.length() != 11) { // 필요 시 rawPhone.length() == 11로 변경 권장
+        if (phone.length() != 11) {
             if (tilPhone != null) tilPhone.setError("전화번호 11자리를 입력하세요.");
             ok = false;
         }
@@ -437,31 +468,23 @@ public class InsertActivity extends AppCompatActivity {
         return "";
     }
 
-    // ===========================================================
-    // ★ 추가: '이미 가입된 이메일'일 때 선택지 제공 다이얼로그
-    //   - 로그인 화면 이동(이메일 프리필 + 힌트)
-    //   - 비밀번호 재설정 메일 전송
-    //   - (가능 시) 인증메일 다시 보내기
-    // ===========================================================
+    // ================= 이미 가입된 이메일 다이얼로그 ==================
     private void showEmailAlreadyInUseDialog(String email, String pw) {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("이미 가입된 이메일")
                 .setMessage("해당 이메일로 이미 계정이 존재합니다.\n로그인하여 인증을 완료하거나, 비밀번호를 재설정할 수 있습니다.")
-                // ➊ 로그인 화면으로 이동 (이메일 미리 채워주기)
                 .setPositiveButton("로그인 화면으로", (d, w) -> {
                     Intent i = new Intent(InsertActivity.this, LoginActivity.class);
-                    i.putExtra("prefill_email", email);   // ★ 추가: Login 화면 이메일 프리필
-                    i.putExtra("showVerifyHint", true);    // ★ 추가: 안내 토스트 표시 플래그
+                    i.putExtra("prefill_email", email);
+                    i.putExtra("showVerifyHint", true);
                     startActivity(i);
                     finish();
                 })
-                // ➋ 비밀번호 재설정
                 .setNegativeButton("비밀번호 재설정", (d, w) -> {
                     FirebaseAuth.getInstance().sendPasswordResetEmail(email)
                             .addOnSuccessListener(v -> Toast.makeText(this, "비밀번호 재설정 메일을 보냈습니다.", Toast.LENGTH_LONG).show())
                             .addOnFailureListener(err -> Toast.makeText(this, "재설정 메일 전송 실패: " + err.getMessage(), Toast.LENGTH_LONG).show());
                 })
-                // ➌ (선택) 지금 입력한 비번이 맞다면 임시 로그인 후 인증메일 재발송
                 .setNeutralButton("인증메일 다시 보내기", (d, w) -> {
                     FirebaseAuth.getInstance().signInWithEmailAndPassword(email, pw)
                             .addOnSuccessListener(res -> {
