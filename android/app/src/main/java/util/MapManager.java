@@ -230,7 +230,7 @@ public class MapManager {
         }
 
         // 마커 스타일 설정
-        LabelStyle style = LabelStyle.from(drawableRes).setAnchorPoint(1.0f, 1.0f);
+        LabelStyle style = LabelStyle.from(drawableRes).setAnchorPoint(0.5f, 1.0f);
         LabelStyles styles = kakaoMap.getLabelManager().addLabelStyles(LabelStyles.from(style));
         Log.d("MAP_DEBUG", "LabelStyles 추가 완료: " + styles);
 
