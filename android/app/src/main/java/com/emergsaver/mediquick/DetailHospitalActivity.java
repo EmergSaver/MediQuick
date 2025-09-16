@@ -3,6 +3,7 @@ package com.emergsaver.mediquick;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -35,6 +36,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private TableLayout tableLayout;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private AppCompatButton findBtn;
+    private ImageButton backBtn;
 
 
     @Override
@@ -60,6 +62,10 @@ public class DetailHospitalActivity extends AppCompatActivity {
         findBtn.setOnClickListener(v -> {
             NavigationUtil.findRoad(fusedLocationProviderClient, this, hospital, 1001);
         });
+
+        backBtn.setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void initView() {
@@ -70,6 +76,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         congestion = findViewById(R.id.tvCongestion);
         miniMap = findViewById(R.id.miniMap);
         findBtn = findViewById(R.id.btnStartNavi);
+        backBtn = findViewById(R.id.backBtn);
 
         // 병원 정보 세팅
         hospitalName.setText(hospital.getHospital_name());
