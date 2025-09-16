@@ -22,13 +22,17 @@
             android:textStyle="bold" />
 
         <!-- 미니맵(이미지 자리) -->
-        <com.kakao.vectormap.MapView
-            android:id="@+id/miniMap"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginTop="42dp"
-            android:scaleType="centerCrop"
-            android:background="#EDEDED" />
+            android:layout_height="250dp"
+            android:layout_marginTop="42dp">
+
+            <com.kakao.vectormap.MapView
+                android:id="@+id/miniMap"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"/>
+        </com.google.android.material.card.MaterialCardView>
+
 
         <!-- 길 안내 시작 -->
         <Button
