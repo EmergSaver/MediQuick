@@ -35,20 +35,24 @@
 
 
         <!-- 길 안내 시작 -->
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnStartNavi"
-            android:layout_width="wrap_content"
-            android:layout_height="44dp"
-            android:layout_marginTop="10dp"
+            android:layout_width="137dp"
+            android:layout_height="34dp"
+            android:background="@drawable/btn_nav"
+            android:layout_marginTop="19dp"
             android:layout_gravity="center_horizontal"
-            android:text="길 안내 시작" />
+            android:text="길 안내 시작"
+            android:textColor="@color/white"
+            android:textSize="14sp"
+            android:backgroundTint="@null"/>
 
         <!-- 주소 -->
         <TextView
             android:id="@+id/tvAddress"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="19dp"
             android:text="대전 서구 관저로 158" />
 
         <!-- 전화 -->

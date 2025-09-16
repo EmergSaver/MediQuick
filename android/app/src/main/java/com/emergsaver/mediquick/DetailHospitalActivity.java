@@ -1,21 +1,15 @@
 package com.emergsaver.mediquick;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -28,7 +22,6 @@ import model.Hospital;
 import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
-import util.NavigationManager;
 import util.NavigationUtil;
 
 public class DetailHospitalActivity extends AppCompatActivity {
@@ -41,7 +34,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private CongestionManager congestionManager;
     private TableLayout tableLayout;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private Button findBtn;
+    private AppCompatButton findBtn;
 
 
     @Override
