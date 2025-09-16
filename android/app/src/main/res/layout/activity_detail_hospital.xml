@@ -13,19 +13,39 @@
         android:layout_marginTop="30dp">
 
         <!-- 제목 -->
-        <TextView
-            android:id="@+id/tvHospitalName"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="건양대학교병원"
-            android:textSize="20sp"
-            android:textStyle="bold" />
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="2dp"
+                android:background="@drawable/ic_back_arrow"/>
+
+            <TextView
+                android:id="@+id/tvHospitalName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="건양대학교병원"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginStart="5dp"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/light_grey"
+            android:layout_marginTop="20dp"/>
 
         <!-- 미니맵(이미지 자리) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="250dp"
-            android:layout_marginTop="42dp">
+            android:layout_marginTop="20dp">
 
             <com.kakao.vectormap.MapView
                 android:id="@+id/miniMap"
@@ -48,40 +68,84 @@
             android:backgroundTint="@null"/>
 
         <!-- 주소 -->
-        <TextView
-            android:id="@+id/tvAddress"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="19dp"
-            android:text="대전 서구 관저로 158" />
+            android:layout_gravity="center"
+            android:layout_marginTop="18dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/black_marker"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/tvAddress"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="대전 서구 관저로 158"
+                android:layout_marginStart="16dp"
+                android:layout_weight="1"/>
+        </LinearLayout>
 
         <!-- 전화 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="18dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:layout_width="15dp"
+            android:layout_height="15dp"
+            android:background="@drawable/ic_phone"
+            android:layout_gravity="center"/>
+
         <TextView
             android:id="@+id/tvPhone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginStart="16dp"
             android:text="1577-3330" />
+    </LinearLayout>
 
         <!-- 혼잡도 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            android:layout_marginTop="18dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
+
+            <ImageView
+                android:layout_width="15dp"
+                android:layout_height="15dp"
+                android:background="@drawable/ic_people"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:text="혼잡도" />
 
             <View
                 android:id="@+id/viewCongestionDot"
                 android:layout_width="8dp"
                 android:layout_height="8dp"
+                android:layout_marginStart="18dp"
                 android:background="@color/red" />
 
             <TextView
                 android:id="@+id/tvCongestion"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="혼잡" />
         </LinearLayout>
 
