@@ -32,7 +32,7 @@ tools:context="nav.MapFragment">
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
-            android:layout_marginTop="40dp">
+            android:layout_marginTop="50dp">
 
             <EditText
                 android:id="@+id/search_text"
@@ -40,7 +40,7 @@ tools:context="nav.MapFragment">
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="20dp"
                 android:background="@drawable/rounded_edittext"
-                android:hint="검색어를 입력하세요."
+                android:hint="병원 검색하기"
                 android:padding="15dp"
                 android:textSize="13sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -174,7 +174,7 @@ tools:context="nav.MapFragment">
                     <ImageView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:src="@drawable/green_marker" />
+                        android:src="@drawable/black_marker" />
 
                     <TextView
                         android:id="@+id/addressText"
@@ -208,7 +208,8 @@ tools:context="nav.MapFragment">
                     <ImageView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:src="@drawable/green_marker" />
+                        android:src="@drawable/ic_phone"
+                        android:backgroundTint="@color/blue_gray"/>
 
                     <TextView
                         android:id="@+id/callText"
@@ -231,7 +232,7 @@ tools:context="nav.MapFragment">
                         android:id="@+id/congestionIcon"
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:src="@drawable/green_marker" />
+                        android:src="@drawable/ic_people" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -243,8 +244,8 @@ tools:context="nav.MapFragment">
                     <View
                         android:id="@+id/viewCongestion"
                         android:layout_marginStart="12dp"
-                        android:layout_width="8dp"
-                        android:layout_height="8dp"
+                        android:layout_width="5dp"
+                        android:layout_height="5dp"
                         android:background="@color/red"/>
 
                     <TextView
@@ -267,7 +268,7 @@ tools:context="nav.MapFragment">
                     <ImageView
                         android:layout_width="15dp"
                         android:layout_height="15dp"
-                        android:src="@drawable/green_marker" />
+                        android:src="@drawable/ic_document" />
 
                     <TextView
                         android:id="@+id/doctorText"

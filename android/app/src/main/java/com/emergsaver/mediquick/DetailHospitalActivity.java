@@ -1,21 +1,18 @@
 package com.emergsaver.mediquick;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -28,7 +25,6 @@ import model.Hospital;
 import model.Specialty;
 import util.CongestionManager;
 import util.MapManager;
-import util.NavigationManager;
 import util.NavigationUtil;
 
 public class DetailHospitalActivity extends AppCompatActivity {
@@ -41,7 +37,8 @@ public class DetailHospitalActivity extends AppCompatActivity {
     private CongestionManager congestionManager;
     private TableLayout tableLayout;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    private Button findBtn;
+    private AppCompatButton findBtn;
+    private ImageButton backBtn;
 
 
     @Override
@@ -67,6 +64,10 @@ public class DetailHospitalActivity extends AppCompatActivity {
         findBtn.setOnClickListener(v -> {
             NavigationUtil.findRoad(fusedLocationProviderClient, this, hospital, 1001);
         });
+
+        backBtn.setOnClickListener(v -> {
+            finish();
+        });
     }
 
     private void initView() {
@@ -77,6 +78,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
         congestion = findViewById(R.id.tvCongestion);
         miniMap = findViewById(R.id.miniMap);
         findBtn = findViewById(R.id.btnStartNavi);
+        backBtn = findViewById(R.id.backBtn);
 
         // 병원 정보 세팅
         hospitalName.setText(hospital.getHospital_name());
@@ -95,7 +97,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
                 if (hospitalPos != null) {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 18));
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 17));
                 }
 
                 // 마커 추가
@@ -155,20 +157,58 @@ public class DetailHospitalActivity extends AppCompatActivity {
         tableLayout = findViewById(R.id.tableDepts);
         tableLayout.removeAllViews();
 
+        // 제목 행
+        TableRow headerRow = new TableRow(this);
+
+        TextView headerDept = new TextView(this);
+        headerDept.setText("진료과");
+        headerDept.setPadding(24, 30, 24, 30);
+        headerDept.setTypeface(null, Typeface.BOLD);
+        headerDept.setGravity(Gravity.CENTER);
+        headerDept.setBackgroundResource(R.drawable.rounded_table_header_left);
+        headerDept.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 2f));
+
+        TextView headerDoctor = new TextView(this);
+        headerDoctor.setText("전문의 수");
+        headerDoctor.setPadding(24, 30, 24, 30);
+        headerDoctor.setTypeface(null, Typeface.BOLD);
+        headerDoctor.setGravity(Gravity.CENTER);
+        headerDoctor.setBackgroundResource(R.drawable.rounded_table_header_right);
+        headerDoctor.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1.5f));
+
+        headerRow.addView(headerDept);
+        headerRow.addView(headerDoctor);
+        tableLayout.addView(headerRow);
+
+        // 일반 데이터 행
         if(hospital.getSpecialties() == null) {
             return;
         }
 
-        for(Specialty s : hospital.getSpecialties()) {
+        for(int i = 0; i < hospital.getSpecialties().size(); i++) {
             TableRow row = new TableRow(this);
 
             TextView deptName = new TextView(this);
-            deptName.setText(s.getDept_name());
-            deptName.setPadding(8, 8, 8, 8);
+            deptName.setText(hospital.getSpecialties().get(i).getDept_name());
+            deptName.setPadding(24, 30, 24, 30);
+            deptName.setGravity(Gravity.CENTER);
 
             TextView doctorCount = new TextView(this);
-            doctorCount.setText(s.getDoctor_count() + " 명");
-            doctorCount.setPadding(8, 8, 8, 8);
+            doctorCount.setText(hospital.getSpecialties().get(i).getDoctor_count() + " 명");
+            doctorCount.setPadding(24, 30, 24, 30);
+            doctorCount.setGravity(Gravity.CENTER);
+
+            // 마지막 행일 경우 → 하단 모서리 둥글게
+            if (i == hospital.getSpecialties().size() - 1) {
+                deptName.setBackgroundResource(R.drawable.rounded_table_left);
+                doctorCount.setBackgroundResource(R.drawable.rounded_table_right);
+            } else {
+                deptName.setBackgroundResource(R.drawable.rounded_table);
+                doctorCount.setBackgroundResource(R.drawable.rounded_table);
+            }
+
+            deptName.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 2f));
+            doctorCount.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1.5f));
 
             row.addView(deptName);
             row.addView(doctorCount);
