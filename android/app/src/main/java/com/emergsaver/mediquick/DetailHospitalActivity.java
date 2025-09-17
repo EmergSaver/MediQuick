@@ -192,13 +192,11 @@ public class DetailHospitalActivity extends AppCompatActivity {
             deptName.setText(hospital.getSpecialties().get(i).getDept_name());
             deptName.setPadding(24, 30, 24, 30);
             deptName.setGravity(Gravity.CENTER);
-//            deptName.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 2f));
 
             TextView doctorCount = new TextView(this);
             doctorCount.setText(hospital.getSpecialties().get(i).getDoctor_count() + " 명");
             doctorCount.setPadding(24, 30, 24, 30);
             doctorCount.setGravity(Gravity.CENTER);
-//            doctorCount.setLayoutParams(new TableRow.LayoutParams(0, TableRow.LayoutParams.WRAP_CONTENT, 1.5f));
 
             // 마지막 행일 경우 → 하단 모서리 둥글게
             if (i == hospital.getSpecialties().size() - 1) {
