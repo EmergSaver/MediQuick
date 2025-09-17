@@ -97,7 +97,7 @@ public class DetailHospitalActivity extends AppCompatActivity {
                 kakaoMap = map;
                 // 병원 위치로 카메라 이동
                 if (hospitalPos != null) {
-                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 18));
+                    kakaoMap.moveCamera(CameraUpdateFactory.newCenterPosition(hospitalPos, 17));
                 }
 
                 // 마커 추가
