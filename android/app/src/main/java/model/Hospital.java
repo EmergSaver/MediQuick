@@ -3,14 +3,13 @@ package model;
 import java.util.List;
 import java.io.Serializable;
 
-public class Hospital implements Serializable{
+public class Hospital implements Serializable {
     private String id;
     private String hospital_name;
     private String phone;
     private String address;
     private double latitude;
     private double longitude;
-    // 추가적으로 상세정보도 추후 추가
     private int doctor_count;
     private int currentPeople;
 
