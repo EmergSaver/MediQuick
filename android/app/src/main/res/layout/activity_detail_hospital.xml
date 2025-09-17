@@ -3,7 +3,8 @@
     android:id="@+id/detail_activity"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -45,7 +46,7 @@
         <!-- 미니맵(이미지 자리) -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="240dp"
             android:layout_marginTop="20dp">
 
             <com.kakao.vectormap.MapView
@@ -150,13 +151,20 @@
                 android:text="혼잡" />
         </LinearLayout>
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0.8dp"
+            android:background="@color/light_grey"
+            android:layout_marginTop="20dp"/>
+
         <!-- 진료 정보 (간단 리스트 예시) -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:text="진료 정보"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:textSize="18sp"/>
 
         <TableLayout
             android:id="@+id/tableDepts"
