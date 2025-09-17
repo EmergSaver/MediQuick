@@ -69,8 +69,8 @@ public class MapSearchAdapter extends RecyclerView.Adapter<MapSearchAdapter.View
 
         public ViewHolder(View itemView) {
             super(itemView);
-            name = itemView.findViewById(R.id.hospital_name_text);
-            address = itemView.findViewById(R.id.hospital_address_text);
+            name = itemView.findViewById(R.id.text_name);
+            address = itemView.findViewById(R.id.text_address);
         }
     }
 

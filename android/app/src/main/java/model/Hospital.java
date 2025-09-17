@@ -1,25 +1,23 @@
 package model;
 
-import java.util.List;
 import java.io.Serializable;
+import java.util.List;
 
-public class Hospital implements Serializable{
+public class Hospital implements Serializable {
     private String id;
     private String hospital_name;
     private String phone;
     private String address;
     private double latitude;
     private double longitude;
-    // 추가적으로 상세정보도 추후 추가
     private int doctor_count;
-
-    // 기본 생성자
-    public Hospital() {
-    }
-
     private List<Specialty> specialties;
 
-    public Hospital(String id, String hospital_name, String phone, String address, Double latitude, Double longitude, int doctor_count) {
+    // 기본 생성자
+    public Hospital() {}
+
+    public Hospital(String id, String hospital_name, String phone, String address,
+                    Double latitude, Double longitude, int doctor_count) {
         this.id = id;
         this.hospital_name = hospital_name;
         this.phone = phone;
@@ -29,68 +27,28 @@ public class Hospital implements Serializable{
         this.doctor_count = doctor_count;
     }
 
-    // getter 생성
-    public String getId() {
-        return id;
-    }
+    // Getter / Setter
+    public String getId() { return id; }
+    public void setId(String id) { this.id = id; }
 
-    public void setId(String id) {
-        this.id = id;
-    }
+    public String getHospital_name() { return hospital_name; }
+    public void setHospital_name(String hospital_name) { this.hospital_name = hospital_name; }
 
-    public String getHospital_name() {
-        return hospital_name;
-    }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-    public void setHospital_name(String hospital_name) {
-        this.hospital_name = hospital_name;
-    }
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-    public String getPhone() {
-        return phone;
-    }
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
 
-    public String getAddress() {
-        return address;
-    }
+    public int getDoctor_count() { return doctor_count; }
+    public void setDoctor_count(int doctor_count) { this.doctor_count = doctor_count; }
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
-    }
-
-    public double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(double longitude) {
-        this.longitude = longitude;
-    }
-
-    public List<Specialty> getSpecialties() {
-        return specialties;
-    }
-
-    public void setSpecialties(List<Specialty> specialties) {
-        this.specialties = specialties;
-    }
-
-    public int getDoctor_count() {
-        return doctor_count;
-    }
-
-    public void setDoctor_count(int doctor_count) {
-        this.doctor_count = doctor_count;
-    }
+    public List<Specialty> getSpecialties() { return specialties; }
+    public void setSpecialties(List<Specialty> specialties) { this.specialties = specialties; }
 }

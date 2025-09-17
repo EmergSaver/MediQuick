@@ -1,55 +1,43 @@
 package nav;
 
-import android.app.AlertDialog;
-import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.emergsaver.mediquick.R;
+import com.emergsaver.mediquick.adapter.HospitalAdapter;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link HospitalFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+import java.util.List;
+
+import model.Hospital;
+
 public class HospitalFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_CATEGORY_ID = "category_id";
+    private static final String ARG_SYMPTOM = "selected_symptom";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private String categoryId;
+    private String selectedSymptom;
 
     public HospitalFragment() {
-        // Required empty public constructor
     }
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment HospitalFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static HospitalFragment newInstance(String param1, String param2) {
+    public static HospitalFragment newInstance(String categoryId, String selectedSymptom) {
         HospitalFragment fragment = new HospitalFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_CATEGORY_ID, categoryId);
+        args.putString(ARG_SYMPTOM, selectedSymptom);
         fragment.setArguments(args);
         return fragment;
     }
@@ -58,15 +46,14 @@ public class HospitalFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            categoryId = getArguments().getString(ARG_CATEGORY_ID);
+            selectedSymptom = getArguments().getString(ARG_SYMPTOM);
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_hospital, container, false);
     }
 
@@ -74,34 +61,50 @@ public class HospitalFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        EditText search = view.findViewById(R.id.search_text);
+        RecyclerView recycler = view.findViewById(R.id.recycler_hospitals);
+        recycler.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        search.setOnClickListener(v -> {
-            // 다이얼로그 UI 불러오기
-            View dialogView = LayoutInflater.from(requireContext())
-                    .inflate(R.layout.dialog_searchpopup, null);
-
-            AlertDialog dialog = new AlertDialog.Builder(requireContext())
-                    .setView(dialogView)
-                    .create();
-
-            // 버튼 연결
-            Button btnCancel = dialogView.findViewById(R.id.btn_cancel);
-            Button btnOk = dialogView.findViewById(R.id.btn_ok);
-
-            btnCancel.setOnClickListener(btn -> dialog.dismiss());
-
-            btnOk.setOnClickListener(btn -> {
-                dialog.dismiss();
-                // ✅ CategoryFragment로 화면 전환
-                requireActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.fragment_container, new CategoryFragment())
-                        .addToBackStack(null)
-                        .commit();
-            });
-
-            dialog.show();
-        });
+        loadHospitals(recycler);
     }
 
+    private void loadHospitals(RecyclerView recyclerView) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+        db.collection("hospitals")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && task.getResult() != null) {
+                        List<Hospital> hospitalList = new ArrayList<>();
+
+
+                        for (DocumentSnapshot doc : task.getResult()) {
+                            String json = doc.getString("hospital_json");
+                            if (json != null) {
+                                // Hospital 객체로 변환 (간단히 Gson 활용 가능)
+                                Hospital hospital = parseHospitalJson(json);
+                                hospitalList.add(hospital);
+                            }
+                        }
+
+                        if (!hospitalList.isEmpty()) {
+                            HospitalAdapter adapter = new HospitalAdapter(hospitalList);
+                            recyclerView.setAdapter(adapter);
+                        } else {
+                            Toast.makeText(getContext(), "추천 병원이 없습니다.", Toast.LENGTH_SHORT).show();
+                        }
+                    } else {
+                        Toast.makeText(getContext(), "병원 데이터를 불러오지 못했습니다.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private Hospital parseHospitalJson(String json) {
+        // Gson이나 org.json으로 변환
+        try {
+            return new com.google.gson.Gson().fromJson(json, Hospital.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 }
