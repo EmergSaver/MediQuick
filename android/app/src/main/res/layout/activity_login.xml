@@ -2,6 +2,7 @@
 <androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
@@ -114,6 +115,18 @@
             android:buttonTint="@color/blue_gray"
             app:layout_constraintTop_toBottomOf="@id/insertPw"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <!--   로그인 오류 시 텍스트    -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="사용자 정보가 일치하지 않습니다."
+            android:textAlignment="center"
+            android:textColor="@color/red"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@+id/btLogin"
+            app:layout_constraintTop_toBottomOf="@+id/cbAuto"
+            tools:layout_editor_absoluteX="40dp" />
 
         <!-- 버튼들 (색/간격은 이전과 동일) -->
         <Button
