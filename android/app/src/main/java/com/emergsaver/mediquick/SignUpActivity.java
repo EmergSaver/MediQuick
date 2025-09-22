@@ -20,7 +20,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
-import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -49,7 +48,7 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPw, etPw2, etPhone;
     private TextInputLayout tilName, tilEmail, tilPw, tilPw2, tilPhone;
-    private AppCompatSpinner spYear, spMonth, spDay, spBlood;
+    private Spinner spYear, spMonth, spDay, spBlood;
     private RadioGroup rgGender;
     private Button btnOk;
     private AppCompatButton btnCancel;
@@ -75,8 +74,8 @@ public class SignUpActivity extends AppCompatActivity {
         setupBloodSpinner();
 
         kakaoIdFromLogin = getIntent().getStringExtra("kakao_id");
-        prefillName      = getIntent().getStringExtra("prefill_name");
-        prefillEmail     = getIntent().getStringExtra("prefill_email");
+        prefillName  = getIntent().getStringExtra("prefill_name");
+        prefillEmail = getIntent().getStringExtra("prefill_email");
         if (!TextUtils.isEmpty(prefillName))  etName.setText(prefillName);
         if (!TextUtils.isEmpty(prefillEmail)) etEmail.setText(prefillEmail);
 
@@ -105,9 +104,9 @@ public class SignUpActivity extends AppCompatActivity {
         btnOk.setOnClickListener(v -> {
             if (!validateAndShowErrors()) return;
 
-            String name  = textOf(etName).trim();
+            String name = textOf(etName).trim();
             String email = textOf(etEmail).trim();
-            String pw    = textOf(etPw).trim();
+            String pw = textOf(etPw).trim();
             String phone = textOf(etPhone).trim();
             int y = getSel(spYear), m = getSel(spMonth), d = getSel(spDay);
             String birth = y + "-" + m + "-" + d;
@@ -132,15 +131,15 @@ public class SignUpActivity extends AppCompatActivity {
     private void showTermsBottomSheet(String email, String pw, Map<String, Object> profile) {
         View sheetView = getLayoutInflater().inflate(R.layout.activity_agree_term, null);
 
-        CheckBox cbService   = sheetView.findViewById(R.id.cbTermsService);
-        CheckBox cbPrivacy   = sheetView.findViewById(R.id.cbTermsPrivacy);
+        CheckBox cbService = sheetView.findViewById(R.id.cbTermsService);
+        CheckBox cbPrivacy = sheetView.findViewById(R.id.cbTermsPrivacy);
         CheckBox cbMarketing = sheetView.findViewById(R.id.cbTermsMarketing);
         MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
         MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
 
         // 👇 추가: "보기" 버튼도 연결
-        View btnViewService   = sheetView.findViewById(R.id.btnViewService);
-        View btnViewPrivacy   = sheetView.findViewById(R.id.btnViewPrivacy);
+        View btnViewService = sheetView.findViewById(R.id.btnViewService);
+        View btnViewPrivacy = sheetView.findViewById(R.id.btnViewPrivacy);
         View btnViewMarketing = sheetView.findViewById(R.id.btnViewMarketing);
 
         BottomSheetDialog dialog = new BottomSheetDialog(this);
