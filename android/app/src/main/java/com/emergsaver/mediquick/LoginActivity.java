@@ -1,12 +1,19 @@
 package com.emergsaver.mediquick;
 
+import static android.view.View.GONE;
+import static android.view.View.VISIBLE;
+
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
+import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -40,8 +47,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputLayout tilEmail, tilPw;
     private TextInputEditText etEmail, etPwEdit;
-    private MaterialButton btLogin, btKakao, btSignup;
+    private Button btLogin;
+    private ImageButton btKakao;
+    private MaterialButton btSignup;
     private CheckBox cbAuto;
+    private TextView loginError;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -74,6 +84,7 @@ public class LoginActivity extends AppCompatActivity {
         btLogin  = findViewById(R.id.btLogin);
         btKakao  = findViewById(R.id.btKakao);
         btSignup = findViewById(R.id.Signup);
+        loginError = findViewById(R.id.loginError);
 
         restoreAutoFill();
 
@@ -134,6 +145,10 @@ public class LoginActivity extends AppCompatActivity {
                                     i.putExtra("birth", birth);
                                     i.putExtra("bloodType", bloodType);
 
+                                    // 로그인 성공 시 TextView가 나와있다면 안보이게 설정
+                                    if(loginError.getVisibility() == VISIBLE) {
+                                        loginError.setVisibility(GONE);
+                                    }
 
                                     startActivity(i);
                                     finish();
@@ -145,7 +160,8 @@ public class LoginActivity extends AppCompatActivity {
                     })
                     .addOnFailureListener(e -> {
                         btLogin.setEnabled(true);
-                        Toast.makeText(this, "로그인 실패: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        // 로그인 실패 시 TextView 보이게 설정
+                        loginError.setVisibility(VISIBLE);
                     });
         });
 
