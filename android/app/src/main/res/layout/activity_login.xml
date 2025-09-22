@@ -13,10 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="40dp">
-<!--        android:paddingStart="24dp"-->
-<!--        android:paddingEnd="24dp"-->
-<!--        android:paddingTop="32dp"-->
-<!--        android:paddingBottom="32dp"-->
 
         <!-- 제목 -->
         <TextView
@@ -62,8 +58,10 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etId"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="45dp"
                 android:background="@drawable/login_edittext"
+                android:padding="5dp"
+                android:textSize="13sp"
                 android:inputType="textEmailAddress" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -99,7 +97,9 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etPw"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
+                android:layout_height="45dp"
+                android:padding="5dp"
+                android:textSize="15sp"
                 android:background="@drawable/login_edittext"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -118,6 +118,7 @@
 
         <!--   로그인 오류 시 텍스트    -->
         <TextView
+            android:id="@+id/loginError"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="사용자 정보가 일치하지 않습니다."
@@ -135,11 +136,14 @@
             android:layout_height="45dp"
             android:layout_marginTop="40dp"
             android:text="로그인"
+            android:textSize="15sp"
+            android:textStyle="bold"
             android:textAllCaps="false"
             android:textColor="@android:color/white"
             android:background="@drawable/rounded_btn"
             app:backgroundTint="@color/blue_navy"
             app:cornerRadius="12dp"
+            android:letterSpacing="0.2"
             app:layout_constraintTop_toBottomOf="@id/cbAuto"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -173,10 +177,13 @@
             android:layout_height="52dp"
             android:layout_marginTop="12dp"
             android:text="회원가입"
+            android:textSize="15sp"
+            android:textStyle="bold"
             android:textColor="@color/blue_navy"
             android:textAllCaps="false"
             app:cornerRadius="8dp"
             app:strokeWidth="1dp"
+            android:letterSpacing="0.2"
             app:backgroundTint="@color/white"
             app:strokeColor="@color/blue_navy"
             app:layout_constraintTop_toBottomOf="@id/btKakao"
