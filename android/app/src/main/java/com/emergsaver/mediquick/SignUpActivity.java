@@ -42,7 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class InsertActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPw, etPw2, etPhone;
     private TextInputLayout tilName, tilEmail, tilPw, tilPw2, tilPhone;
@@ -61,7 +61,7 @@ public class InsertActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_insert);
+        setContentView(R.layout.activity_signup);
 
         db = FirebaseFirestore.getInstance();
         auth = FirebaseAuth.getInstance();
@@ -187,7 +187,7 @@ public class InsertActivity extends AppCompatActivity {
                                                 dialog.dismiss();
                                                 Toast.makeText(this, "인증 메일을 보냈습니다. 메일의 링크로 인증을 완료해 주세요.", Toast.LENGTH_LONG).show();
 
-                                                Intent intent = new Intent(InsertActivity.this, CheckEmail.class);
+                                                Intent intent = new Intent(SignUpActivity.this, CheckEmail.class);
                                                 intent.putExtra("email", user.getEmail());
                                                 startActivity(intent);
                                                 finish();
@@ -474,7 +474,7 @@ public class InsertActivity extends AppCompatActivity {
                 .setTitle("이미 가입된 이메일")
                 .setMessage("해당 이메일로 이미 계정이 존재합니다.\n로그인하여 인증을 완료하거나, 비밀번호를 재설정할 수 있습니다.")
                 .setPositiveButton("로그인 화면으로", (d, w) -> {
-                    Intent i = new Intent(InsertActivity.this, LoginActivity.class);
+                    Intent i = new Intent(SignUpActivity.this, LoginActivity.class);
                     i.putExtra("prefill_email", email);
                     i.putExtra("showVerifyHint", true);
                     startActivity(i);
@@ -493,7 +493,7 @@ public class InsertActivity extends AppCompatActivity {
                                     u.sendEmailVerification()
                                             .addOnSuccessListener(v2 -> {
                                                 Toast.makeText(this, "인증 메일을 다시 보냈습니다.", Toast.LENGTH_LONG).show();
-                                                Intent i = new Intent(InsertActivity.this, CheckEmail.class);
+                                                Intent i = new Intent(SignUpActivity.this, CheckEmail.class);
                                                 i.putExtra("email", email);
                                                 startActivity(i);
                                                 finish();
@@ -501,7 +501,7 @@ public class InsertActivity extends AppCompatActivity {
                                             .addOnFailureListener(err -> Toast.makeText(this, "재발송 실패: " + err.getMessage(), Toast.LENGTH_LONG).show());
                                 } else {
                                     Toast.makeText(this, "이미 인증된 계정입니다. 로그인해 주세요.", Toast.LENGTH_LONG).show();
-                                    Intent i = new Intent(InsertActivity.this, LoginActivity.class);
+                                    Intent i = new Intent(SignUpActivity.this, LoginActivity.class);
                                     i.putExtra("prefill_email", email);
                                     startActivity(i);
                                     finish();

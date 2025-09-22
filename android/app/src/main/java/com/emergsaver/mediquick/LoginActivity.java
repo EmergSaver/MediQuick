@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Patterns;
-import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageButton;
@@ -244,7 +243,7 @@ public class LoginActivity extends AppCompatActivity {
         });
 
         btSignup.setOnClickListener(v ->
-                startActivity(new Intent(LoginActivity.this, InsertActivity.class))
+                startActivity(new Intent(LoginActivity.this, SignUpActivity.class))
         );
     }
 
@@ -359,7 +358,7 @@ public class LoginActivity extends AppCompatActivity {
     private void startSignupForKakao(@NonNull String kakaoId,
                                      @NonNull String nickname,
                                      @NonNull String email) {
-        Intent i = new Intent(LoginActivity.this, InsertActivity.class);
+        Intent i = new Intent(LoginActivity.this, SignUpActivity.class);
         i.putExtra("kakao_id", kakaoId);
         i.putExtra("prefill_name", nickname);
         i.putExtra("prefill_email", email);
