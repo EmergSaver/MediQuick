@@ -171,7 +171,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"/>
 
-        <com.google.android.material.button.MaterialButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/Signup"
             android:layout_width="0dp"
             android:layout_height="52dp"
@@ -180,15 +180,12 @@
             android:textSize="15sp"
             android:textStyle="bold"
             android:textColor="@color/blue_navy"
+            android:background="@drawable/rounded_btn"
             android:textAllCaps="false"
-            app:cornerRadius="8dp"
-            app:strokeWidth="1dp"
             android:letterSpacing="0.2"
-            app:backgroundTint="@color/white"
-            app:strokeColor="@color/blue_navy"
             app:layout_constraintTop_toBottomOf="@id/btKakao"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"/>
 
 
 
