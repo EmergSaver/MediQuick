@@ -10,6 +10,7 @@ import android.util.Patterns;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
+import androidx.appcompat.widget.AppCompatSpinner;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -46,9 +49,10 @@ public class SignUpActivity extends AppCompatActivity {
 
     private TextInputEditText etName, etEmail, etPw, etPw2, etPhone;
     private TextInputLayout tilName, tilEmail, tilPw, tilPw2, tilPhone;
-    private Spinner spYear, spMonth, spDay, spBlood;
+    private AppCompatSpinner spYear, spMonth, spDay, spBlood;
     private RadioGroup rgGender;
-    private MaterialButton btnOk, btnCancel;
+    private Button btnOk;
+    private AppCompatButton btnCancel;
 
     private FirebaseFirestore db;
     private FirebaseAuth auth;
@@ -316,25 +320,25 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void bindViews() {
-        etName  = findViewById(R.id.etName);
+        etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
-        etPw    = findViewById(R.id.etPw);
-        etPw2   = findViewById(R.id.etPw2);
+        etPw  = findViewById(R.id.etPw);
+        etPw2 = findViewById(R.id.etPw2);
         etPhone = findViewById(R.id.etPhone);
 
-        tilName  = findViewById(R.id.tilName);
+        tilName = findViewById(R.id.tilName);
         tilEmail = findViewById(R.id.tilEmail);
-        tilPw    = findViewById(R.id.tilPw);
-        tilPw2   = findViewById(R.id.tilPw2);
+        tilPw = findViewById(R.id.tilPw);
+        tilPw2 = findViewById(R.id.tilPw2);
         tilPhone = findViewById(R.id.tilPhone);
 
-        spYear  = findViewById(R.id.spYear);
+        spYear = findViewById(R.id.spYear);
         spMonth = findViewById(R.id.spMonth);
-        spDay   = findViewById(R.id.spDay);
+        spDay = findViewById(R.id.spDay);
         spBlood = findViewById(R.id.spBlood);
         rgGender = findViewById(R.id.rgGender);
 
-        btnOk     = findViewById(R.id.btnOk);
+        btnOk = findViewById(R.id.btnOk);
         btnCancel = findViewById(R.id.btnCancel);
     }
 

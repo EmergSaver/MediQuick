@@ -187,6 +187,7 @@
                 android:inputType="phone"
                 android:textSize="13sp"
                 android:background="@drawable/login_edittext"
+                android:padding="5dp"
                 android:hint="010-1234-5678" />
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -214,28 +215,31 @@
             <Spinner
                 android:id="@+id/spYear"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="45dp"
                 android:layout_weight="1"
                 android:spinnerMode="dropdown"
                 android:paddingStart="12dp"
-                android:paddingEnd="12dp"/>
+                android:paddingEnd="12dp"
+                android:background="@drawable/spinner_background"/>
 
             <Spinner
                 android:id="@+id/spMonth"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="45dp"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:spinnerMode="dropdown"
+                android:background="@drawable/spinner_background"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"/>
 
             <Spinner
                 android:id="@+id/spDay"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
+                android:layout_height="45dp"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
+                android:background="@drawable/spinner_background"
                 android:spinnerMode="dropdown"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"/>
@@ -265,8 +269,9 @@
             <Spinner
                 android:id="@+id/spBlood"
                 android:layout_width="0dp"
-                android:layout_height="48dp"
-                android:layout_weight="1"
+                android:layout_height="45dp"
+                android:layout_weight="1.5"
+                android:background="@drawable/spinner_background"
                 android:spinnerMode="dropdown"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"/>
@@ -275,8 +280,9 @@
                 android:id="@+id/rgGender"
                 android:layout_width="0dp"
                 android:layout_height="48dp"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:orientation="horizontal"
+                android:layout_marginStart="40dp"
                 android:gravity="center_vertical">
 
                 <RadioButton
@@ -286,15 +292,16 @@
                     android:text="남성"
                     android:checked="true"
                     android:paddingStart="8dp"
-                    android:paddingEnd="8dp"/>
+                    android:paddingEnd="16dp"
+                    app:buttonTint="@color/blue_navy"/>
 
                 <RadioButton
                     android:id="@+id/rbFemale"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="여성"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="8dp"/>
+                    android:paddingStart="8dp"
+                    app:buttonTint="@color/blue_navy"/>
             </RadioGroup>
         </LinearLayout>
 

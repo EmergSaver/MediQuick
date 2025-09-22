@@ -60,6 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:background="@drawable/login_edittext"
+                android:hint="이메일 입력"
                 android:padding="5dp"
                 android:textSize="13sp"
                 android:inputType="textEmailAddress" />
@@ -99,7 +100,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="45dp"
                 android:padding="5dp"
-                android:textSize="15sp"
+                android:textSize="13sp"
+                android:hint="비밀번호 입력"
+
                 android:background="@drawable/login_edittext"
                 android:inputType="textPassword" />
         </com.google.android.material.textfield.TextInputLayout>

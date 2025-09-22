@@ -18,11 +18,11 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -48,7 +48,7 @@ public class LoginActivity extends AppCompatActivity {
     private TextInputEditText etEmail, etPwEdit;
     private Button btLogin;
     private ImageButton btKakao;
-    private MaterialButton btSignup;
+    private AppCompatButton btSignup;
     private CheckBox cbAuto;
     private TextView loginError;
 
