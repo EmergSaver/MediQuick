@@ -13,6 +13,7 @@ public class Hospital implements Serializable {
     private int doctor_count;
     private int currentPeople;
 
+    private double distanceToUser;
     // 기본 생성자
     public Hospital() {
     }
@@ -38,6 +39,12 @@ public class Hospital implements Serializable {
         this.id = id;
     }
 
+    public double getDistanceToUser() {
+        return distanceToUser;
+    }
+    public void setDistanceToUser(double distanceToUser) {
+        this.distanceToUser = distanceToUser;
+    }
     public String getHospital_name() {
         return hospital_name;
     }

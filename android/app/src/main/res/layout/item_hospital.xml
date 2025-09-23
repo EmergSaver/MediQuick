@@ -4,37 +4,49 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="12dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="?attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
-    <TextView
-        android:id="@+id/text_name"
+    <!-- 이름과 거리 한 줄에 표시 -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="병원 이름"
-        android:textSize="18sp"
-        android:textStyle="bold"/>
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="2dp">
+
+        <TextView
+            android:id="@+id/text_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="병원 이름"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:ellipsize="end"
+            android:singleLine="true"/>
+
+        <TextView
+            android:id="@+id/text_distance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0.0 km"
+            android:textSize="14sp"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/text_address"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="주소"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
+        android:textSize="14sp"/>
 
     <TextView
         android:id="@+id/text_phone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="전화번호"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
-
-    <TextView
-        android:id="@+id/text_specialties"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="진료과"
-        android:textSize="14sp"
-        android:layout_marginTop="2dp"/>
+        android:textSize="14sp"/>
 </LinearLayout>
