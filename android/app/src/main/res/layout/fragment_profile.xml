@@ -67,6 +67,18 @@
                 android:textColor="@android:color/black"
                 tools:text="사용자 이름"/>
 
+            <TextView
+                android:id="@+id/tv_gender"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/tv_name"
+                android:layout_alignBottom="@+id/tv_name"
+                android:layout_marginStart="10dp"
+                android:layout_toEndOf="@+id/tv_name"
+                android:textStyle="bold"
+                android:gravity="center"
+                tools:text="(여)" />
+
             <!-- 설정 버튼 -->
             <ImageButton
                 android:id="@+id/btn_settings"
@@ -156,7 +168,9 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginTop="4dp"
-                        android:textColor="#888888"
+                        android:textStyle="bold"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
                         tools:text="2000.03.04" />
 
                     <TextView
@@ -165,7 +179,7 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginTop="4dp"
-                        android:textColor="#888888"
+                        android:textColor="@color/gray"
                         android:textStyle="bold"
                         tools:text="연락처를 등록해주세요" />
 
@@ -180,39 +194,20 @@
                         android:textStyle="bold" />
 
                     <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_marginTop="16dp"
-                        android:text="성별"
-                        android:textColor="@android:color/black"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
                         android:id="@+id/tv_blood_type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginTop="4dp"
-                        android:textColor="#888888"
+                        android:textColor="@color/gray"
                         android:textStyle="bold"
                         tools:text="혈액형을 등록해주세요" />
-
-                    <TextView
-                        android:id="@+id/tv_gender"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_marginTop="4dp"
-                        android:textColor="#888888"
-                        android:textStyle="bold"
-                        tools:text="여성" />
                 </GridLayout>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 알러지 정보 -->
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -239,10 +234,11 @@
                     android:id="@+id/btn_allergy"
                     android:layout_width="20dp"
                     android:layout_height="20dp"
-                    android:src="@drawable/ic_edit_boxpencil"
+                    android:src="@drawable/ic_edit_info"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:scaleType="fitCenter"
-                    app:tint="#000000"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="2dp"
                     android:contentDescription="알러지 정보 수정" />
 
             </LinearLayout>
@@ -252,6 +248,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginTop="16dp"
+                android:baselineAligned="false"
                 android:background="@drawable/allergy_table_background"
                 android:padding="1dp">
 
@@ -260,12 +257,12 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:orientation="vertical"
-                    android:background="#FFFFFF">
+                    android:background="@color/white">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="음식 알러지"
-                        android:background="#E7F0FE"
+                        android:background="@color/light_blue_chart"
                         android:padding="8dp"
                         android:gravity="center"
                         android:textStyle="bold"
@@ -284,12 +281,12 @@
                     android:layout_weight="1"
                     android:layout_marginStart="1dp"
                     android:orientation="vertical"
-                    android:background="#FFFFFF">
+                    android:background="@color/white">
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="약물 알러지"
-                        android:background="#E7F0FE"
+                        android:background="@color/light_blue_chart"
                         android:padding="8dp"
                         android:gravity="center"
                         android:textStyle="bold"
