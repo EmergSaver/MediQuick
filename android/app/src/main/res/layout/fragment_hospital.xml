@@ -33,5 +33,4 @@
         android:layout_weight="1"
         android:clipToPadding="false"
         android:paddingBottom="16dp" />
-
 </LinearLayout>

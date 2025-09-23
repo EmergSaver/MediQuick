@@ -1,7 +1,6 @@
 package nav;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,9 +26,12 @@ import java.util.HashMap;
 
 import model.Category;
 
+// ✅ HospitalFragment import 추가
+import nav.HospitalFragment;
+
 public class CategoryFragment extends Fragment {
 
-    // 앱에서 표시할 이름과 Firebase 문서 ID 매핑
+    // Firebase 문서 ID 매핑
     private static final Map<String, String> DISPLAY_TO_FIREBASE = new HashMap<String, String>() {{
         put("코&귀", "코_귀");
         put("입&목&얼굴", "입_목_얼굴");
@@ -86,8 +88,7 @@ public class CategoryFragment extends Fragment {
                             List<String> subSymptoms = new ArrayList<>(document.getData().keySet());
 
                             if (subSymptoms.isEmpty()) {
-                                // 하위 증상이 없으면 바로 병원 추천 화면으로 이동
-                                openHospitalFragment(firebaseId, displayName);
+                                openHospitalFragment(displayName);
                                 return;
                             }
 
@@ -95,13 +96,12 @@ public class CategoryFragment extends Fragment {
                             builder.setTitle(displayName + " 세부 증상")
                                     .setItems(subSymptoms.toArray(new String[0]), (dialog, which) -> {
                                         String selectedSubSymptom = subSymptoms.get(which);
-                                        showRelatedSymptomsPopup(firebaseId, selectedSubSymptom);
+                                        showRelatedSymptomsPopup(firebaseId, displayName, selectedSubSymptom);
                                     })
                                     .setPositiveButton("닫기", null)
                                     .show();
                         } else {
-                            // 문서가 없으면 병원 추천 화면
-                            openHospitalFragment(firebaseId, displayName);
+                            openHospitalFragment(displayName);
                         }
                     } else {
                         Toast.makeText(getContext(), "데이터 불러오기 실패", Toast.LENGTH_SHORT).show();
@@ -109,9 +109,9 @@ public class CategoryFragment extends Fragment {
                 });
     }
 
-    private void showRelatedSymptomsPopup(String categoryId, String subSymptom) {
+    private void showRelatedSymptomsPopup(String firebaseId, String displayName, String subSymptom) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        db.collection("symptoms").document(categoryId)
+        db.collection("symptoms").document(firebaseId)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && task.getResult() != null) {
@@ -128,31 +128,28 @@ public class CategoryFragment extends Fragment {
                                     AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
                                     builder.setTitle(subSymptom + " 관련 증상")
                                             .setItems(related.toArray(new String[0]), (dialog, which) -> {
-                                                String finalSymptom = related.get(which);
-                                                openHospitalFragment(categoryId, finalSymptom);
+                                                openHospitalFragment(displayName);
                                             })
                                             .setPositiveButton("닫기", null)
                                             .show();
                                 } else {
-                                    // 하위 증상이 없으면 병원 추천 화면으로 이동
-                                    openHospitalFragment(categoryId, subSymptom);
+                                    openHospitalFragment(displayName);
                                 }
                             } else {
-                                // 하위 증상이 없으면 병원 추천 화면으로 이동
-                                openHospitalFragment(categoryId, subSymptom);
+                                openHospitalFragment(displayName);
                             }
                         } else {
-                            // Map 형식이 아니면 병원 추천 화면으로 이동
-                            openHospitalFragment(categoryId, subSymptom);
+                            openHospitalFragment(displayName);
                         }
                     }
                 });
     }
 
-    private void openHospitalFragment(String categoryId, String selectedSymptom) {
-        HospitalFragment hospitalFragment = HospitalFragment.newInstance(categoryId, selectedSymptom);
+    // ✅ HospitalFragment 호출
+    private void openHospitalFragment(String categoryName) {
+        HospitalFragment fragment = HospitalFragment.newInstance(categoryName);
         requireActivity().getSupportFragmentManager().beginTransaction()
-                .replace(R.id.fragment_container, hospitalFragment)
+                .replace(R.id.fragment_container, fragment)
                 .addToBackStack(null)
                 .commit();
     }
