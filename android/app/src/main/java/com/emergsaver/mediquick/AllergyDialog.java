@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ public class AllergyDialog extends DialogFragment {
     private Button btnAddDrugSideEffect;
 //    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
     private LinearLayout noInfo;
+    private TextView tvWarnRegistedAllergy;
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
 
@@ -101,6 +103,7 @@ public class AllergyDialog extends DialogFragment {
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
 //        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화
         noInfo = view.findViewById(R.id.no_info_linear);
+        tvWarnRegistedAllergy = view.findViewById(R.id.warn_register_allergy);
         tvRegisteredAllergies = view.findViewById(R.id.registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
 
@@ -111,9 +114,12 @@ public class AllergyDialog extends DialogFragment {
             if (!drug.isEmpty()) {
                 if (!registeredDrugAllergies.contains(drug)) {
                     registeredDrugAllergies.add(drug);
-                    updateRegisteredAllergiesText();
+//                    updateRegisteredAllergiesText();
+                    // 동적 UI 추가
+                    addDrugItem(drug);
                     etDrugSideEffect.setText("");
                 } else {
+
                     Toast.makeText(getContext(), "이미 등록된 약물입니다.", Toast.LENGTH_SHORT).show();
                 }
             }
@@ -160,6 +166,7 @@ public class AllergyDialog extends DialogFragment {
                         Map<String, Object> allergiesMap = (Map<String, Object>) documentSnapshot.get("allergies");
 
                         if (allergiesMap != null) {
+                            // 음식 알레르기 체크박스 상태 적용
                             Map<String, Boolean> foodAllergies = (Map<String, Boolean>) allergiesMap.get("foodAllergies");
                             if (foodAllergies != null) {
                                 for (int i = 0; i < gridLayout.getChildCount(); i++) {
@@ -175,21 +182,37 @@ public class AllergyDialog extends DialogFragment {
                                 }
                             }
 
+                            // 약물 부작용 리스트 적용
                             Object drugAllergies = allergiesMap.get("drugAllergies");
                             if (drugAllergies instanceof List) {
                                 registeredDrugAllergies = (List<String>) drugAllergies;
-                                updateRegisteredAllergiesText();
+
+                                if (!registeredDrugAllergies.isEmpty()) {
+                                    noInfo.setVisibility(View.GONE);
+                                    for (String drug : registeredDrugAllergies) {
+                                        addDrugItem(drug); // 동적 UI 추가
+                                    }
+                                } else {
+                                    noInfo.setVisibility(View.VISIBLE);
+                                }
+                            } else {
+                                noInfo.setVisibility(View.VISIBLE);
                             }
+                        } else {
+                            noInfo.setVisibility(View.VISIBLE);
                         }
                     } else {
                         Log.d(TAG, "No allergy data found for user.");
+                        noInfo.setVisibility(View.VISIBLE);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "Error loading allergy data", e);
                     Toast.makeText(getContext(), "알레르기 정보를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show();
+                    noInfo.setVisibility(View.VISIBLE);
                 });
     }
+
 
     private void saveAllergyData() {
         if (userUid == null) {
@@ -250,4 +273,54 @@ public class AllergyDialog extends DialogFragment {
             tvRegisteredAllergies.setText(sb.toString().trim());
         }
     }
+
+    private void addDrugItem(String drugName) {
+        // no_info_linear 숨기기
+        noInfo.setVisibility(View.GONE);
+
+        LinearLayout itemLayout = new LinearLayout(getContext());
+        itemLayout.setOrientation(LinearLayout.HORIZONTAL);
+        itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        ));
+        itemLayout.setPadding(0, 8, 0, 8);
+
+        // 동그란 이미지
+        ImageView iv = new ImageView(getContext());
+        iv.setImageResource(R.drawable.ic_user); // 작은 원 이미지 사용
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(60, 60);
+        ivParams.setMargins(0, 0, 16, 0);
+        iv.setLayoutParams(ivParams);
+
+        // 텍스트
+        TextView tv = new TextView(getContext());
+        tv.setText(drugName);
+        tv.setTextSize(14);
+        tv.setLayoutParams(new LinearLayout.LayoutParams(
+                0,
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                1
+        ));
+
+        // 삭제 버튼
+        Button btnDelete = new Button(getContext());
+        btnDelete.setText("삭제");
+        btnDelete.setTextSize(12);
+        btnDelete.setBackgroundResource(R.drawable.rounded_btn); // 필요 시 스타일 적용
+        btnDelete.setOnClickListener(v -> {
+            registeredDrugAllergies.remove(drugName);
+            gridLayout.removeView(itemLayout);
+            if (registeredDrugAllergies.isEmpty()) {
+                noInfo.setVisibility(View.VISIBLE);
+            }
+        });
+
+        itemLayout.addView(iv);
+        itemLayout.addView(tv);
+        itemLayout.addView(btnDelete);
+
+        gridLayout.addView(itemLayout);
+    }
+
 }
