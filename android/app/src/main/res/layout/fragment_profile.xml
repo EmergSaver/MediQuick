@@ -173,7 +173,6 @@
                         android:layout_marginTop="12dp"
                         android:textColor="@color/black"
                         android:textSize="16sp"
-                        android:textStyle="bold"
                         tools:text="2000.03.04" />
 
                     <TextView
@@ -182,15 +181,14 @@
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
                         android:layout_marginTop="12dp"
-                        android:textColor="@color/gray"
-                        android:textStyle="bold"
-                        tools:text="연락처를 등록해주세요" />
+                        android:textColor="@color/black"
+                        tools:text="연락처를 등록해주세요." />
 
                     <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:layout_marginTop="16dp"
+                        android:layout_marginTop="30dp"
                         android:text="혈액형"
                         android:textColor="@android:color/black"
                         android:textSize="14sp"
@@ -200,16 +198,15 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:layout_marginTop="16dp" />
+                        android:layout_marginTop="30dp" />
 
                     <TextView
                         android:id="@+id/tv_blood_type"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_columnWeight="1"
-                        android:layout_marginTop="16dp"
-                        android:textColor="@color/gray"
-                        android:textStyle="bold"
+                        android:layout_marginTop="12dp"
+                        android:textColor="@color/black"
                         tools:text="혈액형을 등록해주세요" />
                 </GridLayout>
             </LinearLayout>
