@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.GridLayout;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,13 +28,12 @@ import java.util.Map;
 import android.app.Dialog;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.ViewGroup; // 이미 있을 수도 있지만, 혹시 없다면 추가
 
 public class AllergyDialog extends DialogFragment {
 
     private static final String TAG = "AllergyDialog";
 
-    private GridLayout gridLayout;
+    private LinearLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
     private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
@@ -76,13 +76,16 @@ public class AllergyDialog extends DialogFragment {
             Dialog dialog = getDialog();
             Window window = dialog.getWindow();
             if (window != null) {
+
+                window.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
                 WindowManager.LayoutParams params = window.getAttributes();
 
                 // 가로를 화면 전체 폭의 90%로 설정
                 params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
 
                 // 높이를 WRAP_CONTENT로 설정 (내용에 맞게 자동 조절)
-                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+                params.height = (int) (getResources().getDisplayMetrics().heightPixels * 0.9);
+//                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
 
                 window.setAttributes(params);
             }
@@ -93,7 +96,7 @@ public class AllergyDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        gridLayout = view.findViewById(R.id.grid_food_allergies);
+        gridLayout = view.findViewById(R.id.food_allergies_linear);
         etDrugSideEffect = view.findViewById(R.id.et_drug_side_effect);
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
         btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화

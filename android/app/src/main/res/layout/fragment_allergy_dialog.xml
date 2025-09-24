@@ -2,9 +2,10 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="24dp"
+    android:layout_height="match_parent"
+    android:padding="20dp"
     android:background="@drawable/dialog_background">
 
     <TextView
@@ -14,70 +15,272 @@
         android:text="알레르기 정보 입력"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:layout_marginTop="26dp"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/tv_allergy_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="35dp"
         android:text="음식 알레르기"
         android:textSize="16sp"
         android:textStyle="bold"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
+        android:gravity="center"
         android:textColor="@android:color/black"
         android:background="@drawable/allergy_rounded_background"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="30dp"
         app:layout_constraintTop_toBottomOf="@id/tv_title"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <GridLayout
-        android:id="@+id/grid_food_allergies"
+    <LinearLayout
+        android:id="@+id/food_allergies_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_allergy_title">
+        android:layout_marginTop="21dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="@+id/tv_allergy_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_allergy_title">
 
-        <CheckBox android:id="@+id/cb_egg" android:text="난류(계란)" />
-        <CheckBox android:id="@+id/cb_milk" android:text="밀" />
-        <CheckBox android:id="@+id/cb_peach" android:text="복숭아" />
-        <CheckBox android:id="@+id/cb_dairy" android:text="우유" />
-        <CheckBox android:id="@+id/cb_sesame" android:text="참깨" />
-        <CheckBox android:id="@+id/cb_tomato" android:text="토마토" />
-        <CheckBox android:id="@+id/cb_buckwheat" android:text="메밀" />
-        <CheckBox android:id="@+id/cb_almond" android:text="아몬드" />
-        <CheckBox android:id="@+id/cb_sulfur_dioxide" android:text="아황산류" />
-        <CheckBox android:id="@+id/cb_peanut" android:text="땅콩" />
-        <CheckBox android:id="@+id/cb_mackerel" android:text="고등어" />
-        <CheckBox android:id="@+id/cb_pork" android:text="돼지고기" />
-        <CheckBox android:id="@+id/cb_soybean" android:text="대두" />
-        <CheckBox android:id="@+id/cb_crab" android:text="꽃게" />
-        <CheckBox android:id="@+id/cb_chicken" android:text="닭고기" />
-        <CheckBox android:id="@+id/cb_walnut" android:text="호두" />
-        <CheckBox android:id="@+id/cb_shrimp" android:text="새우" />
-        <CheckBox android:id="@+id/cb_beef" android:text="쇠고기" />
-        <CheckBox android:id="@+id/cb_clam" android:text="잣" />
-        <CheckBox android:id="@+id/cb_squid" android:text="오징어" />
-        <CheckBox android:id="@+id/cb_shellfish" android:text="조개류" />
-    </GridLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            app:layout_constraintTop_toBottomOf="@+id/tv_allergy_title">
+
+            <CheckBox
+                android:id="@+id/cb_egg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="난류(계란)" />
+
+            <CheckBox
+                android:id="@+id/cb_milk"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="밀" />
+
+            <CheckBox
+                android:id="@+id/cb_peach"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="복숭아" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <CheckBox
+                android:id="@+id/cb_dairy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="우유" />
+
+            <CheckBox
+                android:id="@+id/cb_sesame"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="참깨" />
+
+            <CheckBox
+                android:id="@+id/cb_tomato"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="토마토" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <CheckBox
+                android:id="@+id/cb_buckwheat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="메밀" />
+
+            <CheckBox
+                android:id="@+id/cb_almond"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="아몬드" />
+
+            <CheckBox
+                android:id="@+id/cb_sulfur_dioxide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="아황산류" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_peanut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="땅콩" />
+
+            <CheckBox
+                android:id="@+id/cb_mackerel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="고등어" />
+
+            <CheckBox
+                android:id="@+id/cb_pork"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="돼지고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_soybean"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="대두" />
+
+            <CheckBox
+                android:id="@+id/cb_crab"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="꽃게" />
+
+            <CheckBox
+                android:id="@+id/cb_chicken"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="닭고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_walnut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="호두" />
+
+            <CheckBox
+                android:id="@+id/cb_shrimp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="새우" />
+
+            <CheckBox
+                android:id="@+id/cb_beef"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="쇠고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_clam"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="잣" />
+
+            <CheckBox
+                android:id="@+id/cb_squid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="오징어" />
+
+            <CheckBox
+                android:id="@+id/cb_shellfish"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="조개류" />
+        </LinearLayout>
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tv_drug_side_effect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="35dp"
+        android:gravity="center"
         android:text="약물 부작용"
         android:textSize="16sp"
         android:textStyle="bold"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
         android:textColor="@android:color/black"
         android:background="@drawable/allergy_rounded_background"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/grid_food_allergies"
+        android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@id/food_allergies_linear"
         app:layout_constraintStart_toStartOf="parent" />
 
     <EditText
