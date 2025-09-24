@@ -8,7 +8,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.GridLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,7 +35,8 @@ public class AllergyDialog extends DialogFragment {
     private LinearLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
-    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
+//    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
+    private LinearLayout noInfo;
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
 
@@ -99,8 +99,9 @@ public class AllergyDialog extends DialogFragment {
         gridLayout = view.findViewById(R.id.food_allergies_linear);
         etDrugSideEffect = view.findViewById(R.id.et_drug_side_effect);
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
-        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화
-        tvRegisteredAllergies = view.findViewById(R.id.tv_registered_allergies);
+//        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화
+        noInfo = view.findViewById(R.id.no_info_linear);
+        tvRegisteredAllergies = view.findViewById(R.id.registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
 
         loadAllergyData();
@@ -129,20 +130,20 @@ public class AllergyDialog extends DialogFragment {
         });
 
         // 추가: 삭제 버튼 클릭 리스너
-        btnDeleteDrugSideEffect.setOnClickListener(v -> {
-            String drugToDelete = etDrugSideEffect.getText().toString().trim();
-            if (!drugToDelete.isEmpty()) {
-                if (registeredDrugAllergies.remove(drugToDelete)) {
-                    Toast.makeText(getContext(), "'" + drugToDelete + "'가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-                    updateRegisteredAllergiesText();
-                    etDrugSideEffect.setText("");
-                } else {
-                    Toast.makeText(getContext(), "해당 약물은 목록에 없습니다.", Toast.LENGTH_SHORT).show();
-                }
-            } else {
-                Toast.makeText(getContext(), "삭제할 약물 이름을 입력하세요.", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        btnDeleteDrugSideEffect.setOnClickListener(v -> {
+//            String drugToDelete = etDrugSideEffect.getText().toString().trim();
+//            if (!drugToDelete.isEmpty()) {
+//                if (registeredDrugAllergies.remove(drugToDelete)) {
+//                    Toast.makeText(getContext(), "'" + drugToDelete + "'가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
+//                    updateRegisteredAllergiesText();
+//                    etDrugSideEffect.setText("");
+//                } else {
+//                    Toast.makeText(getContext(), "해당 약물은 목록에 없습니다.", Toast.LENGTH_SHORT).show();
+//                }
+//            } else {
+//                Toast.makeText(getContext(), "삭제할 약물 이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
         btnConfirmAllergy.setOnClickListener(v -> saveAllergyData());
     }
