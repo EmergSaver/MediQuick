@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
+    android:id="@+id/allergy_scroll"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -378,8 +379,9 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         android:background="@drawable/rounded_btn"
-        android:text="확인"
-        android:layout_marginTop="50dp"
+        android:text="확 인"
+        android:textSize="15sp"
+        android:layout_marginTop="40dp"
         android:textColor="@android:color/white"
         app:backgroundTint="@color/blue_navy"
         app:layout_constraintEnd_toEndOf="parent"
