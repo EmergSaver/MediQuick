@@ -12,6 +12,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,7 +45,8 @@ public class AllergyDialog extends DialogFragment {
     private TextView tvWarnRegistedAllergy;
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
-    FlexboxLayout drugAllergyContainer;
+    private FlexboxLayout drugAllergyContainer;
+    private ScrollView scrollView;
     private List<String> registeredDrugAllergies = new ArrayList<>();
     private FirebaseFirestore db;
     private String userUid;
@@ -113,6 +115,7 @@ public class AllergyDialog extends DialogFragment {
         tvWarnRegistedAllergy = view.findViewById(R.id.warn_register_allergy);
         tvRegisteredAllergies = view.findViewById(R.id.registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
+        scrollView = view.findViewById(R.id.allergy_scroll);
 
         loadAllergyData();
 
@@ -315,6 +318,8 @@ public class AllergyDialog extends DialogFragment {
         itemLayout.addView(btnDelete);
 
         drugAllergyContainer.addView(itemLayout);
+
+        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
     }
 
     private int dpToPx(int dp) {
