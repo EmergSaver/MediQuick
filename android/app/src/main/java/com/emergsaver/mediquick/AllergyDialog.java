@@ -1,5 +1,6 @@
 package com.emergsaver.mediquick;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -17,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
+import com.google.android.flexbox.FlexboxLayout;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -41,7 +44,7 @@ public class AllergyDialog extends DialogFragment {
     private TextView tvWarnRegistedAllergy;
     private TextView tvRegisteredAllergies;
     private Button btnConfirmAllergy;
-
+    FlexboxLayout drugAllergyContainer;
     private List<String> registeredDrugAllergies = new ArrayList<>();
     private FirebaseFirestore db;
     private String userUid;
@@ -65,8 +68,13 @@ public class AllergyDialog extends DialogFragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_allergy_dialog, container, false);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_allergy_dialog, container, false);
+
+        drugAllergyContainer = view.findViewById(R.id.drug_allergy_container);
+        noInfo = view.findViewById(R.id.no_info_linear); // 기존 "정보 없음" 레이아웃
+
+        return view;
     }
 
     @Override
@@ -101,7 +109,6 @@ public class AllergyDialog extends DialogFragment {
         gridLayout = view.findViewById(R.id.food_allergies_linear);
         etDrugSideEffect = view.findViewById(R.id.et_drug_side_effect);
         btnAddDrugSideEffect = view.findViewById(R.id.btn_add_drug_side_effect);
-//        btnDeleteDrugSideEffect = view.findViewById(R.id.btn_delete_drug_side_effect); //  추가: 삭제 버튼 초기화
         noInfo = view.findViewById(R.id.no_info_linear);
         tvWarnRegistedAllergy = view.findViewById(R.id.warn_register_allergy);
         tvRegisteredAllergies = view.findViewById(R.id.registered_allergies);
@@ -114,7 +121,6 @@ public class AllergyDialog extends DialogFragment {
             if (!drug.isEmpty()) {
                 if (!registeredDrugAllergies.contains(drug)) {
                     registeredDrugAllergies.add(drug);
-//                    updateRegisteredAllergiesText();
                     // 동적 UI 추가
                     addDrugItem(drug);
                     etDrugSideEffect.setText("");
@@ -134,22 +140,6 @@ public class AllergyDialog extends DialogFragment {
             }
             return true;
         });
-
-        // 추가: 삭제 버튼 클릭 리스너
-//        btnDeleteDrugSideEffect.setOnClickListener(v -> {
-//            String drugToDelete = etDrugSideEffect.getText().toString().trim();
-//            if (!drugToDelete.isEmpty()) {
-//                if (registeredDrugAllergies.remove(drugToDelete)) {
-//                    Toast.makeText(getContext(), "'" + drugToDelete + "'가 삭제되었습니다.", Toast.LENGTH_SHORT).show();
-//                    updateRegisteredAllergiesText();
-//                    etDrugSideEffect.setText("");
-//                } else {
-//                    Toast.makeText(getContext(), "해당 약물은 목록에 없습니다.", Toast.LENGTH_SHORT).show();
-//                }
-//            } else {
-//                Toast.makeText(getContext(), "삭제할 약물 이름을 입력하세요.", Toast.LENGTH_SHORT).show();
-//            }
-//        });
 
         btnConfirmAllergy.setOnClickListener(v -> saveAllergyData());
     }
@@ -262,65 +252,75 @@ public class AllergyDialog extends DialogFragment {
                 });
     }
 
-    private void updateRegisteredAllergiesText() {
-        if (registeredDrugAllergies.isEmpty()) {
-            tvRegisteredAllergies.setText("현재 등록된 정보가 없습니다.");
-        } else {
-            StringBuilder sb = new StringBuilder("등록된 약물 부작용:\n");
-            for (String drug : registeredDrugAllergies) {
-                sb.append("• ").append(drug).append("\n");
-            }
-            tvRegisteredAllergies.setText(sb.toString().trim());
-        }
-    }
-
     private void addDrugItem(String drugName) {
-        // no_info_linear 숨기기
+        // "현재 등록된 정보 없음" 숨기기
         noInfo.setVisibility(View.GONE);
 
+        // 아이템 전체 레이아웃 (가로 정렬)
         LinearLayout itemLayout = new LinearLayout(getContext());
         itemLayout.setOrientation(LinearLayout.HORIZONTAL);
-        itemLayout.setLayoutParams(new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
+        itemLayout.setPadding(16, 8, 16, 8);
+
+        FlexboxLayout.LayoutParams itemParams = new FlexboxLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
-        ));
-        itemLayout.setPadding(0, 8, 0, 8);
+        );
+        itemParams.setMargins(8, 8, 8, 8);
+        itemLayout.setLayoutParams(itemParams);
 
         // 동그란 이미지
         ImageView iv = new ImageView(getContext());
-        iv.setImageResource(R.drawable.ic_user); // 작은 원 이미지 사용
-        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(60, 60);
-        ivParams.setMargins(0, 0, 16, 0);
+        iv.setImageResource(R.drawable.ic_circle);
+        LinearLayout.LayoutParams ivParams = new LinearLayout.LayoutParams(40, 40);
+        ivParams.setMargins(0, 10, 15, 10);
         iv.setLayoutParams(ivParams);
 
         // 텍스트
         TextView tv = new TextView(getContext());
         tv.setText(drugName);
-        tv.setTextSize(14);
-        tv.setLayoutParams(new LinearLayout.LayoutParams(
-                0,
+        tv.setTextSize(17);
+        tv.setTextColor(Color.BLACK);
+        LinearLayout.LayoutParams tvParams = new LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.WRAP_CONTENT,
-                1
-        ));
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+        tvParams.setMargins(15, 0, 15, 0);
+        tv.setLayoutParams(tvParams);
 
-        // 삭제 버튼
-        Button btnDelete = new Button(getContext());
-        btnDelete.setText("삭제");
-        btnDelete.setTextSize(12);
-        btnDelete.setBackgroundResource(R.drawable.rounded_btn); // 필요 시 스타일 적용
+        // 삭제 버튼 (X 아이콘)
+        ImageButton btnDelete = new ImageButton(getContext());
+        btnDelete.setImageResource(R.drawable.ic_cancel);
+
+        // FlexboxLayout 안이므로 FlexboxLayout.LayoutParams 사용
+        FlexboxLayout.LayoutParams btnParams =
+                new FlexboxLayout.LayoutParams(dpToPx(24), dpToPx(24));
+        btnDelete.setLayoutParams(btnParams);
+
+        // 버튼 배경 제거 + 패딩 제거 + 아이콘 꽉 차게
+        btnDelete.setBackground(null);
+        btnDelete.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        btnDelete.setPadding(10, 10, 0, 0);
+
         btnDelete.setOnClickListener(v -> {
             registeredDrugAllergies.remove(drugName);
-            gridLayout.removeView(itemLayout);
+            drugAllergyContainer.removeView(itemLayout);
             if (registeredDrugAllergies.isEmpty()) {
                 noInfo.setVisibility(View.VISIBLE);
             }
         });
 
+        // 순서대로 추가
         itemLayout.addView(iv);
         itemLayout.addView(tv);
         itemLayout.addView(btnDelete);
 
-        gridLayout.addView(itemLayout);
+        drugAllergyContainer.addView(itemLayout);
     }
+
+    private int dpToPx(int dp) {
+        float density = getContext().getResources().getDisplayMetrics().density;
+        return Math.round(dp * density);
+    }
+
 
 }
