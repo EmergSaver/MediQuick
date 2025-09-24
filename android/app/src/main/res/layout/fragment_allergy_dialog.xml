@@ -295,9 +295,10 @@
         android:layout_height="40dp"
         android:layout_marginTop="17dp"
         android:background="@drawable/login_edittext"
-        android:hint="      알레르기 항목을 입력하세요"
+        android:hint="알레르기 항목을 입력하세요"
         android:inputType="text"
         android:textSize="12sp"
+        android:paddingStart="15dp"
         app:layout_constraintStart_toStartOf="@+id/tv_drug_side_effect"
         app:layout_constraintTop_toBottomOf="@id/tv_drug_side_effect" />
 
