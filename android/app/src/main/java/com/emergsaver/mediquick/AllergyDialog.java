@@ -135,16 +135,6 @@ public class AllergyDialog extends DialogFragment {
             }
         });
 
-        // 추가: 약물 부작용 목록을 길게 누르면 삭제
-        tvRegisteredAllergies.setOnLongClickListener(v -> {
-            String text = tvRegisteredAllergies.getText().toString();
-            if (!text.equals("현재 등록된 정보가 없습니다.")) {
-                // 삭제할 항목을 선택하도록 사용자에게 안내
-                Toast.makeText(getContext(), "삭제할 항목을 입력창에 다시 입력해주세요.", Toast.LENGTH_SHORT).show();
-            }
-            return true;
-        });
-
         btnConfirmAllergy.setOnClickListener(v -> saveAllergyData());
     }
 
@@ -241,8 +231,6 @@ public class AllergyDialog extends DialogFragment {
 
         userDocRef.update("allergies", allergyMap)
                 .addOnSuccessListener(aVoid -> {
-                    Toast.makeText(getContext(), "알레르기 정보가 저장되었습니다.", Toast.LENGTH_SHORT).show();
-
                     Bundle result = new Bundle();
                     result.putStringArrayList("food_allergies", foodAllergyNamesForFragment);
                     result.putStringArrayList("drug_allergies", new ArrayList<>(registeredDrugAllergies));
