@@ -24,8 +24,6 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.Blob;
-import com.google.firebase.firestore.Blob;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -33,9 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 public class ProfileFragment extends Fragment {
 
@@ -43,7 +38,6 @@ public class ProfileFragment extends Fragment {
 
     private ImageButton btnAllergy;
     private Button btnProfile;
-
     private TextView tvDob;
     private TextView tvEmergencyContact;
     private TextView tvBloodType;
@@ -171,12 +165,14 @@ public class ProfileFragment extends Fragment {
 
         // Kakao 로그인 캐시가 있으면 우선 표시
         SharedPreferences pref = requireContext().getSharedPreferences(PREF_KAKAO, AppCompatActivity.MODE_PRIVATE);
-        String nickname  = pref.getString(KEY_K_NICK, null);
-        String profileImg= pref.getString(KEY_K_IMG,  null);
-        String email     = pref.getString(KEY_K_MAIL, null);
+        String nickname = pref.getString(KEY_K_NICK, null);
+        String profileImg = pref.getString(KEY_K_IMG,  null);
+        String email = pref.getString(KEY_K_MAIL, null);
 
-        if (nickname != null) tvName.setText(nickname);
-        if (email != null)    tvEmergencyContact.setText(email);
+        if (nickname != null)
+            tvName.setText(nickname);
+        if (email != null)
+            tvEmergencyContact.setText(email);
         if (profileImg != null && !profileImg.isEmpty()) {
             Glide.with(this).load(profileImg).circleCrop().into(ivProfileImage);
         }
@@ -386,8 +382,8 @@ public class ProfileFragment extends Fragment {
     private TextView createAllergyChip(String text) {
         TextView tv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
         );
         params.setMargins(8, 8, 8, 8);
         tv.setLayoutParams(params);

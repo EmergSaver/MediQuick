@@ -1,5 +1,7 @@
 package com.emergsaver.mediquick;
 
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -50,6 +52,9 @@ public class EditProfileDialog extends DialogFragment {
     public void onStart() {
         super.onStart();
         if (getDialog() != null) {
+            // 다이얼로그 배경 투명하게
+            getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
             int width = ViewGroup.LayoutParams.MATCH_PARENT;
             int height = ViewGroup.LayoutParams.WRAP_CONTENT;
             getDialog().getWindow().setLayout(width, height);
@@ -81,9 +86,13 @@ public class EditProfileDialog extends DialogFragment {
 
         binding.btnConfirm.setOnClickListener(v -> {
             // 1. 입력된 데이터 가져오기
-            String birthdate = binding.spinnerYear.getSelectedItem().toString() + "년 "
-                    + binding.spinnerMonth.getSelectedItem().toString() + "월 "
-                    + binding.spinnerDay.getSelectedItem().toString() + "일";
+            String year = binding.spinnerYear.getSelectedItem().toString();
+            String month = binding.spinnerMonth.getSelectedItem().toString();
+            String day = binding.spinnerDay.getSelectedItem().toString();
+
+            String birthdate = (!year.equals("년") && !month.equals("월") && !day.equals("일"))
+                    ? year + "년 " + month + "월 " + day + "일"
+                    : "등록 필요";
 
             String bloodType = binding.spinnerBloodType.getSelectedItem().toString();
 
@@ -96,9 +105,15 @@ public class EditProfileDialog extends DialogFragment {
                 gender = "(여)";
             }
 
-            String emergencyContact = binding.etContact1.getText().toString() + "-"
-                    + binding.etContact2.getText().toString() + "-"
-                    + binding.etContact3.getText().toString();
+            String part1 = binding.etContact1.getText().toString().trim();
+            String part2 = binding.etContact2.getText().toString().trim();
+            String part3 = binding.etContact3.getText().toString().trim();
+            String emergencyContact;
+            if (part1.isEmpty() && part2.isEmpty() && part3.isEmpty()) {
+                emergencyContact = "등록 필요";
+            } else {
+                emergencyContact = part1 + "-" + part2 + "-" + part3;
+            }
 
             // 수정된 정보를 Firebase에 저장
             saveUserDataToFirebase(birthdate, bloodType, emergencyContact, gender);
@@ -114,11 +129,12 @@ public class EditProfileDialog extends DialogFragment {
             // 3. 팝업 닫기
             dismiss();
         });
+
+        binding.btnCancel.setOnClickListener(v -> {
+            dismiss();
+        });
     }
 
-    /**
-     * Firebase에서 사용자 정보를 불러와 EditText와 Spinner, RadioGroup을 채웁니다.
-     */
     private void loadUserDataFromFirebase() {
         if (userUid == null) {
             if (getContext() != null) {
