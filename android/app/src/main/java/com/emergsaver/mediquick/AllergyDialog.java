@@ -115,7 +115,7 @@ public class AllergyDialog extends DialogFragment {
         tvWarnRegistedAllergy = view.findViewById(R.id.warn_register_allergy);
         tvRegisteredAllergies = view.findViewById(R.id.registered_allergies);
         btnConfirmAllergy = view.findViewById(R.id.btn_confirm_allergy);
-        scrollView = view.findViewById(R.id.allergy_scroll);
+        scrollView = view.findViewById(R.id.scroll_registered_drugs);
 
         loadAllergyData();
 
@@ -308,7 +308,9 @@ public class AllergyDialog extends DialogFragment {
 
         drugAllergyContainer.addView(itemLayout);
 
-        scrollView.post(() -> scrollView.fullScroll(View.FOCUS_DOWN));
+        scrollView.post(() -> {
+            scrollView.scrollTo(0, drugAllergyContainer.getBottom());
+        });
     }
 
     private int dpToPx(int dp) {
