@@ -123,13 +123,14 @@ public class AllergyDialog extends DialogFragment {
             String drug = etDrugSideEffect.getText().toString().trim();
             if (!drug.isEmpty()) {
                 if (!registeredDrugAllergies.contains(drug)) {
+                    if(tvWarnRegistedAllergy.getVisibility() == View.VISIBLE)
+                        tvWarnRegistedAllergy.setVisibility(View.GONE);
                     registeredDrugAllergies.add(drug);
                     // 동적 UI 추가
                     addDrugItem(drug);
                     etDrugSideEffect.setText("");
                 } else {
-
-                    Toast.makeText(getContext(), "이미 등록된 약물입니다.", Toast.LENGTH_SHORT).show();
+                    tvWarnRegistedAllergy.setVisibility(View.VISIBLE);
                 }
             }
         });
