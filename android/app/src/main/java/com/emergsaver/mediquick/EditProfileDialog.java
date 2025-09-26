@@ -91,9 +91,9 @@ public class EditProfileDialog extends DialogFragment {
             String gender = "";
             int selectedGenderId = binding.radioGroupGender.getCheckedRadioButtonId();
             if (selectedGenderId == R.id.radio_male) {
-                gender = "남성";
+                gender = "(남)";
             } else if (selectedGenderId == R.id.radio_female) {
-                gender = "여성";
+                gender = "(여)";
             }
 
             String emergencyContact = binding.etContact1.getText().toString() + "-"
@@ -169,9 +169,9 @@ public class EditProfileDialog extends DialogFragment {
 
                         // 성별 RadioButton 설정
                         if (gender != null) {
-                            if (gender.equals("남성")) {
+                            if (gender.equals("(남)")) {
                                 binding.radioMale.setChecked(true);
-                            } else if (gender.equals("여성")) {
+                            } else if (gender.equals("(여)")) {
                                 binding.radioFemale.setChecked(true);
                             }
                         }
