@@ -112,7 +112,7 @@ public class EditProfileDialog extends DialogFragment {
             if (part1.isEmpty() && part2.isEmpty() && part3.isEmpty()) {
                 emergencyContact = "등록 필요";
             } else {
-                emergencyContact = part1 + "-" + part2 + "-" + part3;
+                emergencyContact = part1 + part2 + part3;
             }
 
             // 수정된 정보를 Firebase에 저장
