@@ -192,7 +192,7 @@ public class EditProfileDialog extends DialogFragment {
                         }
 
                         // 비상 연락처 파싱 및 EditText 설정
-                        if (emergencyContact != null && !emergencyContact.isEmpty()) {
+                        if (emergencyContact != null && !emergencyContact.isEmpty() && !emergencyContact.equals("등록 필요")) {
                             String displayContact;
                             if (emergencyContact.length() == 11) {
                                 displayContact = emergencyContact.substring(0, 3) + "-" +
