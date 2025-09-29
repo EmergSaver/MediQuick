@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,8 +24,6 @@ import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.Blob;
-import com.google.firebase.firestore.Blob;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -32,9 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
 
 public class ProfileFragment extends Fragment {
 
@@ -42,8 +38,6 @@ public class ProfileFragment extends Fragment {
 
     private ImageButton btnAllergy;
     private Button btnProfile;
-//    private Button btnUploadphoto; // `fragment_profile.xml`에서 삭제했으므로, 이 변수도 삭제하는 것이 좋습니다.
-
     private TextView tvDob;
     private TextView tvEmergencyContact;
     private TextView tvBloodType;
@@ -68,7 +62,7 @@ public class ProfileFragment extends Fragment {
     private static final String KEY_FB_UID = "firebase_uid";
 
     // ✨ 수정: `bindViews` 내에서 지역 변수로 재선언하지 않고, 클래스 멤버 변수를 사용하도록 수정
-    private Button btnEditProfileIcon;
+    private ImageButton btnEditProfileIcon;
     private Button btnModifyInfo;
 
     private static final Map<String, String> FOOD_ALLERGY_MAP = new HashMap<>();
@@ -171,12 +165,14 @@ public class ProfileFragment extends Fragment {
 
         // Kakao 로그인 캐시가 있으면 우선 표시
         SharedPreferences pref = requireContext().getSharedPreferences(PREF_KAKAO, AppCompatActivity.MODE_PRIVATE);
-        String nickname  = pref.getString(KEY_K_NICK, null);
-        String profileImg= pref.getString(KEY_K_IMG,  null);
-        String email     = pref.getString(KEY_K_MAIL, null);
+        String nickname = pref.getString(KEY_K_NICK, null);
+        String profileImg = pref.getString(KEY_K_IMG,  null);
+        String email = pref.getString(KEY_K_MAIL, null);
 
-        if (nickname != null) tvName.setText(nickname);
-        if (email != null)    tvEmergencyContact.setText(email);
+        if (nickname != null)
+            tvName.setText(nickname);
+        if (email != null)
+            tvEmergencyContact.setText(email);
         if (profileImg != null && !profileImg.isEmpty()) {
             Glide.with(this).load(profileImg).circleCrop().into(ivProfileImage);
         }
@@ -263,8 +259,6 @@ public class ProfileFragment extends Fragment {
             });
         }
 
-        // `btnUploadphoto` 관련 리스너는 XML에 해당 ID가 없으므로 삭제합니다.
-
         // ✨ 수정: 새로운 버튼들에 대한 리스너 설정
         if (btnEditProfileIcon != null) {
             btnEditProfileIcon.setOnClickListener(v -> {
@@ -305,7 +299,19 @@ public class ProfileFragment extends Fragment {
                         if (name != null) tvName.setText(name);
                         tvDob.setText(birth != null ? birth : "정보 없음");
                         tvBloodType.setText(bloodType != null ? bloodType : "정보 없음");
-                        tvEmergencyContact.setText(emergencyContact != null ? emergencyContact : "정보 없음");
+                        if (emergencyContact != null) {
+                            String formattedContact;
+                            if (emergencyContact.length() == 11) {
+                                formattedContact = emergencyContact.substring(0, 3) + "-" +
+                                        emergencyContact.substring(3, 7) + "-" +
+                                        emergencyContact.substring(7, 11);
+                            } else {
+                                formattedContact = emergencyContact; // 이미 "-"가 있는 경우나 길이가 다르면 그대로
+                            }
+                            tvEmergencyContact.setText(formattedContact);
+                        } else {
+                            tvEmergencyContact.setText("정보 없음");
+                        }
                         tvGender.setText(gender != null ? gender : "정보 없음");
 
                         if (profileImageBlob != null && ivProfileImage != null) {
@@ -363,35 +369,39 @@ public class ProfileFragment extends Fragment {
     }
 
     private void updateAllergiesUI(@Nullable ArrayList<String> foodAllergies, @Nullable ArrayList<String> drugAllergies) {
-        if (llFoodAllergies != null) {
-            llFoodAllergies.removeAllViews();
-            if (foodAllergies != null && !foodAllergies.isEmpty()) {
-                for (String allergy : foodAllergies) llFoodAllergies.addView(createAllergyChip(allergy));
-            } else {
-                llFoodAllergies.addView(createAllergyChip("정보 없음"));
-            }
-        }
+        if (foodAllergies == null) foodAllergies = new ArrayList<>();
+        if (drugAllergies == null) drugAllergies = new ArrayList<>();
 
-        if (llDrugAllergies != null) {
-            llDrugAllergies.removeAllViews();
-            if (drugAllergies != null && !drugAllergies.isEmpty()) {
-                for (String allergy : drugAllergies) llDrugAllergies.addView(createAllergyChip(allergy));
-            } else {
-                llDrugAllergies.addView(createAllergyChip("정보 없음"));
-            }
+        // 최소 1개 이상 표시
+        if (foodAllergies.isEmpty()) foodAllergies.add("정보 없음");
+        if (drugAllergies.isEmpty()) drugAllergies.add("정보 없음");
+
+        int maxSize = Math.max(foodAllergies.size(), drugAllergies.size());
+
+        llFoodAllergies.removeAllViews();
+        llDrugAllergies.removeAllViews();
+
+        for (int i = 0; i < maxSize; i++) {
+            String food = i < foodAllergies.size() ? foodAllergies.get(i) : "";
+            String drug = i < drugAllergies.size() ? drugAllergies.get(i) : "";
+
+            llFoodAllergies.addView(createAllergyChip(food));
+            llDrugAllergies.addView(createAllergyChip(drug));
         }
     }
+
 
     private TextView createAllergyChip(String text) {
         TextView tv = new TextView(getContext());
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.topMargin = 4;
+        params.setMargins(8, 8, 8, 8);
         tv.setLayoutParams(params);
         tv.setText(text);
-        tv.setPadding(8, 8, 8, 8);
+        tv.setGravity(Gravity.CENTER);
+        tv.setPadding(16, 16, 16, 16);
         tv.setBackgroundResource(R.drawable.rounded_background);
         return tv;
     }

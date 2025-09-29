@@ -1,11 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<ScrollView
+    android:id="@+id/allergy_scroll"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="24dp"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
     android:background="@drawable/dialog_background">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
 
     <TextView
         android:id="@+id/tv_title"
@@ -14,145 +21,382 @@
         android:text="알레르기 정보 입력"
         android:textSize="22sp"
         android:textStyle="bold"
+        android:layout_marginTop="20dp"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"/>
 
     <TextView
         android:id="@+id/tv_allergy_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="140dp"
+        android:layout_height="35dp"
         android:text="음식 알레르기"
         android:textSize="16sp"
         android:textStyle="bold"
         android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
+        android:gravity="center"
         android:textColor="@android:color/black"
         android:background="@drawable/allergy_rounded_background"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="30dp"
         app:layout_constraintTop_toBottomOf="@id/tv_title"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <GridLayout
-        android:id="@+id/grid_food_allergies"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:columnCount="3"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/tv_allergy_title">
-
-        <CheckBox android:id="@+id/cb_egg" android:text="난류(계란)" />
-        <CheckBox android:id="@+id/cb_milk" android:text="밀" />
-        <CheckBox android:id="@+id/cb_peach" android:text="복숭아" />
-        <CheckBox android:id="@+id/cb_dairy" android:text="우유" />
-        <CheckBox android:id="@+id/cb_sesame" android:text="참깨" />
-        <CheckBox android:id="@+id/cb_tomato" android:text="토마토" />
-        <CheckBox android:id="@+id/cb_buckwheat" android:text="메밀" />
-        <CheckBox android:id="@+id/cb_almond" android:text="아몬드" />
-        <CheckBox android:id="@+id/cb_sulfur_dioxide" android:text="아황산류" />
-        <CheckBox android:id="@+id/cb_peanut" android:text="땅콩" />
-        <CheckBox android:id="@+id/cb_mackerel" android:text="고등어" />
-        <CheckBox android:id="@+id/cb_pork" android:text="돼지고기" />
-        <CheckBox android:id="@+id/cb_soybean" android:text="대두" />
-        <CheckBox android:id="@+id/cb_crab" android:text="꽃게" />
-        <CheckBox android:id="@+id/cb_chicken" android:text="닭고기" />
-        <CheckBox android:id="@+id/cb_walnut" android:text="호두" />
-        <CheckBox android:id="@+id/cb_shrimp" android:text="새우" />
-        <CheckBox android:id="@+id/cb_beef" android:text="쇠고기" />
-        <CheckBox android:id="@+id/cb_clam" android:text="잣" />
-        <CheckBox android:id="@+id/cb_squid" android:text="오징어" />
-        <CheckBox android:id="@+id/cb_shellfish" android:text="조개류" />
-    </GridLayout>
-
-    <TextView
-        android:id="@+id/tv_drug_side_effect"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="약물 부작용"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:paddingHorizontal="16dp"
-        android:paddingVertical="8dp"
-        android:textColor="@android:color/black"
-        android:background="@drawable/allergy_rounded_background"
-        android:layout_marginTop="24dp"
-        app:layout_constraintTop_toBottomOf="@id/grid_food_allergies"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/et_drug_side_effect"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:hint="아목시실린"
-        android:background="@drawable/rounded_background"
-        android:padding="12dp"
-        android:inputType="text"
-        app:layout_constraintTop_toBottomOf="@id/tv_drug_side_effect"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
     <LinearLayout
-        android:id="@+id/layout_drug_buttons"
+        android:id="@+id/food_allergies_linear"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@id/et_drug_side_effect"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        android:layout_marginTop="21dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="@+id/tv_allergy_title"
+        app:layout_constraintTop_toBottomOf="@+id/tv_allergy_title">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_drug_side_effect"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="등록"
-            android:textSize="12sp"
-            android:layout_marginEnd="8dp"
-            app:cornerRadius="8dp"
-            android:backgroundTint="#4285F4"
-            android:textColor="@android:color/white"/>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            app:layout_constraintTop_toBottomOf="@+id/tv_allergy_title">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_delete_drug_side_effect"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="삭제"
-            android:textSize="12sp"
-            android:layout_marginStart="8dp"
-            app:cornerRadius="8dp"
-            style="?attr/materialButtonOutlinedStyle"
-            app:strokeColor="#F44336"
-            android:textColor="#F44336"/>
+            <CheckBox
+                android:id="@+id/cb_egg"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="난류(계란)" />
+
+            <CheckBox
+                android:id="@+id/cb_milk"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="밀" />
+
+            <CheckBox
+                android:id="@+id/cb_peach"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="복숭아" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <CheckBox
+                android:id="@+id/cb_dairy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="우유" />
+
+            <CheckBox
+                android:id="@+id/cb_sesame"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="참깨" />
+
+            <CheckBox
+                android:id="@+id/cb_tomato"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="토마토" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3">
+
+            <CheckBox
+                android:id="@+id/cb_buckwheat"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="메밀" />
+
+            <CheckBox
+                android:id="@+id/cb_almond"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="아몬드" />
+
+            <CheckBox
+                android:id="@+id/cb_sulfur_dioxide"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="아황산류" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_peanut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="땅콩" />
+
+            <CheckBox
+                android:id="@+id/cb_mackerel"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="고등어" />
+
+            <CheckBox
+                android:id="@+id/cb_pork"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="돼지고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_soybean"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="대두" />
+
+            <CheckBox
+                android:id="@+id/cb_crab"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="꽃게" />
+
+            <CheckBox
+                android:id="@+id/cb_chicken"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="닭고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_walnut"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="호두" />
+
+            <CheckBox
+                android:id="@+id/cb_shrimp"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="새우" />
+
+            <CheckBox
+                android:id="@+id/cb_beef"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="쇠고기" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="3"
+            tools:layout_editor_absoluteX="20dp">
+
+            <CheckBox
+                android:id="@+id/cb_clam"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="잣" />
+
+            <CheckBox
+                android:id="@+id/cb_squid"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="오징어" />
+
+            <CheckBox
+                android:id="@+id/cb_shellfish"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="조개류" />
+        </LinearLayout>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tv_registered_allergies"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="현재 등록된 정보가 없습니다."
+        android:id="@+id/tv_drug_side_effect"
+        android:layout_width="140dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="32dp"
+        android:background="@drawable/allergy_rounded_background"
         android:gravity="center"
+        android:paddingHorizontal="16dp"
+        android:text="약물 부작용"
         android:textColor="@android:color/black"
-        app:layout_constraintTop_toBottomOf="@id/layout_drug_buttons"
+        android:textSize="16sp"
+        android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@id/food_allergies_linear" />
+
+    <EditText
+        android:id="@+id/et_drug_side_effect"
+        android:layout_width="230dp"
+        android:layout_height="40dp"
+        android:layout_marginTop="17dp"
+        android:background="@drawable/login_edittext"
+        android:hint="알레르기 항목을 입력하세요"
+        android:inputType="text"
+        android:textSize="12sp"
+        android:paddingStart="15dp"
+        app:layout_constraintStart_toStartOf="@+id/tv_drug_side_effect"
+        app:layout_constraintTop_toBottomOf="@id/tv_drug_side_effect" />
 
     <Button
-        android:id="@+id/btn_confirm_allergy"
-        android:layout_width="150dp"
+        android:id="@+id/btn_add_drug_side_effect"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginStart="10dp"
+        android:layout_weight="1"
+        android:background="@drawable/rounded_btn"
+        android:gravity="center"
+        android:padding="5dp"
+        android:text="등 록"
+        android:textColor="@color/white"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        app:backgroundTint="@color/blue_navy"
+        app:layout_constraintBottom_toBottomOf="@+id/et_drug_side_effect"
+        app:layout_constraintEnd_toEndOf="@+id/food_allergies_linear"
+        app:layout_constraintTop_toTopOf="@+id/et_drug_side_effect" />
+
+        <ScrollView
+            android:id="@+id/scroll_registered_drugs"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:fillViewport="true"
+            android:layout_marginBottom="20dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/btn_confirm_allergy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/et_drug_side_effect">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <com.google.android.flexbox.FlexboxLayout
+                    android:id="@+id/drug_allergy_container"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    app:flexDirection="row"
+                    app:flexWrap="wrap"
+                    app:justifyContent="flex_start" />
+
+                <LinearLayout
+                    android:id="@+id/no_info_linear"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="90dp"
+                        android:layout_height="90dp"
+                        android:src="@drawable/ic_user" />
+
+                    <TextView
+                        android:id="@+id/registered_allergies"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="현재 등록된 정보가 없습니다."
+                        android:textColor="@android:color/black" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </ScrollView>
+
+
+    <TextView
+        android:id="@+id/warn_register_allergy"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:backgroundTint="#4285F4"
-        android:text="확인"
-        android:textColor="@android:color/white"
-        app:layout_constraintTop_toBottomOf="@id/tv_registered_allergies"
+        android:gravity="center"
+        android:text="이미 등록된 약물입니다."
+        android:textColor="@color/red"
+        android:textSize="12sp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/btn_confirm_allergy"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
-        app:cornerRadius="8dp"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:id="@+id/btn_confirm_allergy"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/rounded_btn"
+            android:text="확 인"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            app:backgroundTint="@color/blue_navy"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
