@@ -156,9 +156,14 @@ public class EditProfileDialog extends DialogFragment {
             return;
         }
 
+        binding.getRoot().setAlpha(0f);
+
         db.collection("users").document(userUid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
+                        // 데이터 세팅
+                        binding.getRoot().animate().alpha(1f).setDuration(100).start();
+
                         String birth = documentSnapshot.getString("birth");
                         String bloodType = documentSnapshot.getString("bloodType");
                         String emergencyContact = documentSnapshot.getString("emergencyContact");
