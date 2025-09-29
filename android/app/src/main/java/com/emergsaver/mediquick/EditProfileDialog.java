@@ -108,23 +108,36 @@ public class EditProfileDialog extends DialogFragment {
             String part1 = binding.etContact1.getText().toString().trim();
             String part2 = binding.etContact2.getText().toString().trim();
             String part3 = binding.etContact3.getText().toString().trim();
-            String emergencyContact;
+            // DB에는 하이픈 없이 저장
+            String emergencyContactForDB;
             if (part1.isEmpty() && part2.isEmpty() && part3.isEmpty()) {
-                emergencyContact = "등록 필요";
+                emergencyContactForDB = "등록 필요";
             } else {
-                emergencyContact = part1 + part2 + part3;
+                emergencyContactForDB = part1 + part2 + part3;
             }
 
-            // 수정된 정보를 Firebase에 저장
-            saveUserDataToFirebase(birthdate, bloodType, emergencyContact, gender);
+            // 화면에 보여줄 때는 하이픈 포함
+            String emergencyContactForDisplay;
+            if (emergencyContactForDB.equals("등록 필요")) {
+                emergencyContactForDisplay = "등록 필요";
+            } else if (emergencyContactForDB.length() == 11) {
+                emergencyContactForDisplay = emergencyContactForDB.substring(0, 3) + "-" +
+                        emergencyContactForDB.substring(3, 7) + "-" +
+                        emergencyContactForDB.substring(7, 11);
+            } else {
+                emergencyContactForDisplay = emergencyContactForDB;
+            }
 
             // 2. Fragment Result를 통해 데이터 전달 (UI 즉시 업데이트용)
             Bundle result = new Bundle();
             result.putString("birthdate", birthdate);
             result.putString("bloodType", bloodType);
-            result.putString("emergencyContact", emergencyContact);
+            result.putString("emergencyContact", emergencyContactForDisplay);
             result.putString("gender", gender); //  성별 정보 전달
             getParentFragmentManager().setFragmentResult("requestKey", result);
+
+            // 수정된 정보를 Firebase에 저장
+            saveUserDataToFirebase(birthdate, bloodType, emergencyContactForDB, gender);
 
             // 3. 팝업 닫기
             dismiss();
@@ -175,11 +188,17 @@ public class EditProfileDialog extends DialogFragment {
 
                         // 비상 연락처 파싱 및 EditText 설정
                         if (emergencyContact != null && !emergencyContact.isEmpty()) {
-                            String[] parts = emergencyContact.split("-");
-                            if (parts.length == 3) {
-                                binding.etContact1.setText(parts[0]);
-                                binding.etContact2.setText(parts[1]);
-                                binding.etContact3.setText(parts[2]);
+                            String displayContact;
+                            if (emergencyContact.length() == 11) {
+                                displayContact = emergencyContact.substring(0, 3) + "-" +
+                                        emergencyContact.substring(3, 7) + "-" +
+                                        emergencyContact.substring(7, 11);
+                                binding.etContact1.setText(emergencyContact.substring(0, 3));
+                                binding.etContact2.setText(emergencyContact.substring(3, 7));
+                                binding.etContact3.setText(emergencyContact.substring(7, 11));
+                            } else {
+                                displayContact = emergencyContact;
+                                binding.etContact1.setText(displayContact);
                             }
                         }
 
