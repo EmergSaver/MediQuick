@@ -37,25 +37,23 @@ public class HospitalAdapter extends RecyclerView.Adapter<HospitalAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Hospital hospital = hospitals.get(position);
 
-        // 병원 이름
         holder.name.setText(hospital.getHospital_name());
 
-        // 거리 표시 (km)
         if (hospital.getDistanceToUser() >= 0) {
             holder.distance.setText(String.format("%.1f km", hospital.getDistanceToUser()));
         } else {
             holder.distance.setText("");
         }
 
-        // 주소 및 전화번호
         holder.address.setText(hospital.getAddress());
         holder.phone.setText(hospital.getPhone());
 
-        // 🔹 병원 아이템 클릭 시 상세 화면 이동
+        // 🔹 초기 혼잡도 0명 원활
+        updateCongestion(holder, 0);
+
         holder.itemView.setOnClickListener(v -> {
             Context context = v.getContext();
             Intent intent = new Intent(context, DetailHospitalActivity.class);
-            // Hospital 클래스는 Serializable 구현 필수
             intent.putExtra("hospital", hospital);
             context.startActivity(intent);
         });
@@ -66,8 +64,29 @@ public class HospitalAdapter extends RecyclerView.Adapter<HospitalAdapter.ViewHo
         return hospitals.size();
     }
 
+    // 🔹 혼잡도 업데이트 메서드
+    public void updateCongestion(ViewHolder holder, int peopleCount) {
+        String congestionStatus;
+        int color;
+
+        if (peopleCount <= 20) {
+            congestionStatus = "원활";
+            color = holder.itemView.getResources().getColor(R.color.lime_green);
+        } else if (peopleCount <= 40) {
+            congestionStatus = "보통";
+            color = holder.itemView.getResources().getColor(R.color.orange);
+        } else {
+            congestionStatus = "혼잡";
+            color = holder.itemView.getResources().getColor(R.color.red);
+        }
+
+        holder.congestionDot.setBackgroundColor(color);
+        holder.congestionText.setText(congestionStatus + " (" + peopleCount + " 명)");
+    }
+
     static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView name, distance, address, phone;
+        TextView name, distance, address, phone, congestionText;
+        View congestionDot;
 
         ViewHolder(View itemView) {
             super(itemView);
@@ -75,6 +94,8 @@ public class HospitalAdapter extends RecyclerView.Adapter<HospitalAdapter.ViewHo
             distance = itemView.findViewById(R.id.text_distance);
             address = itemView.findViewById(R.id.text_address);
             phone = itemView.findViewById(R.id.text_phone);
+            congestionDot = itemView.findViewById(R.id.view_congestion_dot);  // View 타입
+            congestionText = itemView.findViewById(R.id.text_congestion);    // TextView 타입
         }
     }
 }
