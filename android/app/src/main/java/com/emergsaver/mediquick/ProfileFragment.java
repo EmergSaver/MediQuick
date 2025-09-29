@@ -299,7 +299,19 @@ public class ProfileFragment extends Fragment {
                         if (name != null) tvName.setText(name);
                         tvDob.setText(birth != null ? birth : "정보 없음");
                         tvBloodType.setText(bloodType != null ? bloodType : "정보 없음");
-                        tvEmergencyContact.setText(emergencyContact != null ? emergencyContact : "정보 없음");
+                        if (emergencyContact != null) {
+                            String formattedContact;
+                            if (emergencyContact.length() == 11) {
+                                formattedContact = emergencyContact.substring(0, 3) + "-" +
+                                        emergencyContact.substring(3, 7) + "-" +
+                                        emergencyContact.substring(7, 11);
+                            } else {
+                                formattedContact = emergencyContact; // 이미 "-"가 있는 경우나 길이가 다르면 그대로
+                            }
+                            tvEmergencyContact.setText(formattedContact);
+                        } else {
+                            tvEmergencyContact.setText("정보 없음");
+                        }
                         tvGender.setText(gender != null ? gender : "정보 없음");
 
                         if (profileImageBlob != null && ivProfileImage != null) {
