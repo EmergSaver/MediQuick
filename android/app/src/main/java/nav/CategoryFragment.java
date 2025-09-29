@@ -51,19 +51,19 @@ public class CategoryFragment extends Fragment {
 
         List<Category> categories = Arrays.asList(
                 new Category(R.drawable.icon_brain, "신경계"),
-                new Category(R.drawable.ic_launcher_foreground, "눈"),
+                new Category(R.drawable.icon_eyes, "눈"),
                 new Category(R.drawable.icon_nose, "코&귀"),
-                new Category(R.drawable.ic_launcher_foreground, "입&목&얼굴"),
-                new Category(R.drawable.ic_launcher_foreground, "호흡기계"),
-                new Category(R.drawable.ic_launcher_foreground, "심혈관계"),
-                new Category(R.drawable.ic_launcher_foreground, "소화기계"),
-                new Category(R.drawable.ic_launcher_foreground, "비뇨기계"),
-                new Category(R.drawable.ic_launcher_foreground, "피부"),
-                new Category(R.drawable.ic_launcher_foreground, "임신"),
-                new Category(R.drawable.ic_launcher_foreground, "근골격계"),
-                new Category(R.drawable.ic_launcher_foreground, "몸통외상"),
-                new Category(R.drawable.ic_launcher_foreground, "물질오용&중독"),
-                new Category(R.drawable.ic_launcher_foreground, "일반")
+                new Category(R.drawable.icon_mouth_neck_face, "입&목&얼굴"),
+                new Category(R.drawable.icon_breath, "호흡기계"),
+                new Category(R.drawable.icon_heart, "심혈관계"),
+                new Category(R.drawable.icon_digestion, "소화기계"),
+                new Category(R.drawable.icon_urinary, "비뇨기계"),
+                new Category(R.drawable.icon_skin, "피부"),
+                new Category(R.drawable.icon_pregnancy, "임신"),
+                new Category(R.drawable.icon_bone, "근골격계"),
+                new Category(R.drawable.icon_body, "몸통외상"),
+                new Category(R.drawable.icon_poison, "물질오용&중독"),
+                new Category(R.drawable.icon_general, "일반")
         );
 
         CategoryAdapter adapter = new CategoryAdapter(categories, item -> {
