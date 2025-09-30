@@ -10,15 +10,15 @@ public class Hospital implements Serializable{
     private String address;
     private double latitude;
     private double longitude;
-    // 추가적으로 상세정보도 추후 추가
     private int doctor_count;
     private int currentPeople;
+    private List<Specialty> specialties;
 
+    private double distanceToUser;
     // 기본 생성자
     public Hospital() {
     }
 
-    private List<Specialty> specialties;
 
     public Hospital(String id, String hospital_name, String phone, String address, Double latitude, Double longitude, int doctor_count) {
         this.id = id;
@@ -39,6 +39,12 @@ public class Hospital implements Serializable{
         this.id = id;
     }
 
+    public double getDistanceToUser() {
+        return distanceToUser;
+    }
+    public void setDistanceToUser(double distanceToUser) {
+        this.distanceToUser = distanceToUser;
+    }
     public String getHospital_name() {
         return hospital_name;
     }
