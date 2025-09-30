@@ -7,6 +7,8 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.LinearInterpolator;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -92,8 +94,24 @@ public class HospitalFragment extends Fragment {
 
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(getContext());
 
+        LinearLayout linearHospital = view.findViewById(R.id.linearHospital);
+
         // Firestore에서 병원 데이터 최초 1회만 로드
-        loadHospitalsFromFirestore();
+        loadHospitalsFromFirestore(() -> {
+            if(userLat != 0 && userLng != 0) {
+                updateHospitalDistances();
+            }
+            recyclerView.setAdapter(new HospitalAdapter(hospitalList));
+
+            // LinearLayout 전체를 페이드인
+            linearHospital.setAlpha(0f);
+            linearHospital.setVisibility(View.VISIBLE);
+            linearHospital.animate()
+                    .alpha(1f)
+                    .setDuration(100) // 0.1초
+                    .setInterpolator(new LinearInterpolator())
+                    .start();
+        });
 
         // 위치 요청 설정 (1초 간격)
         locationRequest = LocationRequest.create();
@@ -140,7 +158,7 @@ public class HospitalFragment extends Fragment {
     }
 
     // Firestore에서 병원 데이터 1회 로드
-    private void loadHospitalsFromFirestore() {
+    private void loadHospitalsFromFirestore(Runnable onDataReady) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         List<String> targetDepts = CATEGORY_TO_DEPTS.getOrDefault(categoryName, new ArrayList<>());
 
@@ -178,8 +196,8 @@ public class HospitalFragment extends Fragment {
                             }
                         }
 
-                        // 초기 RecyclerView 세팅
-                        recyclerView.setAdapter(new HospitalAdapter(hospitalList));
+                        // 데이터 준비 완료 콜백
+                        onDataReady.run();
                     }
                 });
     }
