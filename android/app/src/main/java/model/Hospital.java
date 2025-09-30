@@ -3,7 +3,7 @@ package model;
 import java.util.List;
 import java.io.Serializable;
 
-public class Hospital implements Serializable {
+public class Hospital implements Serializable{
     private String id;
     private String hospital_name;
     private String phone;
@@ -12,6 +12,7 @@ public class Hospital implements Serializable {
     private double longitude;
     private int doctor_count;
     private int currentPeople;
+    private List<Specialty> specialties;
 
     private double distanceToUser;
     // 기본 생성자
