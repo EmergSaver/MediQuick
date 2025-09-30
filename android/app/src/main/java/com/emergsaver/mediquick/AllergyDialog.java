@@ -40,7 +40,7 @@ public class AllergyDialog extends DialogFragment {
     private LinearLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
-//    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
+    //    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
     private LinearLayout noInfo;
     private TextView tvWarnRegistedAllergy;
     private TextView tvRegisteredAllergies;
@@ -93,7 +93,7 @@ public class AllergyDialog extends DialogFragment {
                 WindowManager.LayoutParams params = window.getAttributes();
 
                 // 가로를 화면 전체 폭의 90%로 설정
-                params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.95);
+                params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
 
                 // 높이를 WRAP_CONTENT로 설정 (내용에 맞게 자동 조절)
                 params.height = (int) (getResources().getDisplayMetrics().heightPixels * 0.9);
