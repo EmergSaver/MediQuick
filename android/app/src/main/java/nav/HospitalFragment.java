@@ -178,7 +178,10 @@ public class HospitalFragment extends Fragment {
                             }
                         }
 
-                        // 초기 RecyclerView 세팅
+                        if(userLat != 0 && userLng != 0) {
+                            updateHospitalDistances();
+                        }
+
                         recyclerView.setAdapter(new HospitalAdapter(hospitalList));
                     }
                 });
