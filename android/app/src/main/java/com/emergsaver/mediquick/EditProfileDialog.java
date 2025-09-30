@@ -1,11 +1,14 @@
 package com.emergsaver.mediquick;
 
+import android.app.Dialog;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,9 +58,23 @@ public class EditProfileDialog extends DialogFragment {
             // 다이얼로그 배경 투명하게
             getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
 
-            int width = ViewGroup.LayoutParams.MATCH_PARENT;
-            int height = ViewGroup.LayoutParams.WRAP_CONTENT;
-            getDialog().getWindow().setLayout(width, height);
+            if (getDialog() != null) {
+                Dialog dialog = getDialog();
+                Window window = dialog.getWindow();
+                if (window != null) {
+
+                    window.setBackgroundDrawableResource(R.drawable.bg_dialog_rounded);
+                    WindowManager.LayoutParams params = window.getAttributes();
+
+                    // 가로를 화면 전체 폭의 90%로 설정
+                    params.width = (int) (getResources().getDisplayMetrics().widthPixels * 0.9);
+
+                    // 높이를 WRAP_CONTENT로 설정 (내용에 맞게 자동 조절)
+                    params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+
+                    window.setAttributes(params);
+                }
+            }
         }
     }
 
