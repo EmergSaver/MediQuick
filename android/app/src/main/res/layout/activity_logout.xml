@@ -1,30 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:padding="24dp"
+    android:padding="30dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/main_logout">
 
     <TextView
+        android:id="@+id/textView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="현재 계정에서 로그아웃하시겠어요? 자동로그인이 해제됩니다."
-        android:lineSpacingExtra="4dp"/>
+        android:text="로그아웃"
+        android:textColor="@color/black"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnLogout"
+    <TextView
+        android:id="@+id/textView3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="로그아웃하기"
-        android:layout_marginTop="24dp"/>
+        android:layout_marginTop="44dp"
+        android:lineSpacingExtra="4dp"
+        android:text="현재 계정에서 로그아웃하시겠어요? \n자동로그인이 해제됩니다."
+        android:textSize="15sp"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnCancel"
-        style="?attr/materialButtonOutlinedStyle"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="취소"
-        android:layout_marginTop="8dp"/>
-</LinearLayout>
+        android:orientation="horizontal"
+        android:layout_marginTop="44dp"
+        app:layout_constraintEnd_toEndOf="@+id/textView2"
+        app:layout_constraintStart_toStartOf="@+id/textView2"
+        app:layout_constraintTop_toBottomOf="@+id/textView3">
+
+        <Button
+            android:id="@+id/btnLogout"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_btn"
+            android:text="확인"
+            android:textColor="@color/white"
+            app:backgroundTint="@color/blue_navy" />
+
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCancel"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="12dp"
+            android:layout_weight="1"
+            android:background="@drawable/rounded_btn"
+            android:text="취소"
+            android:textAllCaps="false" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
