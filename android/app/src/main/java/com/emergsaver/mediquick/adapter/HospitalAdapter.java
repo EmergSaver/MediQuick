@@ -29,7 +29,7 @@ public class HospitalAdapter extends RecyclerView.Adapter<HospitalAdapter.ViewHo
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_hospital, parent, false);
+                .inflate(R.layout.item_recom_hospital, parent, false);
         return new ViewHolder(view);
     }
 
