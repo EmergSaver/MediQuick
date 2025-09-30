@@ -40,7 +40,7 @@ public class AllergyDialog extends DialogFragment {
     private LinearLayout gridLayout;
     private EditText etDrugSideEffect;
     private Button btnAddDrugSideEffect;
-//    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
+    //    private Button btnDeleteDrugSideEffect; // 추가: 삭제 버튼
     private LinearLayout noInfo;
     private TextView tvWarnRegistedAllergy;
     private TextView tvRegisteredAllergies;

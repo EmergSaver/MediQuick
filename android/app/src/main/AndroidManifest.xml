@@ -12,6 +12,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <queries>
+
         <!-- Google Maps -->
         <package android:name="com.google.android.apps.maps" />
 
@@ -24,20 +25,27 @@
         <!-- 혹은 scheme 기반 -->
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:scheme="kakaonavi" />
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:scheme="nmap" />
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:scheme="http" />
         </intent>
         <intent>
             <action android:name="android.intent.action.VIEW" />
+
             <data android:scheme="https" />
         </intent>
+    </queries>
+    <queries>
+        <package android:name="com.kakao.talk" />
     </queries>
 
     <application
@@ -52,6 +60,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MediQuick"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".LoginActivity"
+            android:exported="false" />
         <activity
             android:name=".ChangePassActivity"
             android:exported="false" />
@@ -89,34 +100,34 @@
             android:name=".AllergyActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <!--<action android:name="android.intent.action.VIEW" />
+                <!--
+                <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="${KAKAO_SCHEME}" />-->
+                <data android:scheme="${KAKAO_SCHEME}" />
+                -->
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-        android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-        android:exported="true"
-        android:launchMode="singleTask">
-        <intent-filter>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.DEFAULT" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data
-                android:scheme="${KAKAO_SCHEME}"
-                android:host="oauth"/>
-        </intent-filter>
-    </activity>
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="oauth"
+                    android:scheme="${KAKAO_SCHEME}" />
+            </intent-filter>
+        </activity>
     </application>
-    <queries>
-        <package android:name="com.kakao.talk" />
-    </queries>
+
 </manifest>
-
-
