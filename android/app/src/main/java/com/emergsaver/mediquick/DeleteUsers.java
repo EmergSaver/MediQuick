@@ -1,12 +1,18 @@
 package com.emergsaver.mediquick;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.AttributeSet;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
@@ -31,9 +37,11 @@ public class DeleteUsers extends AppCompatActivity {
 
         etPw = findViewById(R.id.etPw);
         cbAgree = findViewById(R.id.cbAgree);
-        MaterialButton btnDelete = findViewById(R.id.btnDelete);
+        AppCompatButton btnDelete = findViewById(R.id.btnDelete);
+        AppCompatButton btnCancel = findViewById(R.id.btnCancel);
 
         btnDelete.setOnClickListener(v -> startDeleteFlow());
+        btnCancel.setOnClickListener(v -> finish());
     }
 
     private void startDeleteFlow() {
