@@ -6,6 +6,8 @@
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
+/.idea/misc.xml
+/.idea/vcs.xml
 /.idea/assetWizardSettings.xml
 .DS_Store
 /build
@@ -23,4 +25,3 @@ output.json
 # Keystore (보안상 제외)
 *.jks
 *.keystore
-

@@ -1,6 +1,6 @@
 pluginManagement {
     repositories {
-        google {
+            google {
             content {
                 includeGroupByRegex("com\\.android.*")
                 includeGroupByRegex("com\\.google.*")
@@ -16,6 +16,10 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // 카카오 지도 Maven 저장소 추가
+        maven { url 'https://devrepo.kakao.com/nexus/repository/kakaomap-releases/' }
+        // 카카오 로그인 maven 저장소 추가
+        maven { url 'https://devrepo.kakao.com/nexus/content/groups/public/' }
     }
 }
 

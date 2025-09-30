@@ -1,1 +1,48 @@
+# Gradle 빌드 결과물
 /build
+/app/build
+**/build/
+
+# Gradle 캐시 및 설정
+.gradle/
+.gradle/*
+!gradle-wrapper.jar
+!gradlew
+!gradlew.bat
+
+# 로컬 환경 설정
+/local.properties
+
+# 안드로이드 스튜디오 캐시
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# 로그 파일
+*.log
+
+# OS 별 불필요 파일
+.DS_Store
+Thumbs.db
+
+# Keystore (민감정보이므로 커밋 금지!)
+*.jks
+*.keystore
+
+# Android Profile / Captures
+captures/
+.externalNativeBuild
+.cxx/
+
+# Android Studio
+/.idea/workspace.xml
+/.idea/misc.xml
+/.idea/tasks.xml
+/.idea/dictionaries
+
+# firebase
+google-services.json
+
+

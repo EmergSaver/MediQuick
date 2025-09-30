@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/white">
+
+    <LinearLayout
+        android:id="@+id/linearHospital"
+        android:paddingTop="80dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/white"
+        android:visibility="gone">
+
+    <!-- 타이틀 -->
+    <TextView
+        android:id="@+id/tv_hospital_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="추천 병원"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginBottom="20dp" />
+
+    <!-- 구분선 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/blue_gray"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- RecyclerView: weight로 남은 공간 모두 차지 -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_hospitals"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingBottom="16dp" />
+    </LinearLayout>
+</LinearLayout>

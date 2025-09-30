@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_agree"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:fillViewport="true"
+    android:padding="20dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="약관 동의"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- 이용약관 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="44dp">
+
+            <CheckBox
+                android:id="@+id/cbTermsService"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="[필수] 이용약관 동의"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewService"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="보기"
+                android:textColor="@color/blue_navy"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+        </LinearLayout>
+
+        <!-- 개인정보 처리방침 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cbTermsPrivacy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="[필수] 개인정보 처리방침 동의"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewPrivacy"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="보기"
+                android:textColor="@color/blue_navy"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+        </LinearLayout>
+
+        <!-- 마케팅 동의 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <CheckBox
+                android:id="@+id/cbTermsMarketing"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="[선택] 마케팅 정보 수신 동의"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnViewMarketing"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="보기"
+                android:textColor="@color/blue_navy"
+                android:textAllCaps="false"
+                style="@style/Widget.MaterialComponents.Button.TextButton"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/tvHelp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="필수 항목에 동의해야 가입이 가능합니다."
+            android:textSize="12sp"
+            android:textColor="@color/gray"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="10dp"/>
+
+        <!-- 동의/취소 버튼 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="40dp">
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnAgree"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="동의하고 계속"
+                android:textSize="15sp"
+                android:gravity="center"
+                android:background="@drawable/rounded_btn"
+                android:backgroundTint="@color/blue_navy"
+                android:textColor="@color/white"/>
+
+            <Space
+                android:layout_width="15dp"
+                android:layout_height="10dp"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btnCancel"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:background="@drawable/rounded_btn"
+                android:text="취소"
+                android:textColor="@color/blue_navy"/>
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
