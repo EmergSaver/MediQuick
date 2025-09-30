@@ -4,12 +4,13 @@ import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import android.content.Intent;
+import android.widget.ImageButton;
 
-import com.google.android.material.button.MaterialButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -22,9 +23,10 @@ public class SettingsActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_settings);
 
-        MaterialButton btnChangePassword = findViewById(R.id.btnChangePw);
-        MaterialButton btnLogout = findViewById(R.id.btnLogout);
-        MaterialButton btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
+        AppCompatButton btnChangePassword = findViewById(R.id.btnChangePw);
+        AppCompatButton btnLogout = findViewById(R.id.btnLogout);
+        AppCompatButton btnDeleteAccount = findViewById(R.id.btnDeleteAccount);
+        ImageButton btnBack = findViewById(R.id.btnBack);
 
         if (btnLogout != null) {
             btnLogout.setOnClickListener(v ->
@@ -50,6 +52,8 @@ public class SettingsActivity extends AppCompatActivity {
                     startActivity(new Intent(this, ChangePassActivity.class))
             );
         }
+
+        btnBack.setOnClickListener(v -> finish());
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_settings), (v, insets) -> {

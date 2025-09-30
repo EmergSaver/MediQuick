@@ -2,9 +2,12 @@ package com.emergsaver.mediquick;
 
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
@@ -95,6 +98,17 @@ public class MainActivity extends AppCompatActivity {
                     });
 
                     dialog.show();
+
+                    if (dialog.getWindow() != null) {
+                        dialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+
+                        // 좌우 여백 주고 싶으면 width 조정
+                        dialog.getWindow().setLayout(
+                                (int) (getResources().getDisplayMetrics().widthPixels * 0.9), // 화면 너비의 90%
+                                WindowManager.LayoutParams.WRAP_CONTENT
+                        );
+                    }
+
                     return true; // Fragment 교체는 하지 않음
                 }
                 else if (id == R.id.nav_map) {

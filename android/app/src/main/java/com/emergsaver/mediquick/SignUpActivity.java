@@ -134,8 +134,8 @@ public class SignUpActivity extends AppCompatActivity {
         CheckBox cbService = sheetView.findViewById(R.id.cbTermsService);
         CheckBox cbPrivacy = sheetView.findViewById(R.id.cbTermsPrivacy);
         CheckBox cbMarketing = sheetView.findViewById(R.id.cbTermsMarketing);
-        MaterialButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
-        MaterialButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
+        AppCompatButton sheetBtnAgree  = sheetView.findViewById(R.id.btnAgree);
+        AppCompatButton sheetBtnCancel = sheetView.findViewById(R.id.btnCancel);
 
         // 👇 추가: "보기" 버튼도 연결
         View btnViewService = sheetView.findViewById(R.id.btnViewService);

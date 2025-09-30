@@ -10,16 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="안내"
-        android:textSize="18sp"
+        android:textColor="@color/black"
+        android:textSize="24sp"
         android:textStyle="bold"
-        android:gravity="center"
-        android:paddingBottom="12dp" />
+        android:gravity="center" />
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="MediQuick은 사용자가 입력한 증상정보를 바탕으로 인근 병원과 참고용 처치정보를 안내합니다."
         android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="30dp"
         android:lineSpacingExtra="4dp"
         android:paddingBottom="8dp"/>
 
@@ -27,7 +29,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="• 증상의 심각도에 따라 추천 결과가 달라질 수 있습니다."
-        android:textColor="@color/purple_700"
+        android:textColor="@color/blue_navy"
+        android:textStyle="bold"
+        android:layout_marginTop="3dp"
         android:textSize="14sp"
         android:paddingBottom="4dp"/>
 
@@ -36,6 +40,8 @@
         android:layout_height="wrap_content"
         android:text="• 응급 상황(의식 저하, 심한 출혈, 호흡곤란 등)에서는 즉시 119에 연락하세요."
         android:textColor="@color/red"
+        android:textStyle="bold"
+        android:layout_marginTop="3dp"
         android:textSize="14sp"
         android:paddingBottom="4dp"/>
 
@@ -44,12 +50,16 @@
         android:layout_height="wrap_content"
         android:text="• 본 정보는 참고용이며, 의료 전문가의 직접적인 진단 및 판단을 대체할 수 없습니다."
         android:textSize="14sp"
+        android:textColor="@color/black"
+        android:layout_marginTop="3dp"
         android:paddingBottom="4dp"/>
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:text="• 최종 판단과 그에 따른 책임은 사용자에게 있습니다."
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="14sp"/>
 
@@ -58,14 +68,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="end"
-        android:paddingTop="16dp">
-
-        <Button
-            android:id="@+id/btn_cancel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="취소"
-            android:backgroundTint="@color/gray"/>
+        android:paddingTop="40dp">
 
         <Button
             android:id="@+id/btn_ok"
@@ -73,6 +76,18 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:text="확인"
-            android:backgroundTint="@color/purple_700"/>
+            android:backgroundTint="@color/blue_navy"/>
+
+        <Space
+            android:layout_width="10dp"
+            android:layout_height="1dp"/>
+
+        <Button
+            android:id="@+id/btn_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="취소"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/light_blue_chart"/>
     </LinearLayout>
 </LinearLayout>

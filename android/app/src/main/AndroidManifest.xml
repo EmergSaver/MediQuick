@@ -74,12 +74,6 @@
             android:name=".DetailHospitalActivity"
             android:exported="false" />
         <activity
-            android:name=".RecommendActivity"
-            android:exported="false" />
-        <activity
-            android:name=".CategoryActivity"
-            android:exported="false" />
-        <activity
             android:name=".SignUpActivity"
             android:exported="false" />
         <activity
