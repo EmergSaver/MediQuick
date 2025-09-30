@@ -3,9 +3,11 @@ package com.emergsaver.mediquick;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -21,7 +23,8 @@ public class LogoutActivity extends AppCompatActivity {
     private static final String KEY_EMAIL  = "auto_email";
     private static final String KEY_PW     = "auto_pw";
 
-    private MaterialButton bLogout, bCancel;
+    private Button bLogout;
+    private AppCompatButton bCancel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
