@@ -187,6 +187,7 @@
             android:textColor="@color/blue_navy"
             android:background="@drawable/rounded_btn"
             android:textAllCaps="false"
+            android:stateListAnimator="@null"
             android:letterSpacing="0.2"
             app:layout_constraintTop_toBottomOf="@id/btKakao"
             app:layout_constraintStart_toStartOf="parent"
